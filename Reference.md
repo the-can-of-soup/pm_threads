@@ -1,5 +1,7 @@
 # Threads Reference
 
+[← Back to Documentation](https://github.com/the-can-of-soup/pm_threads/blob/main/Documentation.md)
+
 ## `(active thread)` -> Thread
 Returns the currently active thread.
 
