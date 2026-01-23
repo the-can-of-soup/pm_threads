@@ -8,3 +8,7 @@ A PenguinMod extension that lets you take full control of the sequencer so you c
 > - Thumbnail
 > - Icon
 > - Documentation
+
+## Documentation
+
+- [Reference](https://github.com/the-can-of-soup/pm_threads/blob/main/Reference.md)
