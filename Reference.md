@@ -147,6 +147,6 @@ Returns the index of `THREAD` in the list of alive threads.
 
 
 
-[^1]: In the case where the thread is stopped because of ![blue flag](https://studio.penguinmod.com/static/assets/e73c3c9d236267ba684bc3817e62ae5f.svg), ![stop sign](https://studio.penguinmod.com/static/assets/c5be883427400df62050a9fcd14a21ff.svg), a restarted hat block, `stop (SPRITE v)`, or `stop [all v]`, the thread will enter limbo. Limbo is when a dead thread's status does not get set to 4. Instead, it may have an incorrect status like 0. To reliably check if a thread is alive, instead you should use [`<[THREAD] is alive?>`](#thread-is-alive---boolean).
+[^1]: In the case where the thread is stopped because of ![blue flag](https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/flag.svg), [stop sign](https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/stop.svg), a restarted hat block, `stop (SPRITE v)`, or `stop [all v]`, the thread will enter limbo. Limbo is when a dead thread's status does not get set to 4. Instead, it may have an incorrect status like 0. To reliably check if a thread is alive, instead you should use [`<[THREAD] is alive?>`](#thread-is-alive---boolean).
 
 [^2]: The one exception to this is when `stop (SPRITE v)` or `stop [all v]` is used; the thread that ran the block will be considered "killed", even though it caused its own termination.
