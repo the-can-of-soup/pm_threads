@@ -147,6 +147,6 @@ Returns the index of `THREAD` in the list of alive threads.
 
 
 
-[^1]: In the case where `stop [all v]` is used, the status of all threads except the thread that ran the block will stay unchanged, rather than becoming status 4, even though the affected threads are now dead. To reliably check if a thread is alive, use [`<[THREAD] is alive?>`](#thread-is-alive---boolean).
+[^1]: In the case where ![blue flag](https://studio.penguinmod.com/static/assets/e73c3c9d236267ba684bc3817e62ae5f.svg), ![stop sign](https://studio.penguinmod.com/static/assets/c5be883427400df62050a9fcd14a21ff.svg), `stop (SPRITE v)` or `stop [all v]` is used, the status of all threads except the thread that ran the block will stay unchanged, rather than becoming status 4, even though the affected threads are now dead. To reliably check if a thread is alive, use [`<[THREAD] is alive?>`](#thread-is-alive---boolean).
 
-[^2]: The one exception to this is when `stop [all v]` is used, the thread that ran the block will be considered "killed", even though it caused its own termination.
+[^2]: The one exception to this is when `stop (SPRITE v)` or `stop [all v]` is used; the thread that ran the block will be considered "killed", even though it caused its own termination.
