@@ -10,7 +10,7 @@
 
 // TO-DO
 //
-// - Fix weird bug where `(running threads)` return result desyncs from `vm.runtime.threads`. Maybe `vm` or `vm.runtime` are being swapped for different objects?
+// - Fix weird bug where `(running threads)` result desyncs from `vm.runtime.threads`. Maybe `vm` or `vm.runtime` are being swapped for different objects?
 
 // NOTES
 //
@@ -251,6 +251,7 @@
       return {
         id: 'soupThreads',
         name: 'Threads',
+        docsURI: 'https://github.com/the-can-of-soup/pm_threads/blob/main/Reference.md',
         color1: '#45c010',
         blocks: [
           {
