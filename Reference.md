@@ -149,6 +149,14 @@ Returns the index of `THREAD` in the list of alive threads.
 
 
 
-[^1]: In the case where the thread is stopped because of &nbsp;<img alt="blue flag" style="height: 1em;" src="https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/flag.svg">, &nbsp;<img alt="stop sign" style="height: 1em;" src="https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/stop.svg">, a restarted hat block, `stop (SPRITE v)`, or `stop [all v]`, the thread will enter limbo. Limbo is when a dead thread's status does not get set to 4. Instead, it may have an incorrect status like 0. To reliably check if a thread is alive, instead you should use [`<[THREAD] is alive?>`](#thread-is-alive---boolean).
+[^1]: Status is not a reliable indicator for whether a thread is alive. To reliably check if a thread is alive, instead you should use [`<[THREAD] is alive?>`](#thread-is-alive---boolean). This is because in many cases when a thread is stopped, it will enter limbo. Limbo is when a dead thread's status does not get set to 4. Some known cases where a thread enters limbo:
+    - When the &nbsp;<img alt="blue flag" style="height: 1em;" src="https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/flag.svg"> blue flag is clicked, all threads will enter limbo.
+    - When the &nbsp;<img alt="stop sign" style="height: 1em;" src="https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/stop.svg"> stop sign is clicked, all threads will enter limbo.
+    - When a stack restarts because its hat is triggered again, the old thread enters limbo.
+    - When a thread runs `stop [all v]`, the thread will enter limbo.
+    - When a thread runs `stop (SPRITE v)` where `SPRITE` is the sprite running the thread, the thread enters limbo.
 
-[^2]: The exception to this is when `stop (SPRITE v)` or `stop [all v]` is used; the thread that ran the block will be considered "killed", even though it caused its own termination.
+[^2]: There are some exceptions where a thread is considered "killed" even though it caused its own termination:
+    - When a thread runs `stop [all v]`, it is considered killed.
+    - When `stop (SPRITE v)` is run, all threads running as `SPRITE` are considered killed, even if they caused it.
+    - When a clone is deleted, all threads running as that clone are considered killed, even if they caused the deletion.
