@@ -1,6 +1,8 @@
 # Threads
 A PenguinMod extension that lets you take full control of the sequencer so you can fix all of those pesky one-frame-off bugs.
 
+URL: [`https://raw.githubusercontent.com/the-can-of-soup/pm_threads/refs/heads/main/soup_threads.js`](https://raw.githubusercontent.com/the-can-of-soup/pm_threads/refs/heads/main/soup_threads.js)
+
 > [!IMPORTANT]
 >
 > This extension is still in alpha. The following have not been finished:
