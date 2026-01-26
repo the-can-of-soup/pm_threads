@@ -420,7 +420,7 @@
           {
             opcode: 'getRunningThreadsInTarget',
             ...jwArray.Block,
-            text: 'running threads in [TARGET]',
+            text: '(not implemented) running threads in [TARGET]',
             arguments: {
               TARGET: jwTargets.Argument,
             }
