@@ -289,6 +289,20 @@
               },
             }
           },
+          {
+            opcode: 'threadBuilder',
+            text: '(not implemented) new thread at [INDEX]',
+            ...Thread.Block,
+            branches: [{}],
+            arguments: {
+              INDEX: {
+                type: Scratch.ArgumentType.NUMBER,
+                exemptFromNormalization: true,
+                menu: 'INDEX',
+                defaultValue: 0, // end
+              }
+            }
+          },
 
           '---',
 
@@ -373,6 +387,14 @@
             }
           },
           {
+            opcode: 'isPaused',
+            text: '(not implemented) [THREAD] is suspended?',
+            ...BooleanBlock,
+            arguments: {
+              THREAD: Thread.Argument,
+            }
+          },
+          {
             opcode: 'isStackClick',
             text: '[THREAD] was started by clicking in the editor?',
             ...BooleanBlock,
@@ -395,6 +417,14 @@
             ...ReporterBlock,
           },
           */
+          {
+            opcode: 'getRunningThreadsInTarget',
+            ...jwArray.Block,
+            text: 'running threads in [TARGET]',
+            arguments: {
+              TARGET: jwTargets.Argument,
+            }
+          },
           {
             opcode: 'setRunningThreads',
             text: '(not implemented) set running threads to [THREADS] with active thread [ACTIVETHREAD]',
@@ -426,6 +456,9 @@
               },
             }
           },
+
+          '---',
+
           {
             opcode: 'killThread',
             text: '(not implemented) kill thread [THREAD]',
@@ -434,9 +467,37 @@
               THREAD: Thread.Argument,
             }
           },
+          {
+            opcode: 'pauseThread',
+            text: '(not implemented) suspend thread [THREAD]',
+            ...CommandBlock,
+            arguments: {
+              THREAD: Thread.Argument,
+            }
+          },
+          {
+            opcode: 'unpauseThread',
+            text: '(not implemented) resume thread [THREAD]',
+            ...CommandBlock,
+            arguments: {
+              THREAD: Thread.Argument,
+            }
+          },
 
           '---',
 
+          {
+            opcode: 'multiYield',
+            text: '(not implemented) yield [TIMES] times',
+            ...CommandBlock,
+            arguments: {
+              TIMES: {
+                type: Scratch.ArgumentType.NUMBER,
+                exemptFromNormalization: true,
+                defaultValue: 30,
+              }
+            }
+          },
           {
             opcode: 'yield',
             text: '(not implemented) yield to next thread',
@@ -499,6 +560,16 @@
               MESSAGE: MessageArgument,
             }
           },
+          {
+            opcode: 'getLastBroadcastThreads',
+            text: '(not implemented) last broadcast',
+            ...jwArray.Block,
+          },
+          {
+            opcode: 'getLastBroadcastFirstThread',
+            text: '(not implemented) last broadcast',
+            ...Thread.Block,
+          },
 
           '---',
 
@@ -546,6 +617,75 @@
           '---',
 
           {
+            opcode: 'getThreadVar',
+            text: '(not implemented) get [VARIABLE] in [THREAD]',
+            ...ReporterBlock,
+            allowDropAnywhere: true,
+            arguments: {
+              VARIABLE: {
+                Scratch.ArgumentType.STRING,
+                exemptFromNormalization: true,
+                defaultValue: 'foo',
+              },
+              THREAD: Thread.Argument,
+            }
+          },
+          {
+            opcode: 'setThreadVar',
+            text: '(not implemented) set [VARIABLE] in [THREAD] to [VALUE]',
+            ...CommandBlock,
+            arguments: {
+              VARIABLE: {
+                Scratch.ArgumentType.STRING,
+                exemptFromNormalization: true,
+                defaultValue: 'foo',
+              },
+              VALUE: {
+                Scratch.ArgumentType.STRING,
+                exemptFromNormalization: true,
+                defaultValue: 'bar',
+              },
+              THREAD: Thread.Argument,
+            }
+          },
+          {
+            opcode: 'getThreadVarNames',
+            text: '(not implemented) variables in [THREAD]',
+            ...jwArray.Block,
+            arguments: {
+              THREAD: Thread.Argument,
+            }
+          },
+          {
+            opcode: 'deleteThreadVar',
+            text: '(not implemented) delete [VARIABLE] in [THREAD]',
+            ...CommandBlock,
+            arguments: {
+              VARIABLE: {
+                Scratch.ArgumentType.STRING,
+                exemptFromNormalization: true,
+                defaultValue: 'foo',
+              },
+              THREAD: Thread.Argument,
+            }
+          },
+
+          '---',
+
+          {
+            opcode: 'afterDeath',
+            text: '(not implemented) immediately after [THREAD] dies',
+            blockType: Scratch.BlockType.EVENT,
+            isEdgeActivated: false,
+            shouldRestartExistingThreads: false, // Overlappable
+            arguments: {
+              THREAD: Thread.Argument,
+            }
+          },
+
+          { blockType: Scratch.BlockType.LABEL, text: "Threads - Advanced" },
+
+          {
             opcode: 'getGraphicsUpdated',
             text: '(not implemented) graphics-updated flag',
             ...BooleanBlock,
@@ -558,6 +698,26 @@
               VALUE: {
                 type: Scratch.ArgumentType.BOOLEAN,
                 exemptFromNormalization: true,
+              }
+            }
+          },
+
+          { blockType: Scratch.BlockType.LABEL, text: "Threads - DANGEROUS" },
+
+          {
+            opcode: 'getWorkTimer',
+            text: '(not implemented) work timer',
+            ...ReporterBlock,
+          },
+          {
+            opcode: 'setWorkTimer',
+            text: '(not implemented) set work timer to [TIME]',
+            ...CommandBlock,
+            arguments: {
+              TIME: {
+                type: Scratch.ArgumentType.NUMBER,
+                exemptFromNormalization: true,
+                defaultValue: 0,
               }
             }
           },
