@@ -289,6 +289,9 @@
               },
             }
           },
+
+          '---',
+
           {
             opcode: 'threadBuilder',
             text: '(not implemented) new thread at [INDEX]',
