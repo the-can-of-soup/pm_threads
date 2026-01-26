@@ -150,8 +150,8 @@ Returns the index of `THREAD` in the list of alive threads.
 
 
 [^1]: Status is not a reliable indicator for whether a thread is alive. To reliably check if a thread is alive, instead you should use [`<[THREAD] is alive?>`](#thread-is-alive---boolean). This is because in many cases when a thread is stopped, it will enter limbo. Limbo is when a dead thread's status does not get set to 4. Some known cases where a thread enters limbo:
-    - When the &nbsp;<img alt="blue flag" style="height: 1em;" src="https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/flag.svg"> blue flag is clicked, all threads will enter limbo.
-    - When the &nbsp;<img alt="stop sign" style="height: 1em;" src="https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/stop.svg"> stop sign is clicked, all threads will enter limbo.
+    - When the &nbsp;<img alt="blue flag" style="height: 1em;" src="https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/flag.svg"> blue flag is clicked, all previously running threads will enter limbo.
+    - When the &nbsp;<img alt="stop sign" style="height: 1em;" src="https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/stop.svg"> stop sign is clicked, all previously running threads will enter limbo.
     - When a stack restarts because its hat is triggered again, the old thread enters limbo.
     - When a thread runs `stop [all v]`, the thread will enter limbo.
     - When a thread runs `stop (SPRITE v)` where `SPRITE` is the sprite running the thread, the thread enters limbo.
