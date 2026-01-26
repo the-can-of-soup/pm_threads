@@ -421,14 +421,6 @@
           },
           */
           {
-            opcode: 'getRunningThreadsInTarget',
-            ...jwArray.Block,
-            text: '(not implemented) running threads in [TARGET]',
-            arguments: {
-              TARGET: jwTargets.Argument,
-            }
-          },
-          {
             opcode: 'setRunningThreads',
             text: '(not implemented) set running threads to [THREADS] with active thread [ACTIVETHREAD]',
             ...CommandBlock,
@@ -457,6 +449,14 @@
                 menu: 'INDEX',
                 defaultValue: 0, // end
               },
+            }
+          },
+          {
+            opcode: 'getRunningThreadsInTarget',
+            ...jwArray.Block,
+            text: '(not implemented) running threads in [TARGET]',
+            arguments: {
+              TARGET: jwTargets.Argument,
             }
           },
 
