@@ -42,7 +42,7 @@
     2: 'Yielded',
     3: 'Yielded for one tick',
     4: 'Completed',
-    5: 'Paused',
+    5: 'Suspended',
   }
 
   function span(text) {
