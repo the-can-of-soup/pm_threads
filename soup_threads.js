@@ -495,7 +495,7 @@
                 type: Scratch.ArgumentType.NUMBER,
                 exemptFromNormalization: true,
                 defaultValue: 30,
-              }
+              },
             }
           },
           {
@@ -582,7 +582,7 @@
                 type: Scratch.ArgumentType.NUMBER,
                 exemptFromNormalization: true,
                 defaultValue: 10,
-              }
+              },
             }
           },
           {
@@ -593,7 +593,7 @@
               CONDITION: {
                 type: Scratch.ArgumentType.BOOLEAN,
                 exemptFromNormalization: true,
-              }
+              },
             }
           },
           {
@@ -604,7 +604,7 @@
               CONDITION: {
                 type: Scratch.ArgumentType.BOOLEAN,
                 exemptFromNormalization: true,
-              }
+              },
             }
           },
           {
@@ -623,7 +623,7 @@
             allowDropAnywhere: true,
             arguments: {
               VARIABLE: {
-                Scratch.ArgumentType.STRING,
+                type: Scratch.ArgumentType.STRING,
                 exemptFromNormalization: true,
                 defaultValue: 'foo',
               },
@@ -636,12 +636,12 @@
             ...CommandBlock,
             arguments: {
               VARIABLE: {
-                Scratch.ArgumentType.STRING,
+                type: Scratch.ArgumentType.STRING,
                 exemptFromNormalization: true,
                 defaultValue: 'foo',
               },
               VALUE: {
-                Scratch.ArgumentType.STRING,
+                type: Scratch.ArgumentType.STRING,
                 exemptFromNormalization: true,
                 defaultValue: 'bar',
               },
@@ -662,7 +662,7 @@
             ...CommandBlock,
             arguments: {
               VARIABLE: {
-                Scratch.ArgumentType.STRING,
+                type: Scratch.ArgumentType.STRING,
                 exemptFromNormalization: true,
                 defaultValue: 'foo',
               },
@@ -675,7 +675,7 @@
           {
             opcode: 'afterDeath',
             text: '(not implemented) immediately after [THREAD] dies',
-            blockType: Scratch.BlockType.EVENT,
+            blockType: Scratch.BlockType.HAT,
             isEdgeActivated: false,
             shouldRestartExistingThreads: false, // Overlappable
             arguments: {
@@ -698,7 +698,7 @@
               VALUE: {
                 type: Scratch.ArgumentType.BOOLEAN,
                 exemptFromNormalization: true,
-              }
+              },
             }
           },
 
@@ -718,7 +718,7 @@
                 type: Scratch.ArgumentType.NUMBER,
                 exemptFromNormalization: true,
                 defaultValue: 0,
-              }
+              },
             }
           },
         ],
