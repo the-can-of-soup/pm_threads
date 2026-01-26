@@ -102,7 +102,7 @@ Returns `true` if `THREAD` is dead, but was not killed, i.e. it exited of its ow
   Returns `true` if:
   - The raw thread is not in the `vm.runtime.threads` array (therefore it is dead).
   - The raw thread's `isKilled` key is `false`.
-  - The raw thead's `status` key is 4 (completed). This catches the `stop [all v]` case in which killed threads have `isKilled` set to `false` and `status` unchanged.
+  - The raw thead's `status` key is 4 (completed). This catches limbo[^1] cases in which killed threads have `isKilled` set to `false` and `status` unchanged.
 </details>
 
 ## `<[THREAD] was killed?>` -> Boolean
@@ -115,7 +115,7 @@ Returns `true` if `THREAD` exited due to an external cause.[^2]
   - The raw thread is not in the `vm.runtime.threads` array (therefore it is dead).
   - Either:
     - The raw thread's `isKilled` key is `true`.
-    - The raw thead's `status` key is not 4 (completed). This catches the `stop [all v]` case in which killed threads have `isKilled` set to `false` and `status` unchanged.
+    - The raw thead's `status` key is not 4 (completed). This catches limbo[^1] cases in which killed threads have `isKilled` set to `false` and `status` unchanged.
 </details>
 
 ## `<[THREAD] was started by clicking in the editor?>` -> Boolean
