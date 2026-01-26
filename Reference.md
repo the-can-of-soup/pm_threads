@@ -153,8 +153,6 @@ Returns the index of `THREAD` in the list of alive threads.
     - When the &nbsp;<img alt="blue flag" style="height: 1em;" src="https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/flag.svg"> blue flag is clicked, all previously running threads will enter limbo.
     - When the &nbsp;<img alt="stop sign" style="height: 1em;" src="https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/stop.svg"> stop sign is clicked, all previously running threads will enter limbo.
     - When a stack restarts because its hat is triggered again, the old thread enters limbo.
-    - When a thread runs `stop [all v]`, that thread (but no other thread) will enter limbo.
-    - When a thread runs `stop (SPRITE v)` where `SPRITE` is the sprite running the thread, the thread enters limbo.
 
 [^2]: There are some exceptions where a thread is considered "killed" even though it caused its own termination:
     - When a thread runs `stop [all v]`, it is considered killed.
