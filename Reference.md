@@ -57,7 +57,7 @@ Returns the current status code of `THREAD`. These are the possible values:
 | 2      | Yielded              | Behavior unknown                                             |
 | 3      | Yielded for one tick | Behavior unknown                                             |
 | 4      | Completed            | The thread is "dead", i.e. it will never run code again.[^1] |
-| 5      | Paused               | Behavior unknown                                             |
+| 5      | Suspended            | Behavior unknown                                             |
 
 <details>
   <summary>Internal behavior</summary>
