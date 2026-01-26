@@ -52,7 +52,7 @@ Returns the current status code of `THREAD`. These are the possible values:
 
 | Status | Display name         | Description                                                  |
 |--------|----------------------|--------------------------------------------------------------|
-| 0      | Running              | The thread is not finished.[^1]                              |
+| 0      | Running              | The default status of a thread.[^1]                          |
 | 1      | Waiting for promise  | Behavior unknown                                             |
 | 2      | Yielded              | Behavior unknown                                             |
 | 3      | Yielded for one tick | Behavior unknown                                             |
