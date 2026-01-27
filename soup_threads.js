@@ -294,7 +294,7 @@
 
           {
             opcode: 'threadBuilder',
-            text: '(not implemented) new thread at [INDEX]',
+            text: '(not implemented) new thread in [TARGET] at [INDEX]',
             ...Thread.Block,
             branches: [{}],
             arguments: {
@@ -303,6 +303,12 @@
                 exemptFromNormalization: true,
                 menu: 'INDEX',
                 defaultValue: 0, // end
+              },
+              TARGET: {
+                ...jwTargets.Argument,
+                exemptFromNormalization: true, // not included in jwTargets.Argument for some reason
+                menu: 'SPRITE',
+                defaultValue: 'this',
               }
             }
           },
@@ -457,6 +463,7 @@
             text: '(not implemented) running threads in [TARGET]',
             arguments: {
               TARGET: jwTargets.Argument,
+              exemptFromNormalization: true, // not included in jwTargets.Argument for some reason
             }
           },
 
@@ -743,8 +750,32 @@
               },
             ],
           },
+          SPRITE: {
+            acceptReporters: true,
+            items: 'getSpriteMenu',
+          },
         },
       };
+    }
+
+    getSpriteMenu() {
+      let menuItems = [{
+        text: 'this',
+        value: 'this',
+      }];
+
+      for (let i = 0; i < runtime.targets.length; i++) {
+        let target = runtime.targets[i];
+        let sprite = target.sprite;
+        if (target.isOriginal) {
+          menuItems.push({
+            text: sprite.name,
+            value: target.id,
+          });
+        }
+      }
+
+      return menuItems;
     }
 
 
