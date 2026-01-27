@@ -344,7 +344,7 @@
                 exemptFromNormalization: true, // not included in jwTargets.Argument for some reason
                 fillIn: 'target',
                 // defaultValue: 'this target',
-              }
+              },
             }
           },
 
