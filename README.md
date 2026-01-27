@@ -3,6 +3,8 @@ A PenguinMod extension that lets you take full control of the sequencer so you c
 
 URL: [`https://raw.githubusercontent.com/the-can-of-soup/pm_threads/refs/heads/main/soup_threads.js`](https://raw.githubusercontent.com/the-can-of-soup/pm_threads/refs/heads/main/soup_threads.js)
 
+**_This extension must be loaded unsandboxed, and does not support TurboWarp!_**
+
 > [!IMPORTANT]
 >
 > This extension is still in alpha. The following have not been finished:
