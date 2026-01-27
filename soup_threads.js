@@ -695,7 +695,7 @@
             }
           },
 
-          { blockType: Scratch.BlockType.LABEL, text: "Threads - Advanced" },
+          '---',
 
           {
             opcode: 'getGraphicsUpdated',
