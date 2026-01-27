@@ -307,8 +307,8 @@
               TARGET: {
                 ...jwTargets.Argument,
                 exemptFromNormalization: true, // not included in jwTargets.Argument for some reason
-                menu: 'SPRITE', // TODO: FIX MENU NOT SHOWING <===================================================================================
-                defaultValue: 'this',
+                menu: 'TARGET', // TODO: FIX MENU NOT SHOWING <===================================================================================
+                defaultValue: 'this target',
               }
             }
           },
@@ -752,18 +752,18 @@
               },
             ],
           },
-          SPRITE: {
+          TARGET: {
             acceptReporters: true,
-            items: 'getSpriteMenu',
+            items: 'getTargetMenu',
           },
         },
       };
     }
 
-    getSpriteMenu() {
+    getTargetMenu() {
       let menuItems = [{
-        text: 'this',
-        value: 'this',
+        text: 'this target',
+        value: 'this target',
       }];
 
       for (let i = 0; i < runtime.targets.length; i++) {
