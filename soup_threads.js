@@ -285,7 +285,7 @@
               INDEX: {
                 type: Scratch.ArgumentType.NUMBER,
                 exemptFromNormalization: true,
-                menu: 'INDEX',
+                menu: 'index',
                 defaultValue: 1, // start
               },
             }
@@ -293,6 +293,7 @@
 
           '---',
 
+          /*
           // Builder dummy block (not visible in block palette)
           {
             opcode: 'threadBuilder',
@@ -304,7 +305,7 @@
               INDEX: {
                 type: Scratch.ArgumentType.NUMBER,
                 exemptFromNormalization: true,
-                menu: 'INDEX',
+                menu: 'index',
                 defaultValue: 0, // end
               },
               TARGET: {
@@ -314,7 +315,7 @@
             }
           },
 
-          // Adds the TARGET menu to the TARGET parameter in the threadBuilder block above.
+          // Adds the target menu to the TARGET parameter in the threadBuilder block above.
           // @ddededodediamante helped with this!
           {
             blockType: Scratch.BlockType.XML,
@@ -323,6 +324,28 @@
                 <shadow type="soupThreads_targetsMenuBlock"></shadow>
               </value>
             </block>`,
+          },
+          */
+
+          {
+            opcode: 'threadBuilder',
+            text: '(not implemented) new thread in [TARGET] at [INDEX]',
+            ...Thread.Block,
+            branches: [{}],
+            arguments: {
+              INDEX: {
+                type: Scratch.ArgumentType.NUMBER,
+                exemptFromNormalization: true,
+                menu: 'index',
+                defaultValue: 0, // end
+              },
+              TARGET: {
+                ...jwTargets.Argument,
+                exemptFromNormalization: true, // not included in jwTargets.Argument for some reason
+                fillIn: 'target',
+                // defaultValue: 'this target',
+              }
+            }
           },
 
           '---',
@@ -464,7 +487,7 @@
               INDEX: {
                 type: Scratch.ArgumentType.NUMBER,
                 exemptFromNormalization: true,
-                menu: 'INDEX',
+                menu: 'index',
                 defaultValue: 0, // end
               },
             }
@@ -557,7 +580,7 @@
               INDEX: {
                 type: Scratch.ArgumentType.NUMBER,
                 exemptFromNormalization: true,
-                menu: 'INDEX',
+                menu: 'index',
                 defaultValue: 0, // end
               },
             }
@@ -571,7 +594,7 @@
               INDEX: {
                 type: Scratch.ArgumentType.NUMBER,
                 exemptFromNormalization: true,
-                menu: 'INDEX',
+                menu: 'index',
                 defaultValue: 0, // end
               },
             }
@@ -747,7 +770,7 @@
           },
         ],
         menus: {
-          INDEX: {
+          index: {
             acceptReporters: true,
             items: [
               {
@@ -764,7 +787,7 @@
               },
             ],
           },
-          TARGET: {
+          target: {
             acceptReporters: true,
             items: 'getTargetMenu',
           },
