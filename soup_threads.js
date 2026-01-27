@@ -11,7 +11,6 @@
 // TO-DO
 //
 // - Fix weird bug where `(running threads)` result desyncs from `vm.runtime.threads`. Maybe `vm` or `vm.runtime` are being swapped for different objects?
-// - Fix thread builder (new thread) block in palette
 
 // NOTES
 //
