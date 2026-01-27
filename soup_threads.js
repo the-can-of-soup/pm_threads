@@ -293,40 +293,6 @@
 
           '---',
 
-          /*
-          // Builder dummy block (not visible in block palette)
-          {
-            opcode: 'threadBuilder',
-            text: '(not implemented) new thread in [TARGET] at [INDEX]',
-            hideFromPalette: true,
-            ...Thread.Block,
-            branches: [{}],
-            arguments: {
-              INDEX: {
-                type: Scratch.ArgumentType.NUMBER,
-                exemptFromNormalization: true,
-                menu: 'index',
-                defaultValue: 0, // end
-              },
-              TARGET: {
-                ...jwTargets.Argument,
-                exemptFromNormalization: true, // not included in jwTargets.Argument for some reason
-              }
-            }
-          },
-
-          // Adds the target menu to the TARGET parameter in the threadBuilder block above.
-          // @ddededodediamante helped with this!
-          {
-            blockType: Scratch.BlockType.XML,
-            xml: `<block type="soupThreads_threadBuilder">
-              <value name="TARGET">
-                <shadow type="soupThreads_targetsMenuBlock"></shadow>
-              </value>
-            </block>`,
-          },
-          */
-
           {
             opcode: 'threadBuilder',
             text: '(not implemented) new thread in [TARGET] at [INDEX]',
@@ -340,10 +306,10 @@
                 defaultValue: 0, // end
               },
               TARGET: {
-                ...jwTargets.Argument,
-                exemptFromNormalization: true, // not included in jwTargets.Argument for some reason
-                fillIn: 'menu_target',
-                // defaultValue: 'this target',
+                shape: jwTargets.Argument.shape, // Do not include "check" parameter from jwTargets.Argument because that breaks menu
+                exemptFromNormalization: true,
+                // fillIn: 'menu_target',
+                menu: 'target',
               },
             }
           },
