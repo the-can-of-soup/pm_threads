@@ -232,9 +232,6 @@
   function handleIndexInput(INDEX, goPastEnd = false) {
     // If goPastEnd is true, the "end" index will select the index after the last index.
 
-    if (INDEX === null) {
-      INDEX = 1;
-    }
     INDEX = Scratch.Cast.toNumber(INDEX);
 
     // Index 0 means "end", otherwise index is 1-based
