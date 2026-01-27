@@ -307,7 +307,7 @@
               TARGET: {
                 ...jwTargets.Argument,
                 exemptFromNormalization: true, // not included in jwTargets.Argument for some reason
-                menu: 'SPRITE',
+                menu: 'SPRITE', // TODO: FIX MENU NOT SHOWING <===================================================================================
                 defaultValue: 'this',
               }
             }
@@ -462,8 +462,10 @@
             ...jwArray.Block,
             text: '(not implemented) running threads in [TARGET]',
             arguments: {
-              TARGET: jwTargets.Argument,
-              exemptFromNormalization: true, // not included in jwTargets.Argument for some reason
+              TARGET: {
+                ...jwTargets.Argument,
+                exemptFromNormalization: true, // not included in jwTargets.Argument for some reason
+              },
             }
           },
 
