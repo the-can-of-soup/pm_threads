@@ -342,7 +342,7 @@
               TARGET: {
                 ...jwTargets.Argument,
                 exemptFromNormalization: true, // not included in jwTargets.Argument for some reason
-                fillIn: 'target',
+                fillIn: 'menu_target',
                 // defaultValue: 'this target',
               },
             }
