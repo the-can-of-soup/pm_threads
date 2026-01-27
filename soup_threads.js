@@ -229,6 +229,18 @@
     defaultValue: 'message1',
   }
 
+  function handleIndexInput(INDEX, goPastEnd = false) {
+    // If goPastEnd is true, the "end" index will select the index after the last index.
+
+    if (INDEX === null) {
+      INDEX = 1;
+    }
+    INDEX = Scratch.Cast.toNumber(INDEX);
+
+    // Index 0 means "end", otherwise index is 1-based
+    return INDEX === 0 ? runtime.threads.length - 1 + goPastEnd : INDEX - 1;
+  }
+
   class SoupThreadsExtension {
 
     constructor() {
@@ -791,14 +803,13 @@
     }
 
     threadAt({INDEX}) {
-      INDEX = Scratch.Cast.toNumber(INDEX);
+      INDEX = handleIndexInput(INDEX);
 
-      let realIndex = INDEX === 0 ? runtime.threads.length - 1 : INDEX - 1;
-      if (realIndex < 0 || realIndex >= runtime.threads.length) {
+      if (INDEX < 0 || INDEX >= runtime.threads.length) {
         return new ThreadType();
       }
 
-      return new ThreadType(runtime.threads[realIndex]);
+      return new ThreadType(runtime.threads[INDEX]);
     }
 
 
