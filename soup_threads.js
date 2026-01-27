@@ -11,6 +11,7 @@
 // TO-DO
 //
 // - Fix weird bug where `(running threads)` result desyncs from `vm.runtime.threads`. Maybe `vm` or `vm.runtime` are being swapped for different objects?
+// - Fix thread builder (new thread) block in palette
 
 // NOTES
 //
@@ -292,9 +293,11 @@
 
           '---',
 
+          // Builder dummy block (not visible in block palette)
           {
             opcode: 'threadBuilder',
             text: '(not implemented) new thread in [TARGET] at [INDEX]',
+            hideFromPalette: true,
             ...Thread.Block,
             branches: [{}],
             arguments: {
@@ -307,10 +310,19 @@
               TARGET: {
                 ...jwTargets.Argument,
                 exemptFromNormalization: true, // not included in jwTargets.Argument for some reason
-                menu: 'TARGET', // TODO: FIX MENU NOT SHOWING <===================================================================================
-                defaultValue: 'this target',
               }
             }
+          },
+
+          // Adds the TARGET menu to the TARGET parameter in the threadBuilder block above.
+          // @ddededodediamante helped with this!
+          {
+            blockType: Scratch.BlockType.XML,
+            xml: `<block type="soupThreads_threadBuilder">
+              <value name="TARGET">
+                <shadow type="soupThreads_targetsMenuBlock"></shadow>
+              </value>
+            </block>`,
           },
 
           '---',
