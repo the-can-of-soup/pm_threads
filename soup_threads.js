@@ -439,7 +439,7 @@
           },
           {
             opcode: 'currentThreadIdx',
-            text: '(not implemented) active index',
+            text: 'active index',
             ...ReporterBlock,
           },
           {
@@ -963,6 +963,13 @@
 
     getRunningThreads() {
       return new jwArray.Type(runtime.threads.map((rawThread) => new ThreadType(rawThread)));
+    }
+
+    currentThreadIdx() {
+      if (sequencer.activeThread === null) {
+        return '';
+      }
+      return sequencer.activeThreadIndex;
     }
 
     getIndex({THREAD}) {
