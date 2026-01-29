@@ -29,9 +29,9 @@
 (function(Scratch) {
   'use strict';
 
-  let vm = Scratch.vm;
-  let runtime = vm.runtime;
-  let sequencer = runtime.sequencer;
+  const vm = Scratch.vm;
+  const runtime = vm.runtime;
+  const sequencer = runtime.sequencer;
 
   let jwArray;
   let jwTargets;
@@ -229,6 +229,10 @@
     defaultValue: 'message1',
   }
 
+  const EmptyArgument = {
+    exemptFromNormalization: true,
+  }
+
   function handleIndexInput(INDEX, goPastEnd = false, constrain = false) {
     // If goPastEnd is true, the "end" index will select the index after the last index.
 
@@ -374,11 +378,7 @@
             text: '[VALUE] is a thread?',
             ...BooleanBlock,
             arguments: {
-              VALUE: {
-                type: Scratch.ArgumentType.STRING,
-                exemptFromNormalization: true,
-                defaultValue: 'foo',
-              }
+              VALUE: EmptyArgument,
             }
           },
           {
