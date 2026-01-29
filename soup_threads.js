@@ -10,7 +10,9 @@
 
 // TO-DO
 //
-// - Fix weird bug where `(running threads)` result desyncs from `vm.runtime.threads`. Maybe `vm` or `vm.runtime` are being swapped for different objects?
+// [ ] Fix yield blocks
+// [ ] Fix weird bug where `(running threads)` result desyncs from `vm.runtime.threads`. Maybe `vm` or `vm.runtime` are being swapped for different objects?
+//     (maybe fixed by using `util.sequencer` in every block instead of having `const sequencer = vm.runtime.sequencer;` at the start?)
 
 // NOTES
 //
@@ -31,7 +33,6 @@
 
   const vm = Scratch.vm;
   const runtime = vm.runtime;
-  const sequencer = runtime.sequencer;
 
   let jwArray;
   let jwTargets;
@@ -276,6 +277,11 @@
             ...Thread.Block,
           },
           {
+            opcode: 'currentThreadIdx',
+            text: 'active index',
+            ...ReporterBlock,
+          },
+          {
             opcode: 'nullThread',
             text: 'null thread',
             ...Thread.Block,
@@ -361,6 +367,14 @@
               }
             }
           },
+          {
+            opcode: 'getIndex',
+            text: 'index of [THREAD]',
+            ...ReporterBlock,
+            arguments: {
+              THREAD: Thread.Argument,
+            }
+          },
 
           '---',
 
@@ -433,132 +447,6 @@
           '---',
 
           {
-            opcode: 'getRunningThreads',
-            ...jwArray.Block,
-            text: 'running threads',
-          },
-          {
-            opcode: 'currentThreadIdx',
-            text: 'active index',
-            ...ReporterBlock,
-          },
-          {
-            opcode: 'getIndex',
-            text: 'position of [THREAD]',
-            ...ReporterBlock,
-            arguments: {
-              THREAD: Thread.Argument,
-            }
-          },
-          {
-            opcode: 'setActiveIndex',
-            text: '(not implemented) set active index to [ACTIVEINDEX]',
-            ...CommandBlock,
-            arguments: {
-              ACTIVEINDEX: {
-                type: Scratch.ArgumentType.NUMBER,
-                exemptFromNormalization: true,
-                menu: 'index',
-                defaultValue: 1, // start
-              },
-            }
-          },
-          {
-            opcode: 'setActiveThread',
-            text: '(not implemented) set active thread to [ACTIVETHREAD]',
-            ...CommandBlock,
-            arguments: {
-              ACTIVETHREAD: Thread.Argument,
-            }
-          },
-          {
-            opcode: 'setRunningThreadsActiveIndex',
-            text: '(not implemented) set running threads to [THREADS] with active index [ACTIVEINDEX]',
-            ...CommandBlock,
-            arguments: {
-              THREADS: jwArray.Argument,
-              ACTIVEINDEX: {
-                type: Scratch.ArgumentType.NUMBER,
-                exemptFromNormalization: true,
-                menu: 'index',
-                defaultValue: 1, // start
-              },
-            }
-          },
-          {
-            opcode: 'setRunningThreadsActiveThread',
-            text: '(not implemented) set running threads to [THREADS] with active thread [ACTIVETHREAD]',
-            ...CommandBlock,
-            arguments: {
-              THREADS: jwArray.Argument,
-              ACTIVETHREAD: Thread.Argument,
-            }
-          },
-          {
-            opcode: 'moveThread',
-            text: '(not implemented) move thread [THREAD] to [INDEX]',
-            ...CommandBlock,
-            arguments: {
-              THREAD: Thread.Argument,
-              INDEX: {
-                type: Scratch.ArgumentType.NUMBER,
-                exemptFromNormalization: true,
-                menu: 'index',
-                defaultValue: 0, // end
-              },
-            }
-          },
-          {
-            opcode: 'swapThreads',
-            text: '(not implemented) swap thread [THREADONE] with [THREADTWO]',
-            ...CommandBlock,
-            arguments: {
-              THREADONE: Thread.Argument,
-              THREADTWO: Thread.Argument,
-            }
-          },
-          {
-            opcode: 'getRunningThreadsInTarget',
-            ...jwArray.Block,
-            text: '(not implemented) running threads in [TARGET]',
-            arguments: {
-              TARGET: {
-                ...jwTargets.Argument,
-                exemptFromNormalization: true, // not included in jwTargets.Argument for some reason
-              },
-            }
-          },
-
-          '---',
-
-          {
-            opcode: 'killThread',
-            text: '(not implemented) kill thread [THREAD]',
-            ...CommandBlock,
-            arguments: {
-              THREAD: Thread.Argument,
-            }
-          },
-          {
-            opcode: 'pauseThread',
-            text: '(not implemented) suspend thread [THREAD]',
-            ...CommandBlock,
-            arguments: {
-              THREAD: Thread.Argument,
-            }
-          },
-          {
-            opcode: 'unpauseThread',
-            text: '(not implemented) resume thread [THREAD]',
-            ...CommandBlock,
-            arguments: {
-              THREAD: Thread.Argument,
-            }
-          },
-
-          '---',
-
-          {
             opcode: 'multiYield',
             text: '(not implemented) yield [TIMES] times',
             ...CommandBlock,
@@ -572,25 +460,48 @@
           },
           {
             opcode: 'yield',
-            text: '(not implemented) yield to next thread',
+            text: 'yield to next thread',
             ...CommandBlock,
           },
           {
             opcode: 'yieldBack',
-            text: '(not implemented) yield to previous thread',
+            text: 'yield to previous thread',
             ...CommandBlock,
           },
+          /*
           {
             opcode: 'yieldTo',
-            text: '(not implemented) yield to running thread [THREAD]',
+            text: '(not implemented) yield to [THREAD]',
             ...CommandBlock,
             arguments: {
               THREAD: Thread.Argument,
             }
           },
+          */
+          {
+            opcode: 'yieldToThread',
+            text: '(not implemented) yield to [ACTIVETHREAD]',
+            ...CommandBlock,
+            arguments: {
+              ACTIVETHREAD: Thread.Argument,
+            }
+          },
+          {
+            opcode: 'yieldToIndex',
+            text: 'yield to thread at [ACTIVEINDEX]',
+            ...CommandBlock,
+            arguments: {
+              ACTIVEINDEX: {
+                type: Scratch.ArgumentType.NUMBER,
+                exemptFromNormalization: true,
+                menu: 'index',
+                defaultValue: 1, // start
+              },
+            }
+          },
           {
             opcode: 'yieldToEnd',
-            text: '(not implemented) yield to end of tick',
+            text: 'yield to end of tick',
             ...CommandBlock,
           },
 
@@ -641,6 +552,98 @@
             opcode: 'getLastBroadcastFirstThread',
             text: '(not implemented) last broadcast',
             ...Thread.Block,
+          },
+
+          '---',
+
+          {
+            opcode: 'killThread',
+            text: '(not implemented) kill thread [THREAD]',
+            ...CommandBlock,
+            arguments: {
+              THREAD: Thread.Argument,
+            }
+          },
+          {
+            opcode: 'pauseThread',
+            text: '(not implemented) suspend thread [THREAD]',
+            ...CommandBlock,
+            arguments: {
+              THREAD: Thread.Argument,
+            }
+          },
+          {
+            opcode: 'unpauseThread',
+            text: '(not implemented) resume thread [THREAD]',
+            ...CommandBlock,
+            arguments: {
+              THREAD: Thread.Argument,
+            }
+          },
+
+          '---',
+
+          {
+            opcode: 'getRunningThreads',
+            ...jwArray.Block,
+            text: 'running threads',
+          },
+          {
+            opcode: 'getRunningThreadsInTarget',
+            ...jwArray.Block,
+            text: '(not implemented) running threads in [TARGET]',
+            arguments: {
+              TARGET: {
+                ...jwTargets.Argument,
+                exemptFromNormalization: true, // not included in jwTargets.Argument for some reason
+              },
+            }
+          },
+          {
+            opcode: 'setRunningThreadsActiveIndex',
+            text: '(not implemented) set running threads to [THREADS] with active index [ACTIVEINDEX]',
+            ...CommandBlock,
+            arguments: {
+              THREADS: jwArray.Argument,
+              ACTIVEINDEX: {
+                type: Scratch.ArgumentType.NUMBER,
+                exemptFromNormalization: true,
+                menu: 'index',
+                defaultValue: 1, // start
+              },
+            }
+          },
+          {
+            opcode: 'setRunningThreadsActiveThread',
+            text: '(not implemented) set running threads to [THREADS] with active thread [ACTIVETHREAD]',
+            ...CommandBlock,
+            arguments: {
+              THREADS: jwArray.Argument,
+              ACTIVETHREAD: Thread.Argument,
+            }
+          },
+          {
+            opcode: 'moveThread',
+            text: '(not implemented) move thread [THREAD] to [INDEX]',
+            ...CommandBlock,
+            arguments: {
+              THREAD: Thread.Argument,
+              INDEX: {
+                type: Scratch.ArgumentType.NUMBER,
+                exemptFromNormalization: true,
+                menu: 'index',
+                defaultValue: 0, // end
+              },
+            }
+          },
+          {
+            opcode: 'swapThreads',
+            text: '(not implemented) swap thread [THREADONE] with [THREADTWO]',
+            ...CommandBlock,
+            arguments: {
+              THREADONE: Thread.Argument,
+              THREADTWO: Thread.Argument,
+            }
           },
 
           '---',
@@ -855,15 +858,15 @@
 
 
 
-    currentThread() {
-      return new ThreadType(sequencer.activeThread);
+    currentThread({}, util) {
+      return new ThreadType(util.sequencer.activeThread);
     }
 
-    nullThread() {
+    nullThread({}, util) {
       return new ThreadType();
     }
 
-    threadAt({INDEX}) {
+    threadAt({INDEX}, util) {
       INDEX = handleIndexInput(INDEX);
 
       if (INDEX < 0 || INDEX >= runtime.threads.length) {
@@ -875,7 +878,7 @@
 
 
 
-    getTarget({THREAD}) {
+    getTarget({THREAD}, util) {
       THREAD = ThreadType.toThread(THREAD);
 
       if (THREAD.thread === null) {
@@ -884,13 +887,13 @@
       return new jwTargets.Type(THREAD.thread.target.id);
     }
 
-    getId({THREAD}) {
+    getId({THREAD}, util) {
       THREAD = ThreadType.toThread(THREAD);
 
       return THREAD.getId();
     }
 
-    getStatus({THREAD, STATUSFORMAT}) {
+    getStatus({THREAD, STATUSFORMAT}, util) {
       THREAD = ThreadType.toThread(THREAD);
 
       if (THREAD.thread === null) {
@@ -904,24 +907,24 @@
 
 
 
-    threadsEqual({THREADONE, THREADTWO}) {
+    threadsEqual({THREADONE, THREADTWO}, util) {
       THREADONE = ThreadType.toThread(THREADONE);
       THREADTWO = ThreadType.toThread(THREADTWO);
 
       return THREADONE.getId() === THREADTWO.getId();
     }
 
-    isThread({VALUE}) {
+    isThread({VALUE}, util) {
       return VALUE instanceof ThreadType;
     }
 
-    isNull({THREAD}) {
+    isNull({THREAD}, util) {
       THREAD = ThreadType.toThread(THREAD);
 
       return THREAD.thread === null;
     }
 
-    isRunning({THREAD}) {
+    isRunning({THREAD}, util) {
       THREAD = ThreadType.toThread(THREAD);
 
       if (THREAD.thread === null) {
@@ -930,7 +933,7 @@
       return runtime.threads.includes(THREAD.thread);
     }
 
-    isFinished({THREAD}) {
+    isFinished({THREAD}, util) {
       THREAD = ThreadType.toThread(THREAD);
 
       if(THREAD.thread === null) {
@@ -940,7 +943,7 @@
       return !THREAD.deadThreadWasKilled() && !runtime.threads.includes(THREAD.thread);
     }
 
-    isKilled({THREAD}) {
+    isKilled({THREAD}, util) {
       THREAD = ThreadType.toThread(THREAD);
 
       if (THREAD.thread === null) {
@@ -950,7 +953,7 @@
       return THREAD.deadThreadWasKilled() && !runtime.threads.includes(THREAD.thread);
     }
 
-    isStackClick({THREAD}) {
+    isStackClick({THREAD}, util) {
       THREAD = ThreadType.toThread(THREAD);
 
       if (THREAD.thread === null) {
@@ -961,18 +964,18 @@
 
 
 
-    getRunningThreads() {
+    getRunningThreads({}, util) {
       return new jwArray.Type(runtime.threads.map((rawThread) => new ThreadType(rawThread)));
     }
 
-    currentThreadIdx() {
-      if (sequencer.activeThread === null) {
+    currentThreadIdx({}, util) {
+      if (util.sequencer.activeThread === null) {
         return '';
       }
-      return sequencer.activeThreadIndex + 1;
+      return util.sequencer.activeThreadIndex + 1;
     }
 
-    getIndex({THREAD}) {
+    getIndex({THREAD}, util) {
       THREAD = ThreadType.toThread(THREAD);
 
       if (THREAD.thread === null) {
@@ -987,6 +990,47 @@
       }
 
       return '';
+    }
+
+    *yield({}, util) {
+      yield;
+    }
+
+    *yieldBack({}, util) {
+      // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value
+      if (util.sequencer.activeThreadIndex <= 0) {
+        // yield to end of tick
+        util.sequencer.activeThreadIndex = runtime.threads.length - 1;
+      } else {
+        util.sequencer.activeThreadIndex--;
+      }
+
+      yield;
+    }
+
+    *yieldToIndex({ACTIVEINDEX}, util) {
+      ACTIVEINDEX = handleIndexInput(ACTIVEINDEX);
+
+      // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value
+      if (ACTIVEINDEX < 0) {
+        // yield to first thread
+        util.sequencer.activeThreadIndex = -1;
+      } else if (ACTIVEINDEX >= runtime.threads.length) {
+        // yield to end of tick
+        util.sequencer.activeThreadIndex = runtime.threads.length - 1;
+      } else {
+        util.sequencer.activeThreadIndex = ACTIVEINDEX - 1;
+      }
+
+      yield;
+    }
+
+    *yieldToEnd({}, util) {
+      // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value
+      // yield to end of tick
+      util.sequencer.activeThreadIndex = runtime.threads.length - 1;
+
+      yield;
     }
 
   }
