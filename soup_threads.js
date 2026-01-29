@@ -229,13 +229,16 @@
     defaultValue: 'message1',
   }
 
-  function handleIndexInput(INDEX, goPastEnd = false) {
+  function handleIndexInput(INDEX, goPastEnd = false, constrain = false) {
     // If goPastEnd is true, the "end" index will select the index after the last index.
 
     INDEX = Scratch.Cast.toNumber(INDEX);
+    INDEX = Math.floor(INDEX);
 
     // Index 0 means "end", otherwise index is 1-based
-    return INDEX === 0 ? runtime.threads.length - 1 + goPastEnd : INDEX - 1;
+    let end = runtime.threads.length - 1 + goPastEnd;
+    let unconstrained = INDEX === 0 ? end : INDEX - 1;
+    return constrain ? Math.max(0, Math.min(unconstrained, end)) : unconstrained;
   }
 
   class SoupThreadsExtension {
@@ -434,21 +437,10 @@
             ...jwArray.Block,
             text: 'running threads',
           },
-          /*
           {
             opcode: 'currentThreadIdx',
             text: '(not implemented) active index',
             ...ReporterBlock,
-          },
-          */
-          {
-            opcode: 'setRunningThreads',
-            text: '(not implemented) set running threads to [THREADS] with active thread [ACTIVETHREAD]',
-            ...CommandBlock,
-            arguments: {
-              THREADS: jwArray.Argument,
-              ACTIVETHREAD: Thread.Argument,
-            }
           },
           {
             opcode: 'getIndex',
@@ -456,6 +448,50 @@
             ...ReporterBlock,
             arguments: {
               THREAD: Thread.Argument,
+            }
+          },
+          {
+            opcode: 'setActiveIndex',
+            text: '(not implemented) set active index to [ACTIVEINDEX]',
+            ...CommandBlock,
+            arguments: {
+              ACTIVEINDEX: {
+                type: Scratch.ArgumentType.NUMBER,
+                exemptFromNormalization: true,
+                menu: 'index',
+                defaultValue: 1, // start
+              },
+            }
+          },
+          {
+            opcode: 'setActiveThread',
+            text: '(not implemented) set active thread to [ACTIVETHREAD]',
+            ...CommandBlock,
+            arguments: {
+              ACTIVETHREAD: Thread.Argument,
+            }
+          },
+          {
+            opcode: 'setRunningThreadsActiveIndex',
+            text: '(not implemented) set running threads to [THREADS] with active index [ACTIVEINDEX]',
+            ...CommandBlock,
+            arguments: {
+              THREADS: jwArray.Argument,
+              ACTIVEINDEX: {
+                type: Scratch.ArgumentType.NUMBER,
+                exemptFromNormalization: true,
+                menu: 'index',
+                defaultValue: 1, // start
+              },
+            }
+          },
+          {
+            opcode: 'setRunningThreadsActiveThread',
+            text: '(not implemented) set running threads to [THREADS] with active thread [ACTIVETHREAD]',
+            ...CommandBlock,
+            arguments: {
+              THREADS: jwArray.Argument,
+              ACTIVETHREAD: Thread.Argument,
             }
           },
           {
@@ -470,6 +506,15 @@
                 menu: 'index',
                 defaultValue: 0, // end
               },
+            }
+          },
+          {
+            opcode: 'swapThreads',
+            text: '(not implemented) swap thread [THREADONE] with [THREADTWO]',
+            ...CommandBlock,
+            arguments: {
+              THREADONE: Thread.Argument,
+              THREADTWO: Thread.Argument,
             }
           },
           {
