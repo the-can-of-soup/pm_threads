@@ -342,10 +342,16 @@
           },
           {
             opcode: 'getStatus',
-            text: 'status of [THREAD]',
+            text: 'status [STATUSFORMAT] of [THREAD]',
             ...ReporterBlock,
             arguments: {
               THREAD: Thread.Argument,
+              STATUSFORMAT: {
+                type: Scratch.ArgumentType.STRING,
+                exemptFromNormalization: true,
+                menu: 'statusFormat',
+                defaultValue: '#',
+              }
             }
           },
 
@@ -765,6 +771,19 @@
             acceptReporters: true,
             items: 'getTargetMenu',
           },
+          statusFormat: {
+            acceptReporters: false,
+            items: [
+              {
+                text: '#',
+                value: '#',
+              },
+              {
+                text: 'text',
+                value: 'text',
+              },
+            ]
+          }
         },
       };
     }
@@ -826,11 +845,14 @@
       return THREAD.getId();
     }
 
-    getStatus({THREAD}) {
+    getStatus({THREAD, STATUSFORMAT}) {
       THREAD = ThreadType.toThread(THREAD);
 
       if (THREAD.thread === null) {
         return '';
+      }
+      if (STATUSFORMAT === 'text') {
+        return ThreadStatus[THREAD.thread.status];
       }
       return THREAD.thread.status;
     }
