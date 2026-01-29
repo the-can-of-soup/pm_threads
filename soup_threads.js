@@ -969,7 +969,7 @@
       if (sequencer.activeThread === null) {
         return '';
       }
-      return sequencer.activeThreadIndex;
+      return sequencer.activeThreadIndex + 1;
     }
 
     getIndex({THREAD}) {
