@@ -10,7 +10,8 @@
 
 // TO-DO
 //
-// [ ] Fix yield blocks
+// [ ] Change all implemented yield blocks to compiled
+// [ ] Fix behavior when the first thread uses yieldBack
 // [ ] Fix weird bug where `(running threads)` result desyncs from `vm.runtime.threads`. Maybe `vm` or `vm.runtime` are being swapped for different objects?
 //     (maybe fixed by using `util.sequencer` in every block instead of having `const sequencer = vm.runtime.sequencer;` at the start?)
 
@@ -249,6 +250,9 @@
   class SoupThreadsExtension {
 
     constructor() {
+      // Register compiled blocks
+      vm.runtime.registerCompiledExtensionBlocks('soupThreads', this.getCompileInfo());
+
       // Register serializer for thread type
       vm.soupThreads = Thread;
       vm.runtime.registerSerializer(
@@ -856,10 +860,62 @@
       return menuItems;
     }
 
+    getCompileInfo() {
+      return {
+        ir: {
+
+          yield(generator, block) {
+            generator.script.yields = true;
+            return {
+              kind: 'stack',
+            };
+          },
+
+          yieldBack(generator, block) {
+            generator.script.yields = true;
+            return {
+              kind: 'stack',
+            };
+          },
+
+        },
+        js: {
+
+          yield(node, compiler, imports) {
+            compiler.source += `
+              yield;
+            `;
+          },
+
+          yieldBack(node, compiler, imports) {
+            // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value
+            // Will yield to end of the tick if the current thread is at the start.
+            compiler.source += `
+              if (runtime.sequencer.activeThreadIndex <= 0) {
+                runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;
+              } else {
+                runtime.sequencer.activeThreadIndex -= 2;
+              }
+
+              yield;
+            `;
+          },
+
+        },
+      };
+    }
+
 
 
     currentThread({}, util) {
       return new ThreadType(util.sequencer.activeThread);
+    }
+
+    currentThreadIdx({}, util) {
+      if (util.sequencer.activeThread === null) {
+        return '';
+      }
+      return util.sequencer.activeThreadIndex + 1;
     }
 
     nullThread({}, util) {
@@ -903,6 +959,23 @@
         return ThreadStatus[THREAD.thread.status];
       }
       return THREAD.thread.status;
+    }
+
+    getIndex({THREAD}, util) {
+      THREAD = ThreadType.toThread(THREAD);
+
+      if (THREAD.thread === null) {
+        return '';
+      }
+
+      let threadId = THREAD.getId();
+      for (let i = 0; i < runtime.threads.length; i++) {
+        if (new ThreadType(runtime.threads[i]).getId() === threadId) {
+          return i + 1;
+        }
+      }
+
+      return '';
     }
 
 
@@ -964,50 +1037,6 @@
 
 
 
-    getRunningThreads({}, util) {
-      return new jwArray.Type(runtime.threads.map((rawThread) => new ThreadType(rawThread)));
-    }
-
-    currentThreadIdx({}, util) {
-      if (util.sequencer.activeThread === null) {
-        return '';
-      }
-      return util.sequencer.activeThreadIndex + 1;
-    }
-
-    getIndex({THREAD}, util) {
-      THREAD = ThreadType.toThread(THREAD);
-
-      if (THREAD.thread === null) {
-        return '';
-      }
-
-      let threadId = THREAD.getId();
-      for (let i = 0; i < runtime.threads.length; i++) {
-        if (new ThreadType(runtime.threads[i]).getId() === threadId) {
-          return i + 1;
-        }
-      }
-
-      return '';
-    }
-
-    *yield({}, util) {
-      yield;
-    }
-
-    *yieldBack({}, util) {
-      // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value
-      if (util.sequencer.activeThreadIndex <= 0) {
-        // yield to end of tick
-        util.sequencer.activeThreadIndex = runtime.threads.length - 1;
-      } else {
-        util.sequencer.activeThreadIndex--;
-      }
-
-      yield;
-    }
-
     *yieldToIndex({ACTIVEINDEX}, util) {
       ACTIVEINDEX = handleIndexInput(ACTIVEINDEX);
 
@@ -1031,6 +1060,12 @@
       util.sequencer.activeThreadIndex = runtime.threads.length - 1;
 
       yield;
+    }
+
+
+
+    getRunningThreads({}, util) {
+      return new jwArray.Type(runtime.threads.map((rawThread) => new ThreadType(rawThread)));
     }
 
   }
