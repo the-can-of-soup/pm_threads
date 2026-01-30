@@ -756,7 +756,7 @@
             text: '(not implemented) immediately after [THREAD] dies',
             blockType: Scratch.BlockType.HAT,
             isEdgeActivated: false,
-            shouldRestartExistingThreads: false, // Overlappable
+            shouldRestartExistingThreads: false, // While there is already a thread alive from this hat, repeated events will be ignored.
             arguments: {
               THREAD: Thread.Argument,
             }
