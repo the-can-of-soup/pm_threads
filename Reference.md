@@ -192,8 +192,8 @@ Yields and immediately ends the tick, skipping all threads that would normally s
 
 ---
 
-### `(running threads)` -> Array\[Thread\]
-Returns all threads that are currently alive in their execution order.
+### `(threads)` -> Array\[Thread\]
+Returns all threads that were alive at the start of the current tick in their execution order.
 
 <details>
   <summary>Internal behavior</summary>
