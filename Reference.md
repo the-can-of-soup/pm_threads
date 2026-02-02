@@ -30,7 +30,7 @@ Returns the null thread.
 This represents a thread that failed to load or doesn't exist. It has an ID of `undefined`. This thread is also used when the wrong type is inserted into a thread input.
 
 ### `(thread at (INDEX v))` -> Thread
-_Menus: `INDEX` uses [Index](#index)_
+_Menus: `INDEX` uses [Index](#index) (get mode)_
 
 Returns the thread that is at `INDEX` in the threads list.
 
@@ -166,7 +166,7 @@ Yields and makes the previous thread active.
 </details>
 
 ### `yield to thread at (INDEX v)` -> Void
-_Menus: `INDEX` uses [Index](#index)_
+_Menus: `INDEX` uses [Index](#index) (get mode)_
 
 Yields and makes the thread at the specified index active.
 
