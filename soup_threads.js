@@ -531,8 +531,13 @@
           '---',
 
           {
+            opcode: 'yield',
+            text: 'yield to next thread',
+            ...CommandBlock,
+          },
+          {
             opcode: 'multiYield',
-            text: '(not implemented) yield [TIMES] times',
+            text: 'yield [TIMES] times',
             ...CommandBlock,
             arguments: {
               TIMES: {
@@ -541,11 +546,6 @@
                 defaultValue: 30,
               },
             }
-          },
-          {
-            opcode: 'yield',
-            text: 'yield to next thread',
-            ...CommandBlock,
           },
           {
             opcode: 'yieldBack',
@@ -993,6 +993,17 @@
             };
           },
 
+          multiYield(generator, block) {
+            generator.script.yields = true;
+
+            return {
+              kind: 'stack',
+              args: {
+                TIMES: generator.descendInputOfBlock(block, 'TIMES'),
+              }
+            };
+          },
+
           yieldBack(generator, block) {
             generator.script.yields = true;
 
@@ -1026,6 +1037,16 @@
           yield(node, compiler, imports) {
             compiler.source += `
               yield;
+            `;
+          },
+
+          multiYield(node, compiler, imports) {
+            compiler.source += `
+              let TIMES = Scratch.Cast.toNumber(${compiler.descendInput(node.args.TIMES).asUnknown()});
+
+              for (let i = 0; i < TIMES; i++) {
+                yield;
+              }
             `;
           },
 
