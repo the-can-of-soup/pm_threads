@@ -668,14 +668,14 @@
           '---',
 
           {
-            opcode: 'getRunningThreads',
+            opcode: 'getThreads',
             ...jwArray.Block,
-            text: 'running threads',
+            text: 'threads',
           },
           {
-            opcode: 'getRunningThreadsInTarget',
+            opcode: 'getThreadsInTarget',
             ...jwArray.Block,
-            text: '(not implemented) running threads in [TARGET]',
+            text: '(not implemented) threads in [TARGET]',
             arguments: {
               TARGET: {
                 ...jwTargets.Argument,
@@ -1263,7 +1263,7 @@
 
 
 
-    getRunningThreads({}, util) {
+    getThreads({}, util) {
       return new jwArray.Type(runtime.threads.map((rawThread) => new ThreadType(rawThread)));
     }
 
