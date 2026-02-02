@@ -156,6 +156,9 @@ Returns `true` if `THREAD` was started by manually clicking a stack in the code 
 ### `yield to next thread` -> Void
 Yields.
 
+### `yield [TIMES] times` -> Void
+Yields `TIMES` times.
+
 ### `yield to previous thread` -> Void
 Yields and makes the previous thread active.
 
