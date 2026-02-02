@@ -845,13 +845,35 @@
           '---',
 
           {
+            opcode: 'getWarpMode',
+            text: '(not implemented) warp mode',
+            ...BooleanBlock,
+          },
+          {
+            opcode: 'setWarpModeFor',
+            text: '(not implemented) [SETBOOLEAN] warp mode for',
+            ...CommandBlock,
+            branches: [{}],
+            arguments: {
+              SETBOOLEAN: {
+                type: Scratch.ArgumentType.STRING,
+                exemptFromNormalization: true,
+                menu: 'setBoolean',
+                defaultValue: 'enable',
+              },
+            }
+          },
+
+          '---',
+
+          {
             opcode: 'getGraphicsUpdated',
-            text: '(not implemented) graphics-updated flag',
+            text: '(not implemented) graphics updated',
             ...BooleanBlock,
           },
           {
             opcode: 'setGraphicsUpdated',
-            text: '(not implemented) set graphics-updated flag to [VALUE]',
+            text: '(not implemented) set graphics updated to [VALUE]',
             ...CommandBlock,
             arguments: {
               VALUE: {
@@ -954,6 +976,19 @@
               {
                 text: 'text',
                 value: 'text',
+              },
+            ]
+          },
+          setBoolean: {
+            acceptReporters: false,
+            items: [
+              {
+                text: 'disable',
+                value: 'disable',
+              },
+              {
+                text: 'enable',
+                value: 'enable',
               },
             ]
           }
