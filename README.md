@@ -7,10 +7,10 @@ URL: [`https://raw.githubusercontent.com/the-can-of-soup/pm_threads/refs/heads/m
 
 > [!IMPORTANT]
 >
-> This extension is still in alpha. The following have not been finished:
+> This extension is still in alpha. Breaking changes may be introduced at any point. The following have not been finished:
 > - Code for one or more blocks
-> - Thumbnail
-> - Icon
+> - Thumbnail (?)
+> - Icon (?)
 > - Documentation
 
 ## Documentation
