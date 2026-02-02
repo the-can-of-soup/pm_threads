@@ -21,6 +21,6 @@ The documentation can be found [here](https://github.com/the-can-of-soup/pm_thre
 
 <br><br><br><br>
 
-_I lowkey probably would've quit making this extension immediately had [this PR](https://github.com/PenguinMod/PenguinMod-Vm/pull/173) not been merged because it would be basically impossible 💀_
+_[This PR](https://github.com/PenguinMod/PenguinMod-Vm/pull/173) pretty much singlehandedly made this extension possible_
 
-_By the way that is my first contribution to PenguinMod 🎉_
+_By the way that was my first contribution to PenguinMod 🎉_
