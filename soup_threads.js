@@ -10,6 +10,7 @@
 
 // TO-DO
 //
+// - Figure out if it is possible for dead threads to be in `runtime.threads` during a step, and if so, apply patches
 // - Fix weird bug where `(running threads)` result desyncs from `vm.runtime.threads`. Maybe `vm` or `vm.runtime` are being swapped for different objects?
 //   (maybe fixed by using `util.sequencer` in every block instead of having `const sequencer = vm.runtime.sequencer;` at the start?)
 // - Yell at @jwklong until they fix the lip that is happening in the `builder` block
