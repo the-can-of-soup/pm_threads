@@ -166,6 +166,8 @@ Yields and makes the previous thread active.
 </details>
 
 ### `yield to thread at (INDEX v)` -> Void
+_Menus: `INDEX` uses [Index](#index)_
+
 Yields and makes the thread at the specified index active.
 
 If `INDEX` is larger than the normally accepted range, will immediately end the tick.
