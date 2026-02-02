@@ -10,10 +10,8 @@
 
 // TO-DO
 //
-// [ ] Change all implemented yield blocks to compiled
-// [ ] Fix behavior when the first thread uses yieldBack
-// [ ] Fix weird bug where `(running threads)` result desyncs from `vm.runtime.threads`. Maybe `vm` or `vm.runtime` are being swapped for different objects?
-//     (maybe fixed by using `util.sequencer` in every block instead of having `const sequencer = vm.runtime.sequencer;` at the start?)
+// - Fix weird bug where `(running threads)` result desyncs from `vm.runtime.threads`. Maybe `vm` or `vm.runtime` are being swapped for different objects?
+//   (maybe fixed by using `util.sequencer` in every block instead of having `const sequencer = vm.runtime.sequencer;` at the start?)
 
 // NOTES
 //
@@ -38,14 +36,8 @@
   let jwArray;
   let jwTargets;
 
-  const ThreadStatus = {
-    0: 'Running',
-    1: 'Waiting for promise',
-    2: 'Yielded',
-    3: 'Yielded for one tick',
-    4: 'Completed',
-    5: 'Suspended',
-  }
+  // Copied from pmControlsExpansion
+  const AsyncIcon = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHByZXNlcnZlQXNwZWN0UmF0aW89Im5vbmUiIHg9IjBweCIgeT0iMHB4IiB3aWR0aD0iMjRweCIgaGVpZ2h0PSIyNHB4IiB2aWV3Qm94PSIwIDAgMjQgMjQiPgo8ZGVmcz4KPGcgaWQ9IkxheWVyMV8wX0ZJTEwiPgo8cGF0aCBmaWxsPSIjMDAwMDAwIiBmaWxsLW9wYWNpdHk9IjAuNDQ3MDU4ODIzNTI5NDExOCIgc3Ryb2tlPSJub25lIiBkPSIKTSAxMi4xIDEuNTUKUSAxMS41MTU0Mjk2ODc1IDEuNDk5NjA5Mzc1IDEwLjk1IDIuMTUKTCA3LjMgNi4xClEgNi42ODcxMDkzNzUgNi41NjI1IDYuNyA3LjIgNi43MjUgOC43NzUxOTUzMTI1IDguMyA4Ljc1CkwgOS4yNSA4Ljc1ClEgOS42MTA1NDY4NzUgMTIuMjU2MDU0Njg3NSA5LjI1IDE1LjMKTCA4LjEgMTUuMjUKUSA3LjE1MzkwNjI1IDE1LjI3MTY3OTY4NzUgNi44IDE2IDYuNjc2MzY3MTg3NSAxNi4yNjY3OTY4NzUgNi42NSAxNi42NSA2LjYxMjY5NTMxMjUgMTcuMTY3MTg3NSA3LjIgMTcuODUKTCAxMC45NSAyMS45ClEgMTEuNDQxMjEwOTM3NSAyMi42NTE5NTMxMjUgMTIuMSAyMi41NSAxMi42MDkxNzk2ODc1IDIyLjY0NDcyNjU2MjUgMTMuMiAyMi4wNQpMIDEzLjIgMjIuMDUgMTcuMDUgMTcuOQpRIDE3LjU1ODc4OTA2MjUgMTcuNDY4OTQ1MzEyNSAxNy41IDE2LjkgMTcuNTI1IDE1LjMyNDgwNDY4NzUgMTUuOTUgMTUuMwpMIDE0LjggMTUuMwpRIDE0LjUyODMyMDMxMjUgMTIuMTIxNjc5Njg3NSAxNC44NSA4LjgKTCAxNi4xNSA4LjgKUSAxNy4xOTg0Mzc1IDguODI4NzEwOTM3NSAxNy40NSA3LjkgMTcuNTIzNjMyODEyNSA3Ljc1MTE3MTg3NSAxNy41IDcuNiAxNy41MjUgNy41NSAxNy41IDcuNDUgMTcuNTQ3NDYwOTM3NSA2Ljg0NDUzMTI1IDE3LjA1IDYuMjUKTCAxMy4yIDIuMgpRIDEyLjc1NTA3ODEyNSAxLjQ5ODI0MjE4NzUgMTIuMSAxLjU1IFoiLz4KPC9nPgoKPGcgaWQ9IkxheWVyMF8wX0ZJTEwiPgo8cGF0aCBmaWxsPSIjRkZGRkZGIiBzdHJva2U9Im5vbmUiIGQ9IgpNIDE2LjM1IDYuODUKTCAxMi40NSAyLjc1ClEgMTIuMyAyLjUgMTIuMSAyLjUgMTEuOSAyLjUgMTEuNyAyLjc1CkwgNy44NSA2Ljg1ClEgNy42NSA3IDcuNjUgNy4yIDcuNjUgNy44NSA4LjMgNy44NQpMIDEwLjEgNy44NQpRIDEwLjY1IDEyLjQgMTAuMSAxNi4yNQpMIDguMSAxNi4yClEgNy43NSAxNi4yIDcuNjUgMTYuNSA3LjYgMTYuNTUgNy42IDE2LjY1IDcuNiAxNi45IDcuOSAxNy4yNQpMIDExLjc1IDIxLjQKUSAxMS45IDIxLjY1IDEyLjEgMjEuNjUgMTIuMyAyMS42NSAxMi41NSAyMS40CkwgMTYuNCAxNy4yNQpRIDE2LjYgMTcuMSAxNi42IDE2LjkgMTYuNiAxNi4yNSAxNS45NSAxNi4yNQpMIDE0IDE2LjI1ClEgMTMuNSAxMi4xNSAxNCA3LjkKTCAxNi4xNSA3LjkKUSAxNi41IDcuOSAxNi42IDcuNiAxNi42IDcuNTUgMTYuNiA3LjQ1IDE2LjYgNy4xNSAxNi4zNSA2Ljg1IFoiLz4KPC9nPgo8L2RlZnM+Cgo8ZyBpZD0iTGF5ZXJfMyI+CjxnIHRyYW5zZm9ybT0ibWF0cml4KCAxLCAwLCAwLCAxLCAwLDApICI+Cjx1c2UgeGxpbms6aHJlZj0iI0xheWVyMV8wX0ZJTEwiLz4KPC9nPgo8L2c+Cgo8ZyBpZD0iYXN5bmNfc3ZnIj4KPGcgdHJhbnNmb3JtPSJtYXRyaXgoIDEsIDAsIDAsIDEsIDAsMCkgIj4KPHVzZSB4bGluazpocmVmPSIjTGF5ZXIwXzBfRklMTCIvPgo8L2c+CjwvZz4KPC9zdmc+Cg==';
 
   function span(text) {
     // Copied from jwArray, jwVector
@@ -235,16 +227,61 @@
     exemptFromNormalization: true,
   }
 
-  function handleIndexInput(INDEX, goPastEnd = false, constrain = false) {
-    // If goPastEnd is true, the "end" index will select the index after the last index.
+  const ThreadStatus = {
+    0: 'Running',
+    1: 'Waiting for promise',
+    2: 'Yielded',
+    3: 'Yielded for one tick',
+    4: 'Completed',
+    5: 'Suspended',
+  }
 
-    INDEX = Scratch.Cast.toNumber(INDEX);
-    INDEX = Math.floor(INDEX);
+  class SoupThreadsUtil {
 
-    // Index 0 means "end", otherwise index is 1-based
-    let end = runtime.threads.length - 1 + goPastEnd;
-    let unconstrained = INDEX === 0 ? end : INDEX - 1;
-    return constrain ? Math.max(0, Math.min(unconstrained, end)) : unconstrained;
+    ThreadType = ThreadType;
+    ThreadStatus = ThreadStatus;
+
+    static handleIndexInput(INDEX, insertMode = false, constrain = false) {
+      // If insertMode is true, the "end" index will select the index after the last index.
+
+      // Convert index to a 1-based integer
+      switch (INDEX) {
+        case 'start':
+        case 'before start':
+          INDEX = 1;
+          break;
+
+        case 'end':
+        case 'after end':
+          INDEX = 0;
+          break;
+
+        case 'previous index':
+        case 'before previous':
+          INDEX = runtime.sequencer.activeThreadIndex;
+          break;
+
+        case 'active index':
+        case 'before active':
+          INDEX = runtime.sequencer.activeThreadIndex + 1;
+          break;
+
+        case 'next index':
+        case 'before next':
+          INDEX = runtime.sequencer.activeThreadIndex + 2;
+          break;
+
+        default:
+          INDEX = Scratch.Cast.toNumber(INDEX);
+          INDEX = Math.floor(INDEX);
+      }
+
+      // Index 0 means "end", otherwise index is 1-based
+      let end = runtime.threads.length - 1 + insertMode;
+      let unconstrained = INDEX === 0 ? end : INDEX - 1;
+      return constrain ? Math.max(0, Math.min(unconstrained, end)) : unconstrained;
+    }
+
   }
 
   class SoupThreadsExtension {
@@ -253,8 +290,11 @@
       // Register compiled blocks
       vm.runtime.registerCompiledExtensionBlocks('soupThreads', this.getCompileInfo());
 
-      // Register serializer for thread type
-      vm.soupThreads = Thread;
+      // Store reference to SoupThreadsUtil
+      vm.SoupThreadsUtil = SoupThreadsUtil;
+
+      // Register thread type
+      vm.SoupThreads = Thread;
       vm.runtime.registerSerializer(
           'soupThread',
           Thread.Type.serialize,
@@ -311,7 +351,7 @@
                 type: Scratch.ArgumentType.NUMBER,
                 exemptFromNormalization: true,
                 menu: 'index',
-                defaultValue: 1, // start
+                defaultValue: 'start',
               },
             }
           },
@@ -319,22 +359,60 @@
           '---',
 
           {
-            opcode: 'threadBuilder',
-            text: '(not implemented) new thread in [TARGET] at [INDEX]',
-            ...Thread.Block,
+            opcode: 'builderNoReturn',
+            text: ['(not implemented) new thread in [TARGET] moved to [INDEX]', '[ICON]'],
+            alignments: [
+              null, // text
+              null, // branch
+              Scratch.ArgumentAlignment.RIGHT, // icon
+            ],
+            ...CommandBlock,
             branches: [{}],
             arguments: {
               INDEX: {
                 type: Scratch.ArgumentType.NUMBER,
                 exemptFromNormalization: true,
-                menu: 'index',
-                defaultValue: 0, // end
+                menu: 'indexInsert',
+                defaultValue: 'after end',
               },
               TARGET: {
                 shape: jwTargets.Argument.shape, // Do not include "check" parameter from jwTargets.Argument because that breaks menu
                 exemptFromNormalization: true,
                 // fillIn: 'menu_target',
                 menu: 'target',
+              },
+              ICON: {
+                type: Scratch.ArgumentType.IMAGE,
+                dataURI: AsyncIcon,
+              },
+            }
+          },
+          {
+            opcode: 'builder',
+            text: ['(not implemented) new thread in [TARGET] moved to [INDEX]', '[ICON]'],
+            alignments: [
+              null, // text
+              null, // branch
+              Scratch.ArgumentAlignment.RIGHT, // icon
+            ],
+            ...Thread.Block,
+            branches: [{}],
+            arguments: {
+              INDEX: {
+                type: Scratch.ArgumentType.NUMBER,
+                exemptFromNormalization: true,
+                menu: 'indexInsert',
+                defaultValue: 'after end',
+              },
+              TARGET: {
+                shape: jwTargets.Argument.shape, // Do not include "check" parameter from jwTargets.Argument because that breaks menu
+                exemptFromNormalization: true,
+                // fillIn: 'menu_target',
+                menu: 'target',
+              },
+              ICON: {
+                type: Scratch.ArgumentType.IMAGE,
+                dataURI: AsyncIcon,
               },
             }
           },
@@ -499,7 +577,7 @@
                 type: Scratch.ArgumentType.NUMBER,
                 exemptFromNormalization: true,
                 menu: 'index',
-                defaultValue: 1, // start
+                defaultValue: 'start',
               },
             }
           },
@@ -513,29 +591,29 @@
 
           {
             opcode: 'broadcastAt',
-            text: '(not implemented) broadcast [MESSAGE] at [INDEX]',
+            text: '(not implemented) broadcast [MESSAGE] to [INDEX]',
             ...CommandBlock,
             arguments: {
               MESSAGE: MessageArgument,
               INDEX: {
                 type: Scratch.ArgumentType.NUMBER,
                 exemptFromNormalization: true,
-                menu: 'index',
-                defaultValue: 0, // end
+                menu: 'indexInsert',
+                defaultValue: 'after end',
               },
             }
           },
           {
             opcode: 'broadcastAtAndWait',
-            text: '(not implemented) broadcast [MESSAGE] at [INDEX] and wait',
+            text: '(not implemented) broadcast [MESSAGE] to [INDEX] and wait',
             ...CommandBlock,
             arguments: {
               MESSAGE: MessageArgument,
               INDEX: {
                 type: Scratch.ArgumentType.NUMBER,
                 exemptFromNormalization: true,
-                menu: 'index',
-                defaultValue: 0, // end
+                menu: 'indexInsert',
+                defaultValue: 'after end',
               },
             }
           },
@@ -613,7 +691,7 @@
                 type: Scratch.ArgumentType.NUMBER,
                 exemptFromNormalization: true,
                 menu: 'index',
-                defaultValue: 1, // start
+                defaultValue: 'start',
               },
             }
           },
@@ -635,8 +713,8 @@
               INDEX: {
                 type: Scratch.ArgumentType.NUMBER,
                 exemptFromNormalization: true,
-                menu: 'index',
-                defaultValue: 0, // end
+                menu: 'indexInsert',
+                defaultValue: 'after end',
               },
             }
           },
@@ -807,15 +885,56 @@
             items: [
               {
                 text: 'start',
-                value: 1,
+                value: 'start',
               },
               {
                 text: 'end',
-                value: 0,
+                value: 'end',
+              },
+              {
+                text: 'previous index',
+                value: 'previous index',
+              },
+              {
+                text: 'active index',
+                value: 'active index',
+              },
+              {
+                text: 'next index',
+                value: 'next index',
               },
               {
                 text: '(you can put an index here)',
-                value: null,
+                value: '(you can put an index here)',
+              },
+            ],
+          },
+          indexInsert: {
+            acceptReporters: true,
+            items: [
+              {
+                text: 'before start',
+                value: 'before start',
+              },
+              {
+                text: 'after end',
+                value: 'after end',
+              },
+              {
+                text: 'before previous',
+                value: 'before previous',
+              },
+              {
+                text: 'before active',
+                value: 'before active',
+              },
+              {
+                text: 'before next',
+                value: 'before next',
+              },
+              {
+                text: '(you can put an index here)',
+                value: '(you can put an index here)',
               },
             ],
           },
@@ -866,6 +985,7 @@
 
           yield(generator, block) {
             generator.script.yields = true;
+
             return {
               kind: 'stack',
             };
@@ -873,6 +993,26 @@
 
           yieldBack(generator, block) {
             generator.script.yields = true;
+
+            return {
+              kind: 'stack',
+            };
+          },
+
+          yieldToIndex(generator, block) {
+            generator.script.yields = true;
+
+            return {
+              kind: 'stack',
+              args: {
+                ACTIVEINDEX: generator.descendInputOfBlock(block, 'ACTIVEINDEX'),
+              }
+            };
+          },
+
+          yieldToEnd(generator, block) {
+            generator.script.yields = true;
+
             return {
               kind: 'stack',
             };
@@ -888,14 +1028,42 @@
           },
 
           yieldBack(node, compiler, imports) {
-            // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value
-            // Will yield to end of the tick if the current thread is at the start.
             compiler.source += `
+              // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value
+              // Will yield to end of the tick if the current thread is at the start.
               if (runtime.sequencer.activeThreadIndex <= 0) {
                 runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;
               } else {
                 runtime.sequencer.activeThreadIndex -= 2;
               }
+
+              yield;
+            `;
+          },
+
+          yieldToIndex(node, compiler, imports) {
+            compiler.source += `
+              let ACTIVEINDEX = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.ACTIVEINDEX).asUnknown()});
+
+              // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value
+              if (ACTIVEINDEX < 0) {
+                // yield to first thread
+                runtime.sequencer.activeThreadIndex = -1;
+              } else if (ACTIVEINDEX >= runtime.threads.length) {
+                // yield to end of tick
+                runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;
+              } else {
+                runtime.sequencer.activeThreadIndex = ACTIVEINDEX - 1;
+              }
+
+              yield;
+            `;
+          },
+
+          yieldToEnd(node, compiler, imports) {
+            compiler.source += `
+              // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value
+              runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;
 
               yield;
             `;
@@ -923,7 +1091,7 @@
     }
 
     threadAt({INDEX}, util) {
-      INDEX = handleIndexInput(INDEX);
+      INDEX = SoupThreadsUtil.handleIndexInput(INDEX);
 
       if (INDEX < 0 || INDEX >= runtime.threads.length) {
         return new ThreadType();
@@ -1033,33 +1201,6 @@
         return false;
       }
       return THREAD.thread.stackClick;
-    }
-
-
-
-    *yieldToIndex({ACTIVEINDEX}, util) {
-      ACTIVEINDEX = handleIndexInput(ACTIVEINDEX);
-
-      // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value
-      if (ACTIVEINDEX < 0) {
-        // yield to first thread
-        util.sequencer.activeThreadIndex = -1;
-      } else if (ACTIVEINDEX >= runtime.threads.length) {
-        // yield to end of tick
-        util.sequencer.activeThreadIndex = runtime.threads.length - 1;
-      } else {
-        util.sequencer.activeThreadIndex = ACTIVEINDEX - 1;
-      }
-
-      yield;
-    }
-
-    *yieldToEnd({}, util) {
-      // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value
-      // yield to end of tick
-      util.sequencer.activeThreadIndex = runtime.threads.length - 1;
-
-      yield;
     }
 
 
