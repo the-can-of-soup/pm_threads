@@ -1269,10 +1269,14 @@
                 for (let i = 0; i < TIMES; i++) {
             `;
             compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads_repeatAtomic')); // true means this is a loop
+            if (runtime.compilerOptions.warpTimer) {
+              compiler.source += `
+                if (isStuck()) {
+                  yield;
+                }
+              `;
+            }
             compiler.source += `
-                  if (isStuck()) {
-                    yield;
-                  }
                 }
               }
             `;
@@ -1284,10 +1288,14 @@
                 while (!(${compiler.descendInput(node.args.CONDITION).asBoolean()})) {
             `;
             compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads_repeatUntilAtomic')); // true means this is a loop
+            if (runtime.compilerOptions.warpTimer) {
+              compiler.source += `
+                if (isStuck()) {
+                  yield;
+                }
+              `;
+            }
             compiler.source += `
-                  if (isStuck()) {
-                    yield;
-                  }
                 }
               }
             `;
@@ -1299,10 +1307,14 @@
                 while (${compiler.descendInput(node.args.CONDITION).asBoolean()}) {
             `;
             compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads_repeatWhileAtomic')); // true means this is a loop
+            if (runtime.compilerOptions.warpTimer) {
+              compiler.source += `
+                if (isStuck()) {
+                  yield;
+                }
+              `;
+            }
             compiler.source += `
-                  if (isStuck()) {
-                    yield;
-                  }
                 }
               }
             `;
@@ -1314,10 +1326,14 @@
                 while (true) {
             `;
             compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads_repeatForeverAtomic')); // true means this is a loop
+            if (runtime.compilerOptions.warpTimer) {
+              compiler.source += `
+                if (isStuck()) {
+                  yield;
+                }
+              `;
+            }
             compiler.source += `
-                  if (isStuck()) {
-                    yield;
-                  }
                 }
               }
             `;
