@@ -41,6 +41,8 @@
   // Copied from pmControlsExpansion
   const AsyncIcon = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHByZXNlcnZlQXNwZWN0UmF0aW89Im5vbmUiIHg9IjBweCIgeT0iMHB4IiB3aWR0aD0iMjRweCIgaGVpZ2h0PSIyNHB4IiB2aWV3Qm94PSIwIDAgMjQgMjQiPgo8ZGVmcz4KPGcgaWQ9IkxheWVyMV8wX0ZJTEwiPgo8cGF0aCBmaWxsPSIjMDAwMDAwIiBmaWxsLW9wYWNpdHk9IjAuNDQ3MDU4ODIzNTI5NDExOCIgc3Ryb2tlPSJub25lIiBkPSIKTSAxMi4xIDEuNTUKUSAxMS41MTU0Mjk2ODc1IDEuNDk5NjA5Mzc1IDEwLjk1IDIuMTUKTCA3LjMgNi4xClEgNi42ODcxMDkzNzUgNi41NjI1IDYuNyA3LjIgNi43MjUgOC43NzUxOTUzMTI1IDguMyA4Ljc1CkwgOS4yNSA4Ljc1ClEgOS42MTA1NDY4NzUgMTIuMjU2MDU0Njg3NSA5LjI1IDE1LjMKTCA4LjEgMTUuMjUKUSA3LjE1MzkwNjI1IDE1LjI3MTY3OTY4NzUgNi44IDE2IDYuNjc2MzY3MTg3NSAxNi4yNjY3OTY4NzUgNi42NSAxNi42NSA2LjYxMjY5NTMxMjUgMTcuMTY3MTg3NSA3LjIgMTcuODUKTCAxMC45NSAyMS45ClEgMTEuNDQxMjEwOTM3NSAyMi42NTE5NTMxMjUgMTIuMSAyMi41NSAxMi42MDkxNzk2ODc1IDIyLjY0NDcyNjU2MjUgMTMuMiAyMi4wNQpMIDEzLjIgMjIuMDUgMTcuMDUgMTcuOQpRIDE3LjU1ODc4OTA2MjUgMTcuNDY4OTQ1MzEyNSAxNy41IDE2LjkgMTcuNTI1IDE1LjMyNDgwNDY4NzUgMTUuOTUgMTUuMwpMIDE0LjggMTUuMwpRIDE0LjUyODMyMDMxMjUgMTIuMTIxNjc5Njg3NSAxNC44NSA4LjgKTCAxNi4xNSA4LjgKUSAxNy4xOTg0Mzc1IDguODI4NzEwOTM3NSAxNy40NSA3LjkgMTcuNTIzNjMyODEyNSA3Ljc1MTE3MTg3NSAxNy41IDcuNiAxNy41MjUgNy41NSAxNy41IDcuNDUgMTcuNTQ3NDYwOTM3NSA2Ljg0NDUzMTI1IDE3LjA1IDYuMjUKTCAxMy4yIDIuMgpRIDEyLjc1NTA3ODEyNSAxLjQ5ODI0MjE4NzUgMTIuMSAxLjU1IFoiLz4KPC9nPgoKPGcgaWQ9IkxheWVyMF8wX0ZJTEwiPgo8cGF0aCBmaWxsPSIjRkZGRkZGIiBzdHJva2U9Im5vbmUiIGQ9IgpNIDE2LjM1IDYuODUKTCAxMi40NSAyLjc1ClEgMTIuMyAyLjUgMTIuMSAyLjUgMTEuOSAyLjUgMTEuNyAyLjc1CkwgNy44NSA2Ljg1ClEgNy42NSA3IDcuNjUgNy4yIDcuNjUgNy44NSA4LjMgNy44NQpMIDEwLjEgNy44NQpRIDEwLjY1IDEyLjQgMTAuMSAxNi4yNQpMIDguMSAxNi4yClEgNy43NSAxNi4yIDcuNjUgMTYuNSA3LjYgMTYuNTUgNy42IDE2LjY1IDcuNiAxNi45IDcuOSAxNy4yNQpMIDExLjc1IDIxLjQKUSAxMS45IDIxLjY1IDEyLjEgMjEuNjUgMTIuMyAyMS42NSAxMi41NSAyMS40CkwgMTYuNCAxNy4yNQpRIDE2LjYgMTcuMSAxNi42IDE2LjkgMTYuNiAxNi4yNSAxNS45NSAxNi4yNQpMIDE0IDE2LjI1ClEgMTMuNSAxMi4xNSAxNCA3LjkKTCAxNi4xNSA3LjkKUSAxNi41IDcuOSAxNi42IDcuNiAxNi42IDcuNTUgMTYuNiA3LjQ1IDE2LjYgNy4xNSAxNi4zNSA2Ljg1IFoiLz4KPC9nPgo8L2RlZnM+Cgo8ZyBpZD0iTGF5ZXJfMyI+CjxnIHRyYW5zZm9ybT0ibWF0cml4KCAxLCAwLCAwLCAxLCAwLDApICI+Cjx1c2UgeGxpbms6aHJlZj0iI0xheWVyMV8wX0ZJTEwiLz4KPC9nPgo8L2c+Cgo8ZyBpZD0iYXN5bmNfc3ZnIj4KPGcgdHJhbnNmb3JtPSJtYXRyaXgoIDEsIDAsIDAsIDEsIDAsMCkgIj4KPHVzZSB4bGluazpocmVmPSIjTGF5ZXIwXzBfRklMTCIvPgo8L2c+CjwvZz4KPC9zdmc+Cg==';
 
+  const LoopIcon = './static/blocks-media/repeat.svg';
+
   function span(text) {
     // Copied from jwArray, jwVector
 
@@ -242,6 +244,8 @@
 
     ThreadType = ThreadType;
     ThreadStatus = ThreadStatus;
+
+    uid = uid;
 
     static handleIndexInput(INDEX, insertMode = false, constrain = false) {
       // If insertMode is true, the "end" index will select the index after the last index.
@@ -734,43 +738,85 @@
 
           {
             opcode: 'repeatAtomic',
-            text: '(not implemented) repeat [TIMES] without yielding',
-            blockType: Scratch.BlockType.LOOP,
+            text: ['repeat [TIMES] without yielding', '[ICON]'],
+            alignments: [
+              null, // text
+              null, // branch
+              Scratch.ArgumentAlignment.RIGHT, // icon
+            ],
+            ...CommandBlock,
+            branches: [{}],
             arguments: {
               TIMES: {
                 type: Scratch.ArgumentType.NUMBER,
                 exemptFromNormalization: true,
                 defaultValue: 10,
               },
+              ICON: {
+                type: Scratch.ArgumentType.IMAGE,
+                dataURI: LoopIcon,
+              },
             }
           },
           {
             opcode: 'repeatUntilAtomic',
-            text: '(not implemented) repeat until [CONDITION] without yielding',
-            blockType: Scratch.BlockType.LOOP,
+            text: ['repeat until [CONDITION] without yielding', '[ICON]'],
+            alignments: [
+              null, // text
+              null, // branch
+              Scratch.ArgumentAlignment.RIGHT, // icon
+            ],
+            ...CommandBlock,
+            branches: [{}],
             arguments: {
               CONDITION: {
                 type: Scratch.ArgumentType.BOOLEAN,
                 exemptFromNormalization: true,
+              },
+              ICON: {
+                type: Scratch.ArgumentType.IMAGE,
+                dataURI: LoopIcon,
               },
             }
           },
           {
             opcode: 'repeatWhileAtomic',
-            text: '(not implemented) while [CONDITION] without yielding',
-            blockType: Scratch.BlockType.LOOP,
+            text: ['while [CONDITION] without yielding', '[ICON]'],
+            alignments: [
+              null, // text
+              null, // branch
+              Scratch.ArgumentAlignment.RIGHT, // icon
+            ],
+            ...CommandBlock,
+            branches: [{}],
             arguments: {
               CONDITION: {
                 type: Scratch.ArgumentType.BOOLEAN,
                 exemptFromNormalization: true,
               },
+              ICON: {
+                type: Scratch.ArgumentType.IMAGE,
+                dataURI: LoopIcon,
+              },
             }
           },
           {
             opcode: 'repeatForeverAtomic',
-            text: '(not implemented) forever without yielding',
-            blockType: Scratch.BlockType.LOOP,
+            text: ['forever without yielding', '[ICON]'],
+            alignments: [
+              null, // text
+              null, // branch
+              Scratch.ArgumentAlignment.RIGHT, // icon
+            ],
+            ...CommandBlock,
+            branches: [{}],
             isTerminal: true,
+            arguments: {
+              ICON: {
+                type: Scratch.ArgumentType.IMAGE,
+                dataURI: LoopIcon,
+              },
+            }
           },
 
           '---',
@@ -1079,6 +1125,47 @@
 
 
 
+          repeatAtomic(generator, block) {
+            return {
+              kind: 'stack',
+              args: {
+                TIMES: generator.descendInputOfBlock(block, 'TIMES'),
+                SUBSTACK: generator.descendSubstack(block, 'SUBSTACK'),
+              }
+            };
+          },
+
+          repeatUntilAtomic(generator, block) {
+            return {
+              kind: 'stack',
+              args: {
+                CONDITION: generator.descendInputOfBlock(block, 'CONDITION'),
+                SUBSTACK: generator.descendSubstack(block, 'SUBSTACK'),
+              }
+            };
+          },
+
+          repeatWhileAtomic(generator, block) {
+            return {
+              kind: 'stack',
+              args: {
+                CONDITION: generator.descendInputOfBlock(block, 'CONDITION'),
+                SUBSTACK: generator.descendSubstack(block, 'SUBSTACK'),
+              }
+            };
+          },
+
+          repeatForeverAtomic(generator, block) {
+            return {
+              kind: 'stack',
+              args: {
+                SUBSTACK: generator.descendSubstack(block, 'SUBSTACK'),
+              }
+            };
+          },
+
+
+
           getWarpMode(generator, block) {
             return {
               kind: 'input',
@@ -1099,7 +1186,7 @@
           multiYield(node, compiler, imports) {
             compiler.source += `
               {
-                let TIMES = Scratch.Cast.toNumber(${compiler.descendInput(node.args.TIMES).asUnknown()});
+                let TIMES = ${compiler.descendInput(node.args.TIMES).asNumber()};
 
                 for (let i = 0; i < TIMES; i++) {
                   yield;
@@ -1168,6 +1255,58 @@
                 runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;
 
                 yield;
+              }
+            `;
+          },
+
+
+
+          repeatAtomic(node, compiler, imports) {
+            compiler.source += `
+              {
+                let TIMES = ${compiler.descendInput(node.args.TIMES).asNumber()};
+
+                for (let i = 0; i < TIMES; i++) {
+            `;
+            compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads_repeatAtomic')); // true means this is a loop
+            compiler.source += `
+                }
+              }
+            `;
+          },
+
+          repeatUntilAtomic(node, compiler, imports) {
+            compiler.source += `
+              {
+                while (!(${compiler.descendInput(node.args.CONDITION).asBoolean()})) {
+            `;
+            compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads_repeatUntilAtomic')); // true means this is a loop
+            compiler.source += `
+                }
+              }
+            `;
+          },
+
+          repeatWhileAtomic(node, compiler, imports) {
+            compiler.source += `
+              {
+                while (${compiler.descendInput(node.args.CONDITION).asBoolean()}) {
+            `;
+            compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads_repeatWhileAtomic')); // true means this is a loop
+            compiler.source += `
+                }
+              }
+            `;
+          },
+
+          repeatForeverAtomic(node, compiler, imports) {
+            compiler.source += `
+              {
+                while (true) {
+            `;
+            compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads_repeatForeverAtomic')); // true means this is a loop
+            compiler.source += `
+                }
               }
             `;
           },
