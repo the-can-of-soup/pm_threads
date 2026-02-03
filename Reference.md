@@ -214,6 +214,30 @@ Returns all threads that are currently alive and all threads that [exited natura
   Reads the `runtime.threads` array.
 </details>
 
+---
+
+### `<graphics updated>` -> Boolean
+Returns the current state of the "graphics-updated" flag as mentioned [here↗](https://www.rokcoder.com/tips/inner-workings.html).
+
+Will always be `false` at the start of the tick, but certain blocks that update visuals will enable the flag. If the flag is enabled at the end of the tick, the engine will sleep until the end of the frame time and then render (instead of running more ticks until the end of the frame time).
+
+<details>
+  <summary>Internal behavior</summary>
+  
+  Reads `runtime.redrawRequested`.
+</details>
+
+### `set graphics updated to <VALUE>` -> Void
+Sets the "graphics-updated" flag as mentioned [here↗](https://www.rokcoder.com/tips/inner-workings.html).
+
+The behavior and effects of this flag are described under [`<graphics updated>`](#graphics-updated---boolean).
+
+<details>
+  <summary>Internal behavior</summary>
+  
+  Writes `runtime.redrawRequested`.
+</details>
+
 
 
 ## Menus
