@@ -1082,82 +1082,92 @@
 
           yield(node, compiler, imports) {
             compiler.source += `
-              yield;
+              {
+                yield;
+              }
             `;
           },
 
           multiYield(node, compiler, imports) {
             compiler.source += `
-              let TIMES = Scratch.Cast.toNumber(${compiler.descendInput(node.args.TIMES).asUnknown()});
+              {
+                let TIMES = Scratch.Cast.toNumber(${compiler.descendInput(node.args.TIMES).asUnknown()});
 
-              for (let i = 0; i < TIMES; i++) {
-                yield;
+                for (let i = 0; i < TIMES; i++) {
+                  yield;
+                }
               }
             `;
           },
 
           yieldBack(node, compiler, imports) {
             compiler.source += `
-              // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value
-              // Will yield to end of the tick if the current thread is at the start.
-              if (runtime.sequencer.activeThreadIndex <= 0) {
-                runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;
-              } else {
-                runtime.sequencer.activeThreadIndex -= 2;
-              }
+              {
+                // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value
+                // Will yield to end of the tick if the current thread is at the start.
+                if (runtime.sequencer.activeThreadIndex <= 0) {
+                  runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;
+                } else {
+                  runtime.sequencer.activeThreadIndex -= 2;
+                }
 
-              yield;
+                yield;
+              }
             `;
           },
 
           yieldToThread(node, compiler, imports) {
             compiler.source += `
-              let ACTIVETHREAD = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.ACTIVETHREAD).asUnknown()});
+              {
+                let ACTIVETHREAD = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.ACTIVETHREAD).asUnknown()});
 
-              if (ACTIVETHREAD.thread === null || !runtime.threads.includes(ACTIVETHREAD.thread)) {
-                return;
-              }
+                if (ACTIVETHREAD.thread !== null && runtime.threads.includes(ACTIVETHREAD.thread)) {
+                  let threadIndex;
+                  for (let i = 0; i < runtime.threads.length; i++) {
+                    if (runtime.threads[i] === ACTIVETHREAD.thread) {
+                      threadIndex = i;
+                      break;
+                    }
+                  }
 
-              let threadIndex;
-              for (let i = 0; i < runtime.threads.length; i++) {
-                if (runtime.threads[i] === ACTIVETHREAD.thread) {
-                  threadIndex = i;
-                  break;
+                  // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value
+                  runtime.sequencer.activeThreadIndex = threadIndex - 1;
+
+                  yield;
                 }
               }
-
-              // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value
-              runtime.sequencer.activeThreadIndex = threadIndex - 1;
-
-              yield;
             `;
           },
 
           yieldToIndex(node, compiler, imports) {
             compiler.source += `
-              let ACTIVEINDEX = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.ACTIVEINDEX).asUnknown()});
+              {
+                let ACTIVEINDEX = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.ACTIVEINDEX).asUnknown()});
 
-              // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value
-              if (ACTIVEINDEX < 0) {
-                // yield to first thread
-                runtime.sequencer.activeThreadIndex = -1;
-              } else if (ACTIVEINDEX >= runtime.threads.length) {
-                // yield to end of tick
-                runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;
-              } else {
-                runtime.sequencer.activeThreadIndex = ACTIVEINDEX - 1;
+                // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value
+                if (ACTIVEINDEX < 0) {
+                  // yield to first thread
+                  runtime.sequencer.activeThreadIndex = -1;
+                } else if (ACTIVEINDEX >= runtime.threads.length) {
+                  // yield to end of tick
+                  runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;
+                } else {
+                  runtime.sequencer.activeThreadIndex = ACTIVEINDEX - 1;
+                }
+
+                yield;
               }
-
-              yield;
             `;
           },
 
           yieldToEnd(node, compiler, imports) {
             compiler.source += `
-              // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value
-              runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;
+              {
+                // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value
+                runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;
 
-              yield;
+                yield;
+              }
             `;
           },
 
