@@ -216,6 +216,19 @@ Returns all threads that are currently alive and all threads that [exited natura
 
 ---
 
+### `<warp mode>` -> Boolean
+Returns `true` if warp mode is enabled. When warp mode is enabled, all yields are ignored.
+
+For example, code inside an `all at once` block or inside a "Run without screen refresh" custom block has warp mode enabled.
+
+<details>
+  <summary>Internal behavior</summary>
+
+  At JS compile time, reads `compiler.isWarp`.
+</details>
+
+---
+
 ### `<graphics updated>` -> Boolean
 Returns the current state of the "graphics-updated" flag as mentioned [here↗](https://www.rokcoder.com/tips/inner-workings.html).
 
