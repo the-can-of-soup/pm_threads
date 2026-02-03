@@ -86,7 +86,7 @@ Returns the index of `THREAD` in the list of threads.
 <details>
   <summary>Internal behavior</summary>
   
-  Uses `soupThreadId` to compare `THREAD` to the threads in the `runtime.threads` array, and returns the index if a match is found.
+  Finds the index of the thread in the `runtime.threads` array.
 </details>
 
 ---
@@ -114,7 +114,7 @@ Returns `true` if `THREAD` is alive, i.e. it is not finished.
 <details>
   <summary>Internal behavior</summary>
   
-  Returns `true` if the raw thread is in the `runtime.threads` array.
+  Returns `true` if the raw thread is in the `runtime.threads` array and its status is not 4 (completed).
 </details>
 
 ### `<[THREAD] exited naturally?>` -> Boolean
@@ -123,10 +123,14 @@ Returns `true` if `THREAD` is dead, but was not killed, i.e. it exited of its ow
 <details>
   <summary>Internal behavior</summary>
   
-  Returns `true` if:
-  - The raw thread is not in the `runtime.threads` array (therefore it is dead).
-  - The raw thread's `isKilled` key is `false`.
-  - The raw thead's `status` key is 4 (completed). This catches limbo[^1] cases in which killed threads have `isKilled` set to `false` and `status` unchanged.
+  Returns `true` if either:
+  - All of:
+    - The raw thread is not in the `runtime.threads` array (therefore it is dead).
+    - The raw thread's `isKilled` key is `false`.
+    - The thread's status is 4 (completed). This catches limbo[^1] cases in which killed threads have `isKilled` set to `false` and `status` unchanged.
+  - All of:
+    - The raw thread is in the `runtime.threads` array (therefore it died this tick if its status is 4).
+    - The thread's status is 4 (completed).
 </details>
 
 ### `<[THREAD] was killed?>` -> Boolean
@@ -168,10 +172,19 @@ Yields and makes the previous thread active.
   Decrements `sequencer.activeThreadIndex` twice before yielding. The second decrement is because this value is always incremented by the engine after every yield.
 </details>
 
+### `yield to [ACTIVETHREAD]` -> Void
+Yields and makes `ACTIVETHREAD` active. If `ACTIVETHREAD` is null or not in the threads list, does nothing.
+
+<details>
+  <summary>Internal behavior</summary>
+  
+  Sets `sequencer.activeThreadIndex` to 1 less than the desired index before yielding. The decrement is because this value is always incremented by the engine after every yield.
+</details>
+
 ### `yield to thread at (INDEX v)` -> Void
 _Menus: `INDEX` uses [Index](#index) (get mode)_
 
-Yields and makes the thread at the specified index active.
+Yields and makes the thread at `INDEX` active.
 
 If `INDEX` is larger than the normally accepted range, will immediately end the tick.
 
