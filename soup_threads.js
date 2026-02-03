@@ -17,7 +17,7 @@
 
 // NOTES
 //
-// graphics-updated is stored in vm.runtime.redrawRequested
+// graphics-updated is stored in `runtime.redrawRequested`.
 //
 // Sequencer: https://github.com/PenguinMod/PenguinMod-Vm/blob/develop/src/engine/sequencer.js
 // Specifically look at `stepThreads()` which executes ticks until the stage should be redrawn.
@@ -868,12 +868,12 @@
 
           {
             opcode: 'getGraphicsUpdated',
-            text: '(not implemented) graphics updated',
+            text: 'graphics updated',
             ...BooleanBlock,
           },
           {
             opcode: 'setGraphicsUpdated',
-            text: '(not implemented) set graphics updated to [VALUE]',
+            text: 'set graphics updated to [VALUE]',
             ...CommandBlock,
             arguments: {
               VALUE: {
@@ -1334,6 +1334,18 @@
 
     getThreads({}, util) {
       return new jwArray.Type(runtime.threads.map((rawThread) => new ThreadType(rawThread)));
+    }
+
+
+
+    getGraphicsUpdated({}, util) {
+      return runtime.redrawRequested;
+    }
+
+    setGraphicsUpdated({VALUE}, util) {
+      VALUE = Scratch.Cast.toBoolean(VALUE);
+
+      runtime.redrawRequested = VALUE;
     }
 
   }
