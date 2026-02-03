@@ -1131,15 +1131,8 @@
               {
                 let ACTIVETHREAD = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.ACTIVETHREAD).asUnknown()});
 
-                if (ACTIVETHREAD.thread !== null && runtime.threads.includes(ACTIVETHREAD.thread)) {
-                  let threadIndex;
-                  for (let i = 0; i < runtime.threads.length; i++) {
-                    if (runtime.threads[i] === ACTIVETHREAD.thread) {
-                      threadIndex = i;
-                      break;
-                    }
-                  }
-
+                let threadIndex;
+                if (ACTIVETHREAD.thread !== null && (threadIndex = runtime.threads.indexOf(ACTIVETHREAD.thread)) !== -1) {
                   // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value
                   runtime.sequencer.activeThreadIndex = threadIndex - 1;
 
@@ -1258,10 +1251,9 @@
         return '';
       }
 
-      for (let i = 0; i < runtime.threads.length; i++) {
-        if (runtime.threads[i] === THREAD.thread) {
-          return i + 1;
-        }
+      let threadIndex;
+      if ((threadIndex = runtime.threads.indexOf(THREAD.thread)) !== -1) {
+        return threadIndex + 1;
       }
 
       return '';
