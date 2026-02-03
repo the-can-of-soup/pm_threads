@@ -216,6 +216,20 @@ Returns all threads that are currently alive and all threads that [exited natura
 
 ---
 
+### `repeat [TIMES] without yielding [SUBSTACK]` -> Void
+Repeatedly executes `SUBSTACK` `TIMES` times. The difference between this block and the normal repeat block is that **this block does not yield after every loop**.[^3][^4]
+
+### `repeat until [CONDITION] without yielding [SUBSTACK]` -> Void
+Repeatedly executes `SUBSTACK` until `CONDITION` is truthy. The difference between this block and the normal repeat until block is that **this block does not yield after every loop**.[^3][^4]
+
+### `while [CONDITION] without yielding [SUBSTACK]` -> Void
+Repeatedly executes `SUBSTACK` until `CONDITION` is falsy. The difference between this block and the normal while block is that **this block does not yield after every loop**.[^3][^4]
+
+### `forever without yielding [SUBSTACK]` -> Void
+Repeatedly executes `SUBSTACK` forever. The difference between this block and the normal forever block is that **this block does not yield after every loop**.[^3][^4]
+
+---
+
 ### `<warp mode>` -> Boolean
 Returns `true` if warp mode is enabled. When warp mode is enabled, all yields are ignored.
 
@@ -291,3 +305,7 @@ For the value `0`, the behavior of `end` or `after end` is used. Otherwise, the 
     - When a thread runs `stop [all v]`, it is considered killed.
     - When `stop (SPRITE v)` is run, all threads running as `SPRITE` are considered killed, even if they caused it.
     - When a clone is deleted, all threads running as that clone are considered killed, even if they caused the deletion.
+
+[^3]: The contents of the loop will **NOT** be run with warp mode (all at once); only the loop itself has this behavior.
+
+[^4]: This block will yield after a loop if the editor is frozen and warp timer is enabled to prevent crashes.
