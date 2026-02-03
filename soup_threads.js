@@ -1077,6 +1077,16 @@
             };
           },
 
+
+
+          /*
+          getWarpMode(generator, block) {
+            return {
+              kind: 'input',
+            };
+          },
+          */
+
         },
         js: {
 
@@ -1170,6 +1180,16 @@
               }
             `;
           },
+
+
+
+          /*
+          getWarpMode(node, compiler, imports) {
+            compiler.source += `
+              ${compiler.isWarp}
+            `;
+          },
+          */
 
         },
       };
