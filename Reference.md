@@ -81,7 +81,7 @@ Returns the current status code of `THREAD`, or the status code in text format i
 </details>
 
 ### `(index of [THREAD])` -> Number
-Returns the index of `THREAD` in the list of threads.
+Returns the index of `THREAD` in the [list of threads](#threads---arraythread).
 
 <details>
   <summary>Internal behavior</summary>
@@ -94,12 +94,12 @@ Returns the index of `THREAD` in the list of threads.
 ### `<[THREADONE] is [THREADTWO]>` -> Boolean
 Returns `true` if the IDs of the threads match, otherwise returns `false`.
 
-Note that the `<[] = []>` block in Operators will not work for this, as that block compares the stringified value.
+Note that the `<[] = []>` block in Operators is not meant for this, as that block compares the stringified value.
 
 <details>
   <summary>Internal behavior</summary>
   
-  Uses `soupThreadId` to compare the threads.
+  Uses the `soupThreadId` key of the raw thread objects to compare the threads.
 </details>
 
 ### `<[VALUE] is a thread?>` -> Boolean
@@ -114,7 +114,7 @@ Returns `true` if `THREAD` is alive, i.e. it is not finished.
 <details>
   <summary>Internal behavior</summary>
   
-  Returns `true` if the raw thread is in the `runtime.threads` array and its status is not 4 (completed).
+  Returns `true` if the raw thread is in the `runtime.threads` array and its status is not [4 (completed)](#status-statusformat-v-of-thread---number).
 </details>
 
 ### `<[THREAD] exited naturally?>` -> Boolean
@@ -127,10 +127,10 @@ Returns `true` if `THREAD` is dead, but was not killed, i.e. it exited of its ow
   - All of:
     - The raw thread is not in the `runtime.threads` array (therefore it is dead).
     - The raw thread's `isKilled` key is `false`.
-    - The thread's status is 4 (completed). This catches limbo[^1] cases in which killed threads have `isKilled` set to `false` and `status` unchanged.
+    - The thread's status is [4 (completed)](#status-statusformat-v-of-thread---number). This catches limbo[^1] cases in which killed threads have `isKilled` set to `false` and `status` unchanged.
   - All of:
-    - The raw thread is in the `runtime.threads` array (therefore it died this tick if its status is 4).
-    - The thread's status is 4 (completed).
+    - The raw thread is in the `runtime.threads` array (therefore it died this tick if its status is [4](#status-statusformat-v-of-thread---number)).
+    - The thread's status is [4 (completed)](#status-statusformat-v-of-thread---number).
 </details>
 
 ### `<[THREAD] was killed?>` -> Boolean
@@ -173,7 +173,7 @@ Yields and makes the previous thread active.
 </details>
 
 ### `yield to [ACTIVETHREAD]` -> Void
-Yields and makes `ACTIVETHREAD` active. If `ACTIVETHREAD` is null or not in the threads list, does nothing.
+Yields and makes `ACTIVETHREAD` active. If `ACTIVETHREAD` is null or not in the [threads list](#threads---arraythread), does nothing.
 
 <details>
   <summary>Internal behavior</summary>
@@ -245,7 +245,7 @@ For the value `0`, the behavior of `end` or `after end` is used. Otherwise, the 
 
 
 
-[^1]: Status is not a reliable indicator for whether a thread is alive. To reliably check if a thread is alive, instead you should use [`<[THREAD] is alive?>`](#thread-is-alive---boolean). This is because in many cases when a thread is stopped, it will enter limbo. Limbo is when a dead thread's status does not get set to 4. Some known cases where a thread enters limbo:
+[^1]: Status is not a reliable indicator for whether a thread is alive. To reliably check if a thread is alive, instead you should use [`<[THREAD] is alive?>`](#thread-is-alive---boolean). This is because in many cases when a thread is stopped, it will enter limbo. Limbo is when a dead thread's status does not get set to [4](#status-statusformat-v-of-thread---number). Some known cases where a thread enters limbo:
     - When the &nbsp;<img alt="blue flag" style="height: 1em;" src="https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/flag.svg"> blue flag is clicked, all previously running threads will enter limbo.
     - When the &nbsp;<img alt="stop sign" style="height: 1em;" src="https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/stop.svg"> stop sign is clicked, all previously running threads will enter limbo.
     - When a stack restarts because its hat is triggered again, the old thread enters limbo.
