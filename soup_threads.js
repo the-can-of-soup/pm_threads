@@ -184,8 +184,8 @@
       // Should only be called if the thread is known to be dead.
 
       // Thread is considered killed if its status is not "completed"
-      // because dead threads are only not "completed" if they were killed
-      // by a stop all block.
+      // because dead threads are only not "completed" if they are
+      // in limbo.
       return this.thread.isKilled || this.thread.status !== 4;
     }
   }
@@ -564,7 +564,7 @@
           */
           {
             opcode: 'yieldToThread',
-            text: '(not implemented) yield to [ACTIVETHREAD]',
+            text: 'yield to [ACTIVETHREAD]',
             ...CommandBlock,
             arguments: {
               ACTIVETHREAD: Thread.Argument,
@@ -1047,6 +1047,17 @@
             };
           },
 
+          yieldToThread(generator, block) {
+            generator.script.yields = true;
+
+            return {
+              kind: 'stack',
+              args: {
+                ACTIVETHREAD: generator.descendInputOfBlock(block, 'ACTIVETHREAD'),
+              }
+            };
+          },
+
           yieldToIndex(generator, block) {
             generator.script.yields = true;
 
@@ -1094,6 +1105,29 @@
               } else {
                 runtime.sequencer.activeThreadIndex -= 2;
               }
+
+              yield;
+            `;
+          },
+
+          yieldToThread(node, compiler, imports) {
+            compiler.source += `
+              let ACTIVETHREAD = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.ACTIVETHREAD).asUnknown()});
+
+              if (ACTIVETHREAD.thread === null || !runtime.threads.includes(ACTIVETHREAD.thread)) {
+                return;
+              }
+
+              let threadIndex;
+              for (let i = 0; i < runtime.threads.length; i++) {
+                if (runtime.threads[i] === ACTIVETHREAD.thread) {
+                  threadIndex = i;
+                  break;
+                }
+              }
+
+              // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value
+              runtime.sequencer.activeThreadIndex = threadIndex - 1;
 
               yield;
             `;
@@ -1194,9 +1228,8 @@
         return '';
       }
 
-      let threadId = THREAD.getId();
       for (let i = 0; i < runtime.threads.length; i++) {
-        if (new ThreadType(runtime.threads[i]).getId() === threadId) {
+        if (runtime.threads[i] === THREAD.thread) {
           return i + 1;
         }
       }
@@ -1229,7 +1262,13 @@
       if (THREAD.thread === null) {
         return false;
       }
-      return runtime.threads.includes(THREAD.thread);
+
+      // Returns true if:
+      //
+      // - The thread is in the threads list (it died this tick if its status is 4).
+      // - The thread's status is not 4.
+
+      return runtime.threads.includes(THREAD.thread) && THREAD.thread.status !== 4;
     }
 
     isFinished({THREAD}, util) {
@@ -1238,8 +1277,22 @@
       if(THREAD.thread === null) {
         return false;
       }
-      // Order of AND swapped for optimization, but should be read in reverse.
-      return !THREAD.deadThreadWasKilled() && !runtime.threads.includes(THREAD.thread);
+      
+      // Returns true if:
+      //
+      // - The thread is not in the threads list (it is dead).
+      // - The thread was not killed.
+      // OR
+      // - The thread *is* in the threads list (it died this tick if its status is 4).
+      // - The thread's status is 4.
+
+      if (runtime.threads.includes(THREAD.thread)) {
+        return THREAD.thread.status === 4;
+      }
+      if (THREAD.deadThreadWasKilled()) {
+        return false;
+      }
+      return true;
     }
 
     isKilled({THREAD}, util) {
@@ -1248,6 +1301,12 @@
       if (THREAD.thread === null) {
         return false;
       }
+
+      // Returns true if:
+      //
+      // - The thread is not in the threads list (it is dead).
+      // - The thread was killed.
+
       // Order of AND swapped for optimization, but should be read in reverse.
       return THREAD.deadThreadWasKilled() && !runtime.threads.includes(THREAD.thread);
     }
