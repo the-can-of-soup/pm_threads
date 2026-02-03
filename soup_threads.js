@@ -846,7 +846,7 @@
 
           {
             opcode: 'getWarpMode',
-            text: '(not implemented) warp mode',
+            text: 'warp mode',
             ...BooleanBlock,
           },
           {
@@ -1079,13 +1079,11 @@
 
 
 
-          /*
           getWarpMode(generator, block) {
             return {
               kind: 'input',
             };
           },
-          */
 
         },
         js: {
@@ -1176,13 +1174,11 @@
 
 
 
-          /*
           getWarpMode(node, compiler, imports) {
-            compiler.source += `
-              ${compiler.isWarp}
-            `;
+            return new imports.TypedInput(`(function(){
+              return ${compiler.isWarp};
+            })()`, imports.TYPE_BOOLEAN);
           },
-          */
 
         },
       };
