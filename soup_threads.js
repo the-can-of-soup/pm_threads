@@ -1270,6 +1270,9 @@
             `;
             compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads_repeatAtomic')); // true means this is a loop
             compiler.source += `
+                  if (isStuck()) {
+                    yield;
+                  }
                 }
               }
             `;
@@ -1282,6 +1285,9 @@
             `;
             compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads_repeatUntilAtomic')); // true means this is a loop
             compiler.source += `
+                  if (isStuck()) {
+                    yield;
+                  }
                 }
               }
             `;
@@ -1294,6 +1300,9 @@
             `;
             compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads_repeatWhileAtomic')); // true means this is a loop
             compiler.source += `
+                  if (isStuck()) {
+                    yield;
+                  }
                 }
               }
             `;
@@ -1306,6 +1315,9 @@
             `;
             compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads_repeatForeverAtomic')); // true means this is a loop
             compiler.source += `
+                  if (isStuck()) {
+                    yield;
+                  }
                 }
               }
             `;
@@ -1314,9 +1326,7 @@
 
 
           getWarpMode(node, compiler, imports) {
-            return new imports.TypedInput(`(function(){
-              return ${compiler.isWarp};
-            })()`, imports.TYPE_BOOLEAN);
+            return new imports.TypedInput(`${compiler.isWarp}`, imports.TYPE_BOOLEAN);
           },
 
         },
