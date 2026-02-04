@@ -318,7 +318,7 @@
       return {
         id: 'soupThreads',
         name: 'Threads',
-        docsURI: 'https://github.com/the-can-of-soup/pm_threads/blob/main/Documentation.md',
+        docsURI: 'https://github.com/the-can-of-soup/pm_threads/blob/main/docs/Documentation.md',
         color1: '#45c010',
         blocks: [
           {
