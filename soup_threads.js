@@ -683,6 +683,7 @@
           {
             opcode: 'getThreads',
             ...jwArray.Block,
+            disableMonitor: false,
             text: 'threads',
           },
           {
