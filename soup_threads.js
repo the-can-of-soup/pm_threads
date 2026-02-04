@@ -963,7 +963,7 @@
           },
           {
             opcode: 'setWarpModeFor',
-            text: '(not implemented) [SETBOOLEAN] warp mode for',
+            text: '[SETBOOLEAN] warp mode for',
             ...CommandBlock,
             branches: [{}],
             arguments: {
@@ -1245,6 +1245,18 @@
             };
           },
 
+          setWarpModeFor(generator, block) {
+            return {
+              kind: 'stack',
+              args: {
+                SUBSTACK: generator.descendSubstack(block, 'SUBSTACK'),
+              },
+              constants: {
+                SETBOOLEAN: block.fields.SETBOOLEAN.value,
+              },
+            };
+          },
+
         },
         js: {
 
@@ -1398,7 +1410,7 @@
               {
                 while (true) {
             `;
-            compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads_repeatForeverAtomic')); // true means this is a loop
+            compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads.repeatForeverAtomic')); // true means this is a loop
             if (runtime.compilerOptions.warpTimer) {
               compiler.source += `
                 if (isStuck()) {
@@ -1416,6 +1428,15 @@
 
           getWarpMode(node, compiler, imports) {
             return new imports.TypedInput(`${compiler.isWarp}`, imports.TYPE_BOOLEAN);
+          },
+
+          setWarpModeFor(node, compiler, imports) {
+            let dropdown = node.constants.SETBOOLEAN;
+            
+            let oldWarp = compiler.isWarp;
+            compiler.isWarp = (dropdown === 'enable');
+            compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads.setWarpModeFor')); // false means this is not a loop
+            compiler.isWarp = oldWarp;
           },
 
         },
@@ -1626,16 +1647,21 @@
 
   }
 
-  if (Scratch.extensions.isPenguinMod) {
-    if (Scratch.extensions.unsandboxed) {
-      Scratch.extensions.register(new SoupThreadsExtension());
-    } else {
-      alert('Please load Threads unsandboxed.');
-      throw new Error('Soup\'s Threads extension attempted to be loaded sandboxed');
-    }
+  // Load extension
+  if (Array.from(vm.extensionManager._loadedExtensions.keys()).includes('soupThreads')) {
+    console.warn('Soup\'s Threads extension attempted to be loaded while already present in the project; ignoring');
   } else {
-    alert('Threads only supports PenguinMod.');
-    throw new Error('Soup\'s Threads extension attempted to be loaded outside of PenguinMod');
+    if (Scratch.extensions.isPenguinMod) {
+      if (Scratch.extensions.unsandboxed) {
+        Scratch.extensions.register(new SoupThreadsExtension());
+      } else {
+        alert('Please load Threads unsandboxed.');
+        throw new Error('Soup\'s Threads extension attempted to be loaded sandboxed');
+      }
+    } else {
+      alert('Threads only supports PenguinMod.');
+      throw new Error('Soup\'s Threads extension attempted to be loaded outside of PenguinMod');
+    }
   }
 
 })(Scratch);
