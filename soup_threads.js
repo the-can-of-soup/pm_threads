@@ -294,14 +294,14 @@
 
     constructor() {
       // Register compiled blocks
-      vm.runtime.registerCompiledExtensionBlocks('soupThreads', this.getCompileInfo());
+      runtime.registerCompiledExtensionBlocks('soupThreads', this.getCompileInfo());
 
       // Store reference to SoupThreadsUtil
       vm.SoupThreadsUtil = SoupThreadsUtil;
 
       // Register thread type
       vm.SoupThreads = Thread;
-      vm.runtime.registerSerializer(
+      runtime.registerSerializer(
           'soupThread',
           Thread.Type.serialize,
           Thread.Type.unserialize,
@@ -312,6 +312,14 @@
       if (!vm.jwTargets) { vm.extensionManager.loadExtensionIdSync('jwTargets'); }
       jwArray = vm.jwArray;
       jwTargets = vm.jwTargets;
+
+      // Register event listeners
+      runtime.on('BEFORE_EXECUTE', function() {
+        // Runs before every frame
+
+        // Mimics this line from sequencer.js: https://github.com/PenguinMod/PenguinMod-Vm/blob/b88731f3f93ed36d2b57024f8e8d758b6b60b54e/src/engine/sequencer.js#L74
+        runtime.sequencer.soupThreadsWorkTime = 0.75 * runtime.currentStepTime;
+      });
     }
 
     getInfo() {
@@ -932,13 +940,18 @@
           { blockType: Scratch.BlockType.LABEL, text: "Threads - DANGEROUS" },
 
           {
+            opcode: 'getWorkTime',
+            text: 'work time',
+            ...ReporterBlock,
+          },
+          {
             opcode: 'getWorkTimer',
-            text: '(not implemented) work timer',
+            text: 'work timer',
             ...ReporterBlock,
           },
           {
             opcode: 'setWorkTimer',
-            text: '(not implemented) set work timer to [TIME]',
+            text: 'set work timer to [TIME]',
             ...CommandBlock,
             arguments: {
               TIME: {
@@ -1519,6 +1532,27 @@
       VALUE = Scratch.Cast.toBoolean(VALUE);
 
       runtime.redrawRequested = VALUE;
+    }
+
+
+
+    getWorkTimer({}, util) {
+      return util.sequencer.timer.timeElapsed() / 1000;
+    }
+
+    getWorkTime({}, util) {
+      // Fall back to calculating work time immediately instead of at the start of the frame
+      return (util.sequencer.soupThreadsWorkTime ?? 0.75 * runtime.currentStepTime) / 1000;
+    }
+
+    setWorkTimer({TIME}, util) {
+      TIME = Scratch.Cast.toNumber(TIME);
+
+      if (util.sequencer.timer._pausedTime !== null) {
+        util.sequencer.timer._pausedTime = TIME;
+      } else {
+        util.sequencer.timer.startTime = util.sequencer.timer.relativeTime() - TIME;
+      }
     }
 
   }
