@@ -311,7 +311,7 @@ For example, code inside an `all at once` block or inside a "Run without screen 
 ### `<graphics updated>` -> Boolean
 Returns the current state of the "graphics-updated" flag as mentioned [here↗](https://www.rokcoder.com/tips/inner-workings.html).
 
-Will always be `false` at the start of the tick, but certain blocks that update visuals will enable the flag. If the flag is enabled at the end of the tick, the engine will sleep until the end of the frame time and then render (instead of running more ticks until the end of the frame time).
+Will always be `false` at the start of the tick, but certain blocks that update visuals will enable the flag. If the flag is `true` at the end of the tick, the engine will sleep until the end of the frame time and then render (instead of running more ticks until the end of the frame time).
 
 <details>
   <summary>Internal behavior</summary>
