@@ -903,16 +903,19 @@
             opcode: 'getTickOverall',
             text: '(not implemented) tick # from init',
             ...ReporterBlock,
+            disableMonitor: false,
           },
           {
             opcode: 'getFrameOverall',
             text: '(not implemented) frame # from init',
             ...ReporterBlock,
+            disableMonitor: false,
           },
           {
             opcode: 'getTick',
             text: '(not implemented) tick # from [BLUEFLAG]',
             ...ReporterBlock,
+            disableMonitor: false,
             arguments: {
               BLUEFLAG: {
                 type: Scratch.ArgumentType.IMAGE,
@@ -924,6 +927,7 @@
             opcode: 'getFrame',
             text: '(not implemented) frame # from [BLUEFLAG]',
             ...ReporterBlock,
+            disableMonitor: false,
             arguments: {
               BLUEFLAG: {
                 type: Scratch.ArgumentType.IMAGE,
@@ -935,6 +939,7 @@
             opcode: 'getTickInFrame',
             text: '(not implemented) tick # this frame',
             ...ReporterBlock,
+            disableMonitor: false,
             arguments: {
               BLUEFLAG: {
                 type: Scratch.ArgumentType.IMAGE,
@@ -990,11 +995,13 @@
             opcode: 'getWorkTime',
             text: 'work time',
             ...ReporterBlock,
+            disableMonitor: false,
           },
           {
             opcode: 'getWorkTimer',
             text: 'work timer',
             ...ReporterBlock,
+            disableMonitor: false,
           },
           {
             opcode: 'setWorkTimer',
@@ -1596,9 +1603,9 @@
       TIME = Scratch.Cast.toNumber(TIME);
 
       if (util.sequencer.timer._pausedTime !== null) {
-        util.sequencer.timer._pausedTime = TIME;
+        util.sequencer.timer._pausedTime = TIME * 1000;
       } else {
-        util.sequencer.timer.startTime = util.sequencer.timer.relativeTime() - TIME;
+        util.sequencer.timer.startTime = util.sequencer.timer.relativeTime() - TIME * 1000;
       }
     }
 
