@@ -540,6 +540,14 @@
               THREAD: Thread.Argument,
             }
           },
+          {
+            opcode: 'isMonitor',
+            text: '[THREAD] is for updating a monitor?',
+            ...BooleanBlock,
+            arguments: {
+              THREAD: Thread.Argument,
+            }
+          },
 
           '---',
 
@@ -1569,6 +1577,15 @@
         return false;
       }
       return THREAD.thread.stackClick;
+    }
+
+    isMonitor({THREAD}, util) {
+      THREAD = ThreadType.toThread(THREAD);
+
+      if (THREAD.thread === null) {
+        return false;
+      }
+      return THREAD.thread.updateMonitor;
     }
 
 
