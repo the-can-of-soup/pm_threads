@@ -43,6 +43,10 @@
   - [Graphics Updated](#graphics-updated)
     - [`<graphics updated>` -> Boolean](#graphics-updated---boolean)
     - [`set graphics updated to <VALUE>` -> Undefined](#set-graphics-updated-to-value---undefined)
+  - [Work Timer](#work-timer)
+    - [`work time`](#work-time---number)
+    - [`work timer`](#work-timer---number)
+    - [`set work timer to [TIME]`](#set-work-timer-to-time---undefined)
 - [Menus](#menus)
     - [Index](#index)
     - [Status Format](#status-format)
@@ -240,6 +244,17 @@ Returns `true` if `THREAD` was started by manually clicking a stack in the code 
   Returns the `stackClick` key from the raw thread object.
 </details>
 
+### `<[THREAD] is a monitor updater?>` -> Boolean
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/is_a_monitor_updater.png?raw=true">
+
+Returns `true` if `THREAD` was started by the engine to check the value of a reporter for a monitor.
+
+<details>
+  <summary>Internal behavior</summary>
+  
+  Returns the `updateMonitor` key from the raw thread object.
+</details>
+
 
 
 ## Yielding
@@ -356,6 +371,43 @@ For example, code inside an `all at once` block or inside a "Run without screen 
   <summary>Internal behavior</summary>
 
   At JS compile time, reads `compiler.isWarp`.
+</details>
+
+
+
+## Work Timer
+
+### `work time` -> Number
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/work_time.png?raw=true">
+
+Returns the amount of time in seconds before the sequencer will end the frame and rerender.
+
+<details>
+  <summary>Internal behavior</summary>
+
+  Before the start of every frame, reads `runtime.currentStepTime`, multiplies by 75% (as done [here↗](https://github.com/PenguinMod/PenguinMod-Vm/blob/b88731f3f93ed36d2b57024f8e8d758b6b60b54e/src/engine/sequencer.js#L74)), and stores it to be retrieved every time this block is run.
+</details>
+
+### `work timer` -> Number
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/work_timer.png?raw=true">
+
+Returns the time elapsed so far this frame. This timer is used by the sequencer to know when to end the frame and rerender.
+
+<details>
+  <summary>Internal behavior</summary>
+
+  Uses `sequencer.timer.timeElapsed()`.
+</details>
+
+### `set work timer to [TIMER]` -> Undefined
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/set_work_timer_to_0.png?raw=true">
+
+Overrides the [work timer](#work-timer---number).
+
+<details>
+  <summary>Internal behavior</summary>
+
+  Writes `sequencer.timer.startTime` (or `sequencer.timer._pausedTime` if paused) to change the timer value.
 </details>
 
 
