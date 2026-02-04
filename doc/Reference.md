@@ -1,6 +1,6 @@
 # Threads Reference
 
-[← Back to Documentation](https://github.com/the-can-of-soup/pm_threads/blob/main/Documentation.md)
+[← Back to Documentation](https://github.com/the-can-of-soup/pm_threads/blob/main/doc/Documentation.md)
 
 ### Table of Contents
 - [\(top of page\)](#threads-reference)
