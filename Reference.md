@@ -34,10 +34,10 @@
   - [Threads List](#threads-list)
     - [`(threads)` -> Array\[Thread\]](#threads---arraythread)
   - [Atomic Loops](#atomic-loops)
-    - [`repeat [TIMES] without yielding [SUBSTACK]` -> Void](#repeat-times-without-yielding-substack---void)
-    - [`repeat until [CONDITION] without yielding [SUBSTACK]` -> Void](#repeat-until-condition-without-yielding-substack---void)
-    - [`while [CONDITION] without yielding [SUBSTACK]` -> Void](#while-condition-without-yielding-substack---void)
-    - [`forever without yielding [SUBSTACK]` -> Void](#forever-without-yielding-substack---void)
+    - [`repeat [TIMES] without yielding {SUBSTACK}` -> Void](#repeat-times-without-yielding-substack---void)
+    - [`repeat until [CONDITION] without yielding {SUBSTACK}` -> Void](#repeat-until-condition-without-yielding-substack---void)
+    - [`while [CONDITION] without yielding {SUBSTACK}` -> Void](#while-condition-without-yielding-substack---void)
+    - [`forever without yielding {SUBSTACK}` -> Void](#forever-without-yielding-substack---void)
   - [Warp Mode](#warp-mode)
     - [`<warp mode>` -> Boolean](#warp-mode---boolean)
   - [Graphics Updated](#graphics-updated)
@@ -277,16 +277,16 @@ Returns all threads that are currently alive and all threads that [exited natura
 
 ## Atomic Loops
 
-### `repeat [TIMES] without yielding [SUBSTACK]` -> Void
+### `repeat [TIMES] without yielding {SUBSTACK}` -> Void
 Repeatedly executes `SUBSTACK` `TIMES` times. The difference between this block and the normal repeat block is that this block **does not yield after every loop**.[^3][^4]
 
-### `repeat until [CONDITION] without yielding [SUBSTACK]` -> Void
+### `repeat until [CONDITION] without yielding {SUBSTACK}` -> Void
 Repeatedly executes `SUBSTACK` until `CONDITION` is truthy. The difference between this block and the normal repeat until block is that this block **does not yield after every loop**.[^3][^4]
 
-### `while [CONDITION] without yielding [SUBSTACK]` -> Void
+### `while [CONDITION] without yielding {SUBSTACK}` -> Void
 Repeatedly executes `SUBSTACK` until `CONDITION` is falsy. The difference between this block and the normal while block is that this block **does not yield after every loop**.[^3][^4]
 
-## `forever without yielding [SUBSTACK]` -> Void
+## `forever without yielding {SUBSTACK}` -> Void
 Repeatedly executes `SUBSTACK` forever. The difference between this block and the normal forever block is that this block **does not yield after every loop**.[^3][^4]
 
 
