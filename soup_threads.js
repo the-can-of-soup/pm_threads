@@ -689,7 +689,7 @@
           },
           {
             opcode: 'setRunningThreadsActiveIndex',
-            text: '(not implemented) set running threads to [THREADS] with active index [ACTIVEINDEX]',
+            text: '(not implemented) set threads to [THREADS] with active index [ACTIVEINDEX]',
             ...CommandBlock,
             arguments: {
               THREADS: jwArray.Argument,
@@ -703,7 +703,7 @@
           },
           {
             opcode: 'setRunningThreadsActiveThread',
-            text: '(not implemented) set running threads to [THREADS] with active thread [ACTIVETHREAD]',
+            text: '(not implemented) set threads to [THREADS] with active thread [ACTIVETHREAD]',
             ...CommandBlock,
             arguments: {
               THREADS: jwArray.Argument,
