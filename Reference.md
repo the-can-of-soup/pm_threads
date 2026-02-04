@@ -25,24 +25,24 @@
     - [`<[THREAD] was killed?>` -> Boolean](#thread-was-killed---boolean)
     - [`<[THREAD] was started by clicking in the editor?>` -> Boolean](#thread-was-started-by-clicking-in-the-editor---boolean)
   - [Yielding](#yielding)
-    - [`yield to next thread` -> Void](#yield-to-next-thread---void)
-    - [`yield [TIMES] times` -> Void](#yield-times-times---void)
-    - [`yield to previous thread` -> Void](#yield-to-previous-thread---void)
-    - [`yield to [ACTIVETHREAD]` -> Void](#yield-to-activethread---void)
-    - [`yield to thread at (INDEX v)` -> Void](#yield-to-thread-at-index-v---void)
-    - [`yield to end of tick` -> Void](#yield-to-end-of-tick---void)
+    - [`yield to next thread` -> Undefined](#yield-to-next-thread---undefined)
+    - [`yield [TIMES] times` -> Undefined](#yield-times-times---undefined)
+    - [`yield to previous thread` -> Undefined](#yield-to-previous-thread---undefined)
+    - [`yield to [ACTIVETHREAD]` -> Undefined](#yield-to-activethread---undefined)
+    - [`yield to thread at (INDEX v)` -> Undefined](#yield-to-thread-at-index-v---undefined)
+    - [`yield to end of tick` -> Undefined](#yield-to-end-of-tick---undefined)
   - [Threads List](#threads-list)
     - [`(threads)` -> Array\[Thread\]](#threads---arraythread)
   - [Atomic Loops](#atomic-loops)
-    - [`repeat [TIMES] without yielding {SUBSTACK}` -> Void](#repeat-times-without-yielding-substack---void)
-    - [`repeat until [CONDITION] without yielding {SUBSTACK}` -> Void](#repeat-until-condition-without-yielding-substack---void)
-    - [`while [CONDITION] without yielding {SUBSTACK}` -> Void](#while-condition-without-yielding-substack---void)
-    - [`forever without yielding {SUBSTACK}` -> Void](#forever-without-yielding-substack---void)
+    - [`repeat [TIMES] without yielding {SUBSTACK}` -> Undefined](#repeat-times-without-yielding-substack---undefined)
+    - [`repeat until [CONDITION] without yielding {SUBSTACK}` -> Undefined](#repeat-until-condition-without-yielding-substack---undefined)
+    - [`while [CONDITION] without yielding {SUBSTACK}` -> Undefined](#while-condition-without-yielding-substack---undefined)
+    - [`forever without yielding {SUBSTACK}` -> Undefined](#forever-without-yielding-substack---undefined)
   - [Warp Mode](#warp-mode)
     - [`<warp mode>` -> Boolean](#warp-mode---boolean)
   - [Graphics Updated](#graphics-updated)
     - [`<graphics updated>` -> Boolean](#graphics-updated---boolean)
-    - [`set graphics updated to <VALUE>` -> Void](#set-graphics-updated-to-value---void)
+    - [`set graphics updated to <VALUE>` -> Undefined](#set-graphics-updated-to-value---undefined)
 - [Menus](#menus)
     - [Index](#index)
     - [Status Format](#status-format)
@@ -214,13 +214,13 @@ Returns `true` if `THREAD` was started by manually clicking a stack in the code 
 
 ## Yielding
 
-### `yield to next thread` -> Void
+### `yield to next thread` -> Undefined
 Yields.
 
-### `yield [TIMES] times` -> Void
+### `yield [TIMES] times` -> Undefined
 Yields `TIMES` times.
 
-### `yield to previous thread` -> Void
+### `yield to previous thread` -> Undefined
 Yields and makes the previous thread active.
 
 <details>
@@ -229,7 +229,7 @@ Yields and makes the previous thread active.
   Decrements `sequencer.activeThreadIndex` twice before yielding. The second decrement is because this value is always incremented by the engine after every yield.
 </details>
 
-### `yield to [ACTIVETHREAD]` -> Void
+### `yield to [ACTIVETHREAD]` -> Undefined
 Yields and makes `ACTIVETHREAD` active. If `ACTIVETHREAD` is null or not in the [threads list](#threads---arraythread), does nothing.
 
 <details>
@@ -238,7 +238,7 @@ Yields and makes `ACTIVETHREAD` active. If `ACTIVETHREAD` is null or not in the 
   Sets `sequencer.activeThreadIndex` to 1 less than the desired index before yielding. The decrement is because this value is always incremented by the engine after every yield.
 </details>
 
-### `yield to thread at (INDEX v)` -> Void
+### `yield to thread at (INDEX v)` -> Undefined
 _Menus: `INDEX` uses [Index](#index) (get mode)_
 
 Yields and makes the thread at `INDEX` active.
@@ -251,7 +251,7 @@ If `INDEX` is larger than the normally accepted range, will immediately end the 
   Sets `sequencer.activeThreadIndex` to 1 less than the desired index before yielding. The decrement is because this value is always incremented by the engine after every yield.
 </details>
 
-### `yield to end of tick` -> Void
+### `yield to end of tick` -> Undefined
 Yields and immediately ends the tick, skipping all threads that would normally step after this one.
 
 <details>
@@ -277,16 +277,16 @@ Returns all threads that are currently alive and all threads that [exited natura
 
 ## Atomic Loops
 
-### `repeat [TIMES] without yielding {SUBSTACK}` -> Void
+### `repeat [TIMES] without yielding {SUBSTACK}` -> Undefined
 Repeatedly executes `SUBSTACK` `TIMES` times. The difference between this block and the normal repeat block is that this block **does not yield after every loop**.[^3][^4]
 
-### `repeat until [CONDITION] without yielding {SUBSTACK}` -> Void
+### `repeat until [CONDITION] without yielding {SUBSTACK}` -> Undefined
 Repeatedly executes `SUBSTACK` until `CONDITION` is truthy. The difference between this block and the normal repeat until block is that this block **does not yield after every loop**.[^3][^4]
 
-### `while [CONDITION] without yielding {SUBSTACK}` -> Void
+### `while [CONDITION] without yielding {SUBSTACK}` -> Undefined
 Repeatedly executes `SUBSTACK` until `CONDITION` is falsy. The difference between this block and the normal while block is that this block **does not yield after every loop**.[^3][^4]
 
-## `forever without yielding {SUBSTACK}` -> Void
+## `forever without yielding {SUBSTACK}` -> Undefined
 Repeatedly executes `SUBSTACK` forever. The difference between this block and the normal forever block is that this block **does not yield after every loop**.[^3][^4]
 
 
@@ -319,7 +319,7 @@ Will always be `false` at the start of the tick, but certain blocks that update 
   Reads `runtime.redrawRequested`.
 </details>
 
-### `set graphics updated to <VALUE>` -> Void
+### `set graphics updated to <VALUE>` -> Undefined
 Sets the "graphics-updated" flag as mentioned [here↗](https://www.rokcoder.com/tips/inner-workings.html).
 
 The behavior and effects of this flag are described under [`<graphics updated>`](#graphics-updated---boolean).
