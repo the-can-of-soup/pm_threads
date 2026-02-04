@@ -24,7 +24,7 @@
     - [`<[THREAD] exited naturally?>` -> Boolean](#thread-exited-naturally---boolean)
     - [`<[THREAD] was killed?>` -> Boolean](#thread-was-killed---boolean)
     - [`<[THREAD] was started by clicking in the editor?>` -> Boolean](#thread-was-started-by-clicking-in-the-editor---boolean)
-    - [`<[THREAD] is a monitor updater?>`](#thread-is-a-monitor-updater---boolean)
+    - [`<[THREAD] is a monitor updater?>` -> Boolean](#thread-is-a-monitor-updater---boolean)
   - [Yielding](#yielding)
     - [`yield to next thread` -> Undefined](#yield-to-next-thread---undefined)
     - [`yield [TIMES] times` -> Undefined](#yield-times-times---undefined)
