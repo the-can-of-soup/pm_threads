@@ -15,7 +15,7 @@ URL: [`https://raw.githubusercontent.com/the-can-of-soup/pm_threads/refs/heads/m
 
 ## Documentation
 
-The documentation can be found [here](https://github.com/the-can-of-soup/pm_threads/blob/main/Documentation.md).
+The documentation can be found [here](https://github.com/the-can-of-soup/pm_threads/blob/main/docs/Documentation.md).
 
 
 
