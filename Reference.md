@@ -2,7 +2,58 @@
 
 [← Back to Documentation](https://github.com/the-can-of-soup/pm_threads/blob/main/Documentation.md)
 
-## Blocks
+### Table of Contents
+- [\(top of page\)](#threads-reference)
+    - [Table of Contents](#table-of-contents)
+- [Blocks](#blocks)
+  - [Thread Getters](#thread-getters)
+    - [`(active thread)` -> Thread](#active-thread---thread)
+    - [`(active index)` -> Number](#active-index---number)
+    - [`(null thread)` -> Thread](#null-thread---thread)
+    - [`(thread at (INDEX v))` -> Thread](#thread-at-index-v---thread)
+  - [Thread Properties](#thread-properties)
+    - [`(target of [THREAD])` -> Target](#target-of-thread---target)
+    - [`(id of [THREAD])` -> String](#id-of-thread---string)
+    - [`(status [STATUSFORMAT v] of [THREAD])` -> Number](#status-statusformat-v-of-thread---number)
+    - [`(index of [THREAD])` -> Number](#index-of-thread---number)
+  - [Boolean Thread Operators](#boolean-thread-operators)
+    - [`<[THREADONE] is [THREADTWO]>` -> Boolean](#threadone-is-threadtwo---boolean)
+    - [`<[VALUE] is a thread?>` -> Boolean](#value-is-a-thread---boolean)
+    - [`<[THREAD] is null?>` -> Boolean](#thread-is-null---boolean)
+    - [`<[THREAD] is alive?>` -> Boolean](#thread-is-alive---boolean)
+    - [`<[THREAD] exited naturally?>` -> Boolean](#thread-exited-naturally---boolean)
+    - [`<[THREAD] was killed?>` -> Boolean](#thread-was-killed---boolean)
+    - [`<[THREAD] was started by clicking in the editor?>` -> Boolean](#thread-was-started-by-clicking-in-the-editor---boolean)
+  - [Yielding](#yielding)
+    - [`yield to next thread` -> Void](#yield-to-next-thread---void)
+    - [`yield [TIMES] times` -> Void](#yield-times-times---void)
+    - [`yield to previous thread` -> Void](#yield-to-previous-thread---void)
+    - [`yield to [ACTIVETHREAD]` -> Void](#yield-to-activethread---void)
+    - [`yield to thread at (INDEX v)` -> Void](#yield-to-thread-at-index-v---void)
+    - [`yield to end of tick` -> Void](#yield-to-end-of-tick---void)
+  - [Threads List](#threads-list)
+    - [`(threads)` -> Array\[Thread\]](#threads---arraythread)
+  - [Atomic Loops](#atomic-loops)
+    - [`repeat [TIMES] without yielding [SUBSTACK]` -> Void](#repeat-times-without-yielding-substack---void)
+    - [`repeat until [CONDITION] without yielding [SUBSTACK]` -> Void](#repeat-until-condition-without-yielding-substack---void)
+    - [`while [CONDITION] without yielding [SUBSTACK]` -> Void](#while-condition-without-yielding-substack---void)
+    - [`forever without yielding [SUBSTACK]` -> Void](#forever-without-yielding-substack---void)
+  - [Warp Mode](#warp-mode)
+    - [`<warp mode>` -> Boolean](#warp-mode---boolean)
+  - [Graphics Updated](#graphics-updated)
+    - [`<graphics updated>` -> Boolean](#graphics-updated---boolean)
+    - [`set graphics updated to <VALUE>` -> Void](#set-graphics-updated-to-value---void)
+- [Menus](#menus)
+    - [Index](#index)
+    - [Status Format](#status-format)
+
+
+
+# Blocks
+
+
+
+## Thread Getters
 
 ### `(active thread)` -> Thread
 Returns the currently active thread.
@@ -40,7 +91,9 @@ Returns the thread that is at `INDEX` in the threads list.
   Reads from the `runtime.threads` array.
 </details>
 
----
+
+
+## Thread Properties
 
 ### `(target of [THREAD])` -> Target
 Returns the target that is running / ran `THREAD`.
@@ -89,7 +142,9 @@ Returns the index of `THREAD` in the [list of threads](#threads---arraythread).
   Finds the index of the thread in the `runtime.threads` array.
 </details>
 
----
+
+
+## Boolean Thread Operators
 
 ### `<[THREADONE] is [THREADTWO]>` -> Boolean
 Returns `true` if the IDs of the threads match, otherwise returns `false`.
@@ -155,7 +210,9 @@ Returns `true` if `THREAD` was started by manually clicking a stack in the code 
   Returns the `stackClick` key from the raw thread object.
 </details>
 
----
+
+
+## Yielding
 
 ### `yield to next thread` -> Void
 Yields.
@@ -203,7 +260,9 @@ Yields and immediately ends the tick, skipping all threads that would normally s
   Sets `sequencer.activeThreadIndex` to 1 less than the length of `runtime.threads` before yielding. The engine increments the active thread index after every yield, so then it is left at the length of `runtime.threads`, causing the loop in the sequencer to exit, completing the tick.
 </details>
 
----
+
+
+## Threads List
 
 ### `(threads)` -> Array\[Thread\]
 Returns all threads that are currently alive and all threads that [exited naturally](#thread-exited-naturally---boolean) this tick in their execution order.
@@ -214,7 +273,9 @@ Returns all threads that are currently alive and all threads that [exited natura
   Reads the `runtime.threads` array.
 </details>
 
----
+
+
+## Atomic Loops
 
 ### `repeat [TIMES] without yielding [SUBSTACK]` -> Void
 Repeatedly executes `SUBSTACK` `TIMES` times. The difference between this block and the normal repeat block is that this block **does not yield after every loop**.[^3][^4]
@@ -225,10 +286,12 @@ Repeatedly executes `SUBSTACK` until `CONDITION` is truthy. The difference betwe
 ### `while [CONDITION] without yielding [SUBSTACK]` -> Void
 Repeatedly executes `SUBSTACK` until `CONDITION` is falsy. The difference between this block and the normal while block is that this block **does not yield after every loop**.[^3][^4]
 
-### `forever without yielding [SUBSTACK]` -> Void
+## `forever without yielding [SUBSTACK]` -> Void
 Repeatedly executes `SUBSTACK` forever. The difference between this block and the normal forever block is that this block **does not yield after every loop**.[^3][^4]
 
----
+
+
+## Warp Mode
 
 ### `<warp mode>` -> Boolean
 Returns `true` if warp mode is enabled. When warp mode is enabled, all yields are ignored.
@@ -241,7 +304,9 @@ For example, code inside an `all at once` block or inside a "Run without screen 
   At JS compile time, reads `compiler.isWarp`.
 </details>
 
----
+
+
+## Graphics Updated
 
 ### `<graphics updated>` -> Boolean
 Returns the current state of the "graphics-updated" flag as mentioned [here↗](https://www.rokcoder.com/tips/inner-workings.html).
@@ -267,7 +332,7 @@ The behavior and effects of this flag are described under [`<graphics updated>`]
 
 
 
-## Menus
+# Menus
 
 ### Index
 
