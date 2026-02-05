@@ -41,16 +41,18 @@
     - [`forever without yielding {SUBSTACK}` -> Undefined](#forever-without-yielding-substack---undefined)
   - [Warp Mode](#warp-mode)
     - [`<warp mode>` -> Boolean](#warp-mode---boolean)
+    - [`[SETBOOLEAN v] warp mode for {SUBSTACK}` -> Undefined](#setboolean-v-warp-mode-for-substack---undefined)
   - [Graphics Updated](#graphics-updated)
     - [`<graphics updated>` -> Boolean](#graphics-updated---boolean)
     - [`set graphics updated to <VALUE>` -> Undefined](#set-graphics-updated-to-value---undefined)
   - [Work Timer](#work-timer)
-    - [`work time`](#work-time---number)
-    - [`work timer`](#work-timer---number)
-    - [`set work timer to [TIME]`](#set-work-timer-to-time---undefined)
+    - [`work time` -> Number](#work-time---number)
+    - [`work timer` -> Number](#work-timer---number)
+    - [`set work timer to [TIME]` -> Undefined](#set-work-timer-to-time---undefined)
 - [Menus](#menus)
     - [Index](#index)
     - [Status Format](#status-format)
+    - [Set Boolean](#set-boolean)
 
 
 
@@ -364,14 +366,30 @@ Repeatedly executes `SUBSTACK` forever. The difference between this block and th
 ### `<warp mode>` -> Boolean
 <img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/warp_mode.png?raw=true">
 
-Returns `true` if warp mode is enabled. When warp mode is enabled, all yields are ignored.
+Returns `true` if warp mode is enabled. When warp mode is enabled, **all yields are ignored**.
 
-For example, code inside an `all at once` block or inside a "Run without screen refresh" custom block has warp mode enabled.
+Some cases where warp mode is enabled:
+- Code inside an `all at once` block
+- Code inside a "Run without screen refresh" custom block
+- Code inside an [`[enable v] warp mode for {SUBSTACK}`](#setboolean-v-warp-mode-for-substack---undefined) block
 
 <details>
   <summary>Internal behavior</summary>
 
   At JS compile time, reads `compiler.isWarp`.
+</details>
+
+### `[SETBOOLEAN v] warp mode for {SUBSTACK}` -> Undefined
+_Menus: `SETBOOLEAN` uses [Set Boolean](#set-boolean)_
+
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/enable_warp_mode_for.png?raw=true">
+
+Enables or disables [warp mode](#warp-mode---boolean) for `SUBSTACK`.
+
+<details>
+  <summary>Internal behavior</summary>
+
+  At JS compile time, writes `compiler.isWarp` before compiling `SUBSTACK`, then restores it to its previous state.
 </details>
 
 
@@ -400,10 +418,10 @@ Returns the time elapsed so far this frame. This timer is used by the sequencer 
   Uses `sequencer.timer.timeElapsed()`.
 </details>
 
-### `set work timer to [TIMER]` -> Undefined
+### `set work timer to [TIME]` -> Undefined
 <img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/set_work_timer_to_0.png?raw=true">
 
-Overrides the [work timer](#work-timer---number).
+Overrides the [work timer](#work-timer---number) by setting it to `TIME` seconds.
 
 <details>
   <summary>Internal behavior</summary>
@@ -469,6 +487,13 @@ For the value `0`, the behavior of `end` or `after end` is used. Otherwise, the 
 |------------|
 | #          |
 | text       |
+
+### Set Boolean
+
+| Menu Items |
+|------------|
+| enable     |
+| disable    |
 
 
 
