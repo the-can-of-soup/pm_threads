@@ -990,7 +990,6 @@
             opcode: 'getTickInFrame',
             text: 'tick # this frame',
             ...ReporterBlock,
-            disableMonitor: false,
             arguments: {
               BLUEFLAG: {
                 type: Scratch.ArgumentType.IMAGE,
