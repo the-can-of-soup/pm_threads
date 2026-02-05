@@ -320,13 +320,39 @@
       jwArray = vm.jwArray;
       jwTargets = vm.jwTargets;
 
+      // Set up state
+      runtime.soupThreadsTickFromInit = 0;
+      runtime.soupThreadsFrameFromInit = 0;
+      runtime.soupThreadsTickFromStart = 0;
+      runtime.soupThreadsFrameFromStart = 0;
+      runtime.soupThreadsTickWithinFrame = 0;
+
       // Register event listeners
       runtime.on('BEFORE_EXECUTE', function() {
         // Runs before every frame
 
+        runtime.soupThreadsFrameFromInit += 1;
+        runtime.soupThreadsFrameFromStart += 1;
+
+        runtime.soupThreadsTickWithinFrame = 0;
+
+        // Calculate work time
         // Mimics this line from sequencer.js: https://github.com/PenguinMod/PenguinMod-Vm/blob/b88731f3f93ed36d2b57024f8e8d758b6b60b54e/src/engine/sequencer.js#L74
         runtime.sequencer.soupThreadsWorkTime = 0.75 * runtime.currentStepTime;
       });
+      runtime.on('BEFORE_TICK', function() {
+        // Runs before every tick
+
+        runtime.soupThreadsTickFromInit += 1;
+        runtime.soupThreadsTickFromStart += 1;
+        runtime.soupThreadsTickWithinFrame += 1;
+      });
+      runtime.on('PROJECT_START', function() {
+        // Runs when blue flag clicked, after state has been reset
+
+        runtime.soupThreadsTickFromStart = 0;
+        runtime.soupThreadsFrameFromStart = 0;
+      })
     }
 
     getInfo() {
@@ -916,19 +942,19 @@
 
           {
             opcode: 'getTickOverall',
-            text: '(not implemented) tick # from init',
+            text: 'tick # from init',
             ...ReporterBlock,
             disableMonitor: false,
           },
           {
             opcode: 'getFrameOverall',
-            text: '(not implemented) frame # from init',
+            text: 'frame # from init',
             ...ReporterBlock,
             disableMonitor: false,
           },
           {
             opcode: 'getTick',
-            text: '(not implemented) tick # from [BLUEFLAG]',
+            text: 'tick # from [BLUEFLAG]',
             ...ReporterBlock,
             disableMonitor: false,
             arguments: {
@@ -940,7 +966,7 @@
           },
           {
             opcode: 'getFrame',
-            text: '(not implemented) frame # from [BLUEFLAG]',
+            text: 'frame # from [BLUEFLAG]',
             ...ReporterBlock,
             disableMonitor: false,
             arguments: {
@@ -952,7 +978,7 @@
           },
           {
             opcode: 'getTickInFrame',
-            text: '(not implemented) tick # this frame',
+            text: 'tick # this frame',
             ...ReporterBlock,
             disableMonitor: false,
             arguments: {
@@ -1668,6 +1694,28 @@
 
       let variables = THREAD.thread.soupThreadVariables;
       delete variables[VARIABLE];
+    }
+
+
+
+    getTickOverall({}, util) {
+      return runtime.soupThreadsTickFromInit ?? 0;
+    }
+
+    getFrameOverall({}, util) {
+      return runtime.soupThreadsFrameFromInit ?? 0;
+    }
+
+    getTick({}, util) {
+      return runtime.soupThreadsTickFromStart ?? 0;
+    }
+
+    getFrame({}, util) {
+      return runtime.soupThreadsFrameFromStart ?? 0;
+    }
+
+    getTickInFrame({}, util) {
+      return runtime.soupThreadsTickWithinFrame ?? 0;
     }
 
 
