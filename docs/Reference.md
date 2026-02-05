@@ -44,6 +44,12 @@
     - [`set [VARIABLE] in [THREAD] to [VALUE]` -> Undefined](#set-variable-in-thread-to-value---undefined)
     - [`(variables in [THREAD])` -> Array\[String\]](#variables-in-thread---arraystring)
     - [`delete [VARIABLE] in [THREAD]` -> Undefined](#delete-variable-in-thread---undefined)
+  - [Counters](#counters)
+    - [`(tick # from init)` -> Number](#tick--from-init---number)
+    - [`(frame # from init)` -> Number](#frame--from-init---number)
+    - [`(tick # from @blueFlag)` -> Number](#tick--from-blueflag---number)
+    - [`(frame # from @blueFlag)` -> Number](#frame--from-blueflag---number)
+    - [`(tick # this frame)` -> Number](#tick--this-frame---number)
   - [Warp Mode](#warp-mode)
     - [`<warp mode>` -> Boolean](#warp-mode---boolean)
     - [`[SETBOOLEAN v] warp mode for {SUBSTACK}` -> Undefined](#setboolean-v-warp-mode-for-substack---undefined)
@@ -416,6 +422,65 @@ Deletes the [thread variable](#get-variable-in-thread---any) named `VARIABLE` fr
 
 
 
+## Counters
+
+### `(tick # from init)` -> Number
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/tick_%23_from_init.png?raw=true">
+
+Returns the state of a counter that increments every tick and starts at 1 on the first tick the editor is loaded.
+
+<details>
+  <summary>Internal behavior</summary>
+
+  Sets to 0 when the extension is loaded and increments on the `BEFORE_TICK` event.
+</details>
+
+### `(frame # from init)` -> Number
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/frame_%23_from_init.png?raw=true">
+
+Returns the state of a counter that increments every frame and starts at 1 on the first tick the editor is loaded.
+
+<details>
+  <summary>Internal behavior</summary>
+
+  Sets to 0 when the extension is loaded and increments on the `BEFORE_EXECUTE` event.
+</details>
+
+### `(tick # from @blueFlag)` -> Number
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/tick_%23_from_blueFlag.png?raw=true">
+
+Returns the state of a counter that increments every tick and starts at 1 on the first tick after <img alt="blue flag" style="height: 1em;" src="https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/flag.svg"> is clicked.
+
+<details>
+  <summary>Internal behavior</summary>
+
+  Sets to 0 on the `PROJECT_START` event and increments on the `BEFORE_TICK` event.
+</details>
+
+### `(frame # from @blueFlag)` -> Number
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/frame_%23_from_blueFlag.png?raw=true">
+
+Returns the state of a counter that increments every frame and starts at 1 on the first tick after <img alt="blue flag" style="height: 1em;" src="https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/flag.svg"> is clicked.
+
+<details>
+  <summary>Internal behavior</summary>
+
+  Sets to 0 on the `PROJECT_START` event and increments on the `BEFORE_EXECUTE` event.
+</details>
+
+### `(tick # this frame)` -> Number
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/tick_%23_this_frame.png?raw=true">
+
+Returns the state of a counter that increments every frame and starts at 1 on the first tick of every frame.
+
+<details>
+  <summary>Internal behavior</summary>
+
+  Sets to 0 on the `BEFORE_EXECUTE` event and increments on the `BEFORE_TICK` event.
+</details>
+
+
+
 ## Warp Mode
 
 ### `<warp mode>` -> Boolean
@@ -553,8 +618,8 @@ For the value `0`, the behavior of `end` or `after end` is used. Otherwise, the 
 
 
 [^1]: Status is not a reliable indicator for whether a thread is alive. To reliably check if a thread is alive, instead you should use [`<[THREAD] is alive?>`](#thread-is-alive---boolean). This is because in many cases when a thread is stopped, it will enter limbo. Limbo is when a dead thread's [status](#status-statusformat-v-of-thread---number) does not get set to 4. Some known cases where a thread enters limbo:
-    - When the &nbsp;<img alt="blue flag" style="height: 1em;" src="https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/flag.svg"> blue flag is clicked, all previously running threads will enter limbo.
-    - When the &nbsp;<img alt="stop sign" style="height: 1em;" src="https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/stop.svg"> stop sign is clicked, all previously running threads will enter limbo.
+    - When <img alt="blue flag" style="height: 1em;" src="https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/flag.svg"> is clicked, all previously running threads will enter limbo.
+    - When <img alt="stop sign" style="height: 1em;" src="https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/stop.svg"> is clicked, all previously running threads will enter limbo.
     - When a stack restarts because its hat is triggered again, the old thread enters limbo.
 
 [^2]: There are some exceptions where a thread is considered "killed" even though it caused its own termination:
