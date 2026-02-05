@@ -248,6 +248,15 @@
     [RawThread.STATUS_PAUSED]: 'Suspended',
   };
 
+  const ThreadStatusInternalNames = {
+    [RawThread.STATUS_RUNNING]: 'STATUS_RUNNING',
+    [RawThread.STATUS_PROMISE_WAIT]: 'STATUS_PROMISE_WAIT',
+    [RawThread.STATUS_YIELD]: 'STATUS_YIELD',
+    [RawThread.STATUS_YIELD_TICK]: 'STATUS_YIELD_TICK',
+    [RawThread.STATUS_DONE]: 'STATUS_DONE',
+    [RawThread.STATUS_PAUSED]: 'STATUS_PAUSED',
+  }
+
   class SoupThreadsUtil {
 
     ThreadType = ThreadType;
@@ -1132,6 +1141,10 @@
                 text: 'text',
                 value: 'text',
               },
+              {
+                text: 'internal name',
+                value: 'internal name',
+              },
             ]
           },
           setBoolean: {
@@ -1531,6 +1544,9 @@
       }
       if (STATUSFORMAT === 'text') {
         return ThreadStatus[THREAD.thread.status];
+      }
+      if (STATUSFORMAT === 'internal name') {
+        return ThreadStatusInternalNames[THREAD.thread.status];
       }
       return THREAD.thread.status;
     }
