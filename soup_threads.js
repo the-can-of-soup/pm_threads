@@ -213,40 +213,40 @@
         check: ['soupThread'],
         exemptFromNormalization: true,
     }
-  }
+  };
 
   const BooleanBlock = {
     blockType: Scratch.BlockType.BOOLEAN,
     disableMonitor: true,
-  }
+  };
 
   const ReporterBlock = {
     blockType: Scratch.BlockType.REPORTER,
     disableMonitor: true,
-  }
+  };
 
   const CommandBlock = {
     blockType: Scratch.BlockType.COMMAND,
-  }
+  };
 
   const MessageArgument = {
     type: Scratch.ArgumentType.BROADCAST,
     exemptFromNormalization: true,
     defaultValue: 'message1',
-  }
+  };
 
   const EmptyArgument = {
     exemptFromNormalization: true,
-  }
+  };
 
   const ThreadStatus = {
-    RawThread.STATUS_RUNNING: 'Running',
-    RawThread.STATUS_PROMISE_WAIT: 'Waiting for promise',
-    RawThread.STATUS_YIELD: 'Yielded',
-    RawThread.STATUS_YIELD_TICK: 'Yielded for one tick',
-    RawThread.STATUS_DONE: 'Completed',
-    RawThread.STATUS_PAUSED: 'Suspended',
-  }
+    [RawThread.STATUS_RUNNING]: 'Running',
+    [RawThread.STATUS_PROMISE_WAIT]: 'Waiting for promise',
+    [RawThread.STATUS_YIELD]: 'Yielded',
+    [RawThread.STATUS_YIELD_TICK]: 'Yielded for one tick',
+    [RawThread.STATUS_DONE]: 'Completed',
+    [RawThread.STATUS_PAUSED]: 'Suspended',
+  };
 
   class SoupThreadsUtil {
 
