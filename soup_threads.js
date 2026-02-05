@@ -100,8 +100,13 @@
     constructor(thread = null) {
       this.thread = thread;
 
-      if (this.thread !== null && !('soupThreadId' in this.thread)) {
-        this.thread.soupThreadId = uid();
+      if (this.thread !== null) {
+        if (!('soupThreadId' in this.thread)) {
+          this.thread.soupThreadId = uid();
+        }
+        if (!('soupThreadVariables' in this.thread)) {
+          this.thread.soupThreadVariables = {};
+        }
       }
     }
 
@@ -109,7 +114,11 @@
       if (this.thread === null) {
         return `Null thread`;
       }
-      let result = `${ThreadStatus[this.thread.status]} thread`;
+      let result = ThreadStatus[this.thread.status];
+      if (this.thread.status !== 4 && !runtime.threads.includes(this.thread)) {
+        result += ` (limbo)`;
+      }
+      result += ` thread`;
       try {
         result += ` in ${this.thread.target.sprite.name}`;
       } catch {
@@ -838,7 +847,7 @@
 
           {
             opcode: 'getThreadVar',
-            text: '(not implemented) get [VARIABLE] in [THREAD]',
+            text: 'get [VARIABLE] in [THREAD]',
             ...ReporterBlock,
             allowDropAnywhere: true,
             arguments: {
@@ -852,7 +861,7 @@
           },
           {
             opcode: 'setThreadVar',
-            text: '(not implemented) set [VARIABLE] in [THREAD] to [VALUE]',
+            text: 'set [VARIABLE] in [THREAD] to [VALUE]',
             ...CommandBlock,
             arguments: {
               VARIABLE: {
@@ -870,7 +879,7 @@
           },
           {
             opcode: 'getThreadVarNames',
-            text: '(not implemented) variables in [THREAD]',
+            text: 'variables in [THREAD]',
             ...jwArray.Block,
             arguments: {
               THREAD: Thread.Argument,
@@ -878,7 +887,7 @@
           },
           {
             opcode: 'deleteThreadVar',
-            text: '(not implemented) delete [VARIABLE] in [THREAD]',
+            text: 'delete [VARIABLE] in [THREAD]',
             ...CommandBlock,
             arguments: {
               VARIABLE: {
@@ -1610,6 +1619,55 @@
 
     getThreads({}, util) {
       return new jwArray.Type(runtime.threads.map((rawThread) => new ThreadType(rawThread)));
+    }
+
+
+
+    getThreadVar({THREAD, VARIABLE}, util) {
+      THREAD = ThreadType.toThread(THREAD);
+      VARIABLE = Scratch.Cast.toString(VARIABLE);
+
+      if (THREAD.thread === null) {
+        return '';
+      }
+
+      let variables = THREAD.thread.soupThreadVariables;
+      return variables.hasOwnProperty(VARIABLE) ? variables[VARIABLE] : '';
+    }
+
+    setThreadVar({THREAD, VARIABLE, VALUE}, util) {
+      THREAD = ThreadType.toThread(THREAD);
+      VARIABLE = Scratch.Cast.toString(VARIABLE);
+
+      if (THREAD.thread === null) {
+        return;
+      }
+
+      let variables = THREAD.thread.soupThreadVariables;
+      variables[VARIABLE] = VALUE;
+    }
+
+    getThreadVarNames({THREAD}, util) {
+      THREAD = ThreadType.toThread(THREAD);
+
+      if (THREAD.thread === null) {
+        return new jwArray.Type([]);
+      }
+
+      let variables = THREAD.thread.soupThreadVariables;
+      return new jwArray.Type(Object.keys(variables));
+    }
+
+    deleteThreadVar({THREAD, VARIABLE}, util) {
+      THREAD = ThreadType.toThread(THREAD);
+      VARIABLE = Scratch.Cast.toString(VARIABLE);
+
+      if (THREAD.thread === null) {
+        return;
+      }
+
+      let variables = THREAD.thread.soupThreadVariables;
+      delete variables[VARIABLE];
     }
 
 
