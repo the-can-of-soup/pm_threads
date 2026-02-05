@@ -148,7 +148,7 @@ _Menus: `STATUSFORMAT` uses [Status Format](#status-format)_
 
 <img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/status_%23_of.png?raw=true">
 
-Returns the current status code of `THREAD`, or the status code in text format if `STATUSFORMAT` is "text". These are the possible values:
+Returns the current status code of `THREAD`, the status code in text format if `STATUSFORMAT` is "text", or the internal name of the status code if `STATUSFORMAT` is "internal name". These are the possible values:
 
 | Status # | Status text          | Internal name         | Description                                                  |
 |----------|----------------------|-----------------------|--------------------------------------------------------------|
@@ -603,10 +603,11 @@ For the value `0`, the behavior of `end` or `after end` is used. Otherwise, the 
 
 ### Status Format
 
-| Menu Items |
-|------------|
-| #          |
-| text       |
+| Menu Items    |
+|---------------|
+| #             |
+| text          |
+| internal name |
 
 ### Set Boolean
 
