@@ -191,7 +191,7 @@
     }
 
     deadThreadWasKilled() {
-      // Should only be called if the thread is known to be dead.
+      // Should only be used if the thread is known to be dead.
 
       // Thread is considered killed if its status is not "completed"
       // because dead threads are only not "completed" if they are
@@ -1609,7 +1609,7 @@
       // Returns true if:
       //
       // - The thread is not in the threads list (it is dead).
-      // - The thread was not killed.
+      // - The thread was not killed (as defined in `deadThreadWasKilled()`).
       // OR
       // - The thread *is* in the threads list (it died this tick if its status is STATUS_DONE).
       // - The thread's status is STATUS_DONE.
@@ -1633,7 +1633,7 @@
       // Returns true if:
       //
       // - The thread is not in the threads list (it is dead).
-      // - The thread was killed.
+      // - The thread was killed (as defined in `deadThreadWasKilled()`).
 
       // Order of AND swapped for optimization, but should be read in reverse.
       return THREAD.deadThreadWasKilled() && !runtime.threads.includes(THREAD.thread);
@@ -1773,7 +1773,7 @@
   if (Array.from(vm.extensionManager._loadedExtensions.keys()).includes('soupThreads')) {
     console.warn('Soup\'s Threads extension attempted to be loaded while already present in the project; ignoring');
   } else {
-    if (Scratch.extensions.isPenguinMod) {
+    if (Scratch.extensions.isPenguinMod && !Scratch.extensions.isDinosaurMod) {
       if (Scratch.extensions.unsandboxed) {
         Scratch.extensions.register(new SoupThreadsExtension());
       } else {
