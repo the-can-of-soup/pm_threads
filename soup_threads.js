@@ -31,6 +31,7 @@
 
   const vm = Scratch.vm;
   const runtime = vm.runtime;
+  const RawThread = vm.exports.Thread;
 
   let jwArray;
   let jwTargets;
@@ -115,7 +116,7 @@
         return `Null thread`;
       }
       let result = ThreadStatus[this.thread.status];
-      if (this.thread.status !== 4 && !runtime.threads.includes(this.thread)) {
+      if (this.thread.status !== RawThread.STATUS_DONE && !runtime.threads.includes(this.thread)) {
         result += ` (limbo)`;
       }
       result += ` thread`;
@@ -195,7 +196,7 @@
       // Thread is considered killed if its status is not "completed"
       // because dead threads are only not "completed" if they are
       // in limbo.
-      return this.thread.isKilled || this.thread.status !== 4;
+      return this.thread.isKilled || this.thread.status !== RawThread.STATUS_DONE;
     }
   }
 
@@ -239,12 +240,12 @@
   }
 
   const ThreadStatus = {
-    0: 'Running',
-    1: 'Waiting for promise',
-    2: 'Yielded',
-    3: 'Yielded for one tick',
-    4: 'Completed',
-    5: 'Suspended',
+    RawThread.STATUS_RUNNING: 'Running',
+    RawThread.STATUS_PROMISE_WAIT: 'Waiting for promise',
+    RawThread.STATUS_YIELD: 'Yielded',
+    RawThread.STATUS_YIELD_TICK: 'Yielded for one tick',
+    RawThread.STATUS_DONE: 'Completed',
+    RawThread.STATUS_PAUSED: 'Suspended',
   }
 
   class SoupThreadsUtil {
@@ -1577,10 +1578,10 @@
 
       // Returns true if:
       //
-      // - The thread is in the threads list (it died this tick if its status is 4).
-      // - The thread's status is not 4.
+      // - The thread is in the threads list (it died this tick if its status is STATUS_DONE).
+      // - The thread's status is not STATUS_DONE.
 
-      return runtime.threads.includes(THREAD.thread) && THREAD.thread.status !== 4;
+      return runtime.threads.includes(THREAD.thread) && THREAD.thread.status !== RawThread.STATUS_DONE;
     }
 
     isFinished({THREAD}, util) {
@@ -1595,11 +1596,11 @@
       // - The thread is not in the threads list (it is dead).
       // - The thread was not killed.
       // OR
-      // - The thread *is* in the threads list (it died this tick if its status is 4).
-      // - The thread's status is 4.
+      // - The thread *is* in the threads list (it died this tick if its status is STATUS_DONE).
+      // - The thread's status is STATUS_DONE.
 
       if (runtime.threads.includes(THREAD.thread)) {
-        return THREAD.thread.status === 4;
+        return THREAD.thread.status === RawThread.STATUS_DONE;
       }
       if (THREAD.deadThreadWasKilled()) {
         return false;
