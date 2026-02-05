@@ -39,6 +39,11 @@
     - [`repeat until [CONDITION] without yielding {SUBSTACK}` -> Undefined](#repeat-until-condition-without-yielding-substack---undefined)
     - [`while [CONDITION] without yielding {SUBSTACK}` -> Undefined](#while-condition-without-yielding-substack---undefined)
     - [`forever without yielding {SUBSTACK}` -> Undefined](#forever-without-yielding-substack---undefined)
+  - [Thread Variables](#thread-variables)
+    - [`(get [VARIABLE] in [THREAD])` -> Any](#get-variable-in-thread---any)
+    - [`set [VARIABLE] in [THREAD] to [VALUE]` -> Undefined](#set-variable-in-thread-to-value---undefined)
+    - [`(variables in [THREAD])` -> Array\[String\]](#variables-in-thread---arraystring)
+    - [`delete [VARIABLE] in [THREAD]` -> Undefined](#delete-variable-in-thread---undefined)
   - [Warp Mode](#warp-mode)
     - [`<warp mode>` -> Boolean](#warp-mode---boolean)
     - [`[SETBOOLEAN v] warp mode for {SUBSTACK}` -> Undefined](#setboolean-v-warp-mode-for-substack---undefined)
@@ -46,8 +51,8 @@
     - [`<graphics updated>` -> Boolean](#graphics-updated---boolean)
     - [`set graphics updated to <VALUE>` -> Undefined](#set-graphics-updated-to-value---undefined)
   - [Work Timer](#work-timer)
-    - [`work time` -> Number](#work-time---number)
-    - [`work timer` -> Number](#work-timer---number)
+    - [`(work time)` -> Number](#work-time---number)
+    - [`(work timer)` -> Number](#work-timer---number)
     - [`set work timer to [TIME]` -> Undefined](#set-work-timer-to-time---undefined)
 - [Menus](#menus)
     - [Index](#index)
@@ -361,6 +366,56 @@ Repeatedly executes `SUBSTACK` forever. The difference between this block and th
 
 
 
+## Thread Variables
+
+### `(get [VARIABLE] in [THREAD])` -> Any
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/get_foo_in.png?raw=true">
+
+Gets the thread variable named `VARIABLE` from `THREAD`. These thread variables are unique to this extension and are not used by the PenguinMod engine.
+
+The null thread cannot store thread variables.
+
+<details>
+  <summary>Internal behavior</summary>
+
+  Gets the `VARIABLE` key from the object at the `soupThreadVariables` key of the raw thread.
+</details>
+
+### `set [VARIABLE] in [THREAD] to [VALUE]` -> Undefined
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/set_foo_in_to_bar.png?raw=true">
+
+Sets the [thread variable](#get-variable-in-thread---any) named `VARIABLE` in `THREAD` to `VALUE`.
+
+<details>
+  <summary>Internal behavior</summary>
+
+  Sets the `VARIABLE` key to `VALUE` in the object at the `soupThreadVariables` key of the raw thread.
+</details>
+
+### `(variables in [THREAD])` -> Array\[String\]
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/variables_in.png?raw=true">
+
+Returns an array containing the name of every [thread variable](#get-variable-in-thread---any) stored in `THREAD`.
+
+<details>
+  <summary>Internal behavior</summary>
+
+  Gets the list of keys in the object at the `soupThreadVariables` key of the raw thread.
+</details>
+
+### `delete [VARIABLE] in [THREAD]` -> Undefined
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/delete_foo_in.png?raw=true">
+
+Deletes the [thread variable](#get-variable-in-thread---any) named `VARIABLE` from `THREAD`.
+
+<details>
+  <summary>Internal behavior</summary>
+
+  Deletes the `VARIABLE` key from the object at the `soupThreadVariables` key of the raw thread.
+</details>
+
+
+
 ## Warp Mode
 
 ### `<warp mode>` -> Boolean
@@ -396,7 +451,7 @@ Enables or disables [warp mode](#warp-mode---boolean) for `SUBSTACK`.
 
 ## Work Timer
 
-### `work time` -> Number
+### `(work time)` -> Number
 <img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/work_time.png?raw=true">
 
 Returns the amount of time in seconds before the sequencer will end the frame and rerender.
@@ -407,7 +462,7 @@ Returns the amount of time in seconds before the sequencer will end the frame an
   Before the start of every frame, reads `runtime.currentStepTime`, multiplies by 75% (as done [here↗](https://github.com/PenguinMod/PenguinMod-Vm/blob/b88731f3f93ed36d2b57024f8e8d758b6b60b54e/src/engine/sequencer.js#L74)), and stores it to be retrieved every time this block is run.
 </details>
 
-### `work timer` -> Number
+### `(work timer)` -> Number
 <img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/work_timer.png?raw=true">
 
 Returns the time elapsed so far this frame. This timer is used by the sequencer to know when to end the frame and rerender.
