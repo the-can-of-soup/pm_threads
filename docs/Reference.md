@@ -635,7 +635,7 @@ Depending on whether the argument is going to be used as a _get_ index or an _in
 *This item will not appear if _absolute mode_ is used.
 
 For *get* indexes, the value can be overridden by an integer from `0` to the length of the [threads array](#threads---arraythread) (inclusive).\
-For *insert* indexes, the value can be overridden by an integer from `0` to the length of the [threads array](#threads---arraythread) + 1 (inclusive).
+For *insert* indexes, the value can be overridden by an integer from `0` to the length of the threads array + 1 (inclusive).
 
 For the value `0`, the behavior of `end` or `after end` is used. Otherwise, the value is interpreted as a 1-based index.
 
