@@ -748,8 +748,17 @@
             }
           },
           {
+            opcode: 'setRunningThreadsActiveThread',
+            text: 'set threads to [THREADS] with active thread [ACTIVETHREAD]',
+            ...CommandBlock,
+            arguments: {
+              THREADS: jwArray.Argument,
+              ACTIVETHREAD: Thread.Argument,
+            }
+          },
+          {
             opcode: 'setRunningThreadsActiveIndex',
-            text: '(not implemented) set threads to [THREADS] with active index [ACTIVEINDEX]',
+            text: 'set threads to [THREADS] with active index [ACTIVEINDEX]',
             ...CommandBlock,
             arguments: {
               THREADS: jwArray.Argument,
@@ -759,15 +768,6 @@
                 menu: 'index',
                 defaultValue: 'start',
               },
-            }
-          },
-          {
-            opcode: 'setRunningThreadsActiveThread',
-            text: '(not implemented) set threads to [THREADS] with active thread [ACTIVETHREAD]',
-            ...CommandBlock,
-            arguments: {
-              THREADS: jwArray.Argument,
-              ACTIVETHREAD: Thread.Argument,
             }
           },
           {
@@ -1246,6 +1246,32 @@
 
 
 
+          setRunningThreadsActiveThread(generator, block) {
+            generator.script.yields = true;
+
+            return {
+              kind: 'stack',
+              args: {
+                THREADS: generator.descendInputOfBlock(block, 'THREADS'),
+                ACTIVETHREAD: generator.descendInputOfBlock(block, 'ACTIVETHREAD'),
+              }
+            };
+          },
+
+          setRunningThreadsActiveIndex(generator, block) {
+            generator.script.yields = true;
+
+            return {
+              kind: 'stack',
+              args: {
+                THREADS: generator.descendInputOfBlock(block, 'THREADS'),
+                ACTIVEINDEX: generator.descendInputOfBlock(block, 'ACTIVEINDEX'),
+              }
+            };
+          },
+
+
+
           repeatAtomic(generator, block) {
             return {
               kind: 'stack',
@@ -1331,7 +1357,7 @@
           yieldBack(node, compiler, imports) {
             compiler.source += `
               {
-                // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value
+                // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
                 // Will yield to end of the tick if the current thread is at the start.
                 if (runtime.sequencer.activeThreadIndex <= 0) {
                   runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;
@@ -1351,11 +1377,14 @@
 
                 let threadIndex;
                 if (ACTIVETHREAD.thread !== null && (threadIndex = runtime.threads.indexOf(ACTIVETHREAD.thread)) !== -1) {
-                  // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value
+                  // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
                   runtime.sequencer.activeThreadIndex = threadIndex - 1;
-
-                  yield;
+                } else {
+                  // Fall back to yielding to end of tick.
+                  runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;
                 }
+
+                yield;
               }
             `;
           },
@@ -1365,7 +1394,7 @@
               {
                 let ACTIVEINDEX = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.ACTIVEINDEX).asUnknown()});
 
-                // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value
+                // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
                 if (ACTIVEINDEX < 0) {
                   // yield to first thread
                   runtime.sequencer.activeThreadIndex = -1;
@@ -1384,8 +1413,68 @@
           yieldToEnd(node, compiler, imports) {
             compiler.source += `
               {
-                // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value
+                // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
                 runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;
+
+                yield;
+              }
+            `;
+          },
+
+
+
+          setRunningThreadsActiveThread(node, compiler, imports) {
+            compiler.source += `
+              {
+                let THREADS = vm.jwArray.Type.toArray(${compiler.descendInput(node.args.THREADS).asUnknown()}).array;
+                THREADS = THREADS.map((thread) => (vm.SoupThreads.Type.toThread(thread)).thread);
+                THREADS = Array.from(new Set(THREADS));
+                THREADS = THREADS.filter((rawThread) => (rawThread !== null && runtime.threads.includes(rawThread)));
+
+                // Completely replace threads array via mutating only.
+                runtime.threads.splice(0, runtime.threads.length, ...THREADS.map((thread) => (thread.thread)));
+
+                // Only handle index input after replacing threads array so that length calculations are correct.
+                let ACTIVEINDEX = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.ACTIVEINDEX).asUnknown()});
+
+                // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value..
+                if (ACTIVEINDEX < 0) {
+                  // yield to first thread
+                  runtime.sequencer.activeThreadIndex = -1;
+                } else if (ACTIVEINDEX >= runtime.threads.length) {
+                  // yield to end of tick
+                  runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;
+                } else {
+                  runtime.sequencer.activeThreadIndex = ACTIVEINDEX - 1;
+                }
+
+                yield;
+              }
+            `;
+          },
+          
+          setRunningThreadsActiveIndex(node, compiler, imports) {
+            compiler.source += `
+              {
+                let THREADS = vm.jwArray.Type.toArray(${compiler.descendInput(node.args.THREADS).asUnknown()}).array;
+                THREADS = THREADS.map((thread) => (vm.SoupThreads.Type.toThread(thread)).thread);
+                THREADS = Array.from(new Set(THREADS));
+                THREADS = THREADS.filter((rawThread) => (rawThread !== null && runtime.threads.includes(rawThread)));
+
+                // Completely replace threads array via mutating only.
+                runtime.threads.splice(0, runtime.threads.length, ...THREADS.map((thread) => (thread.thread)));
+
+                // Only handle index input after replacing threads array so that length calculations are correct.
+                let ACTIVETHREAD = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.ACTIVETHREAD).asUnknown()});
+
+                // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value..
+                let threadIndex;
+                if (ACTIVETHREAD.thread !== null && (threadIndex = runtime.threads.indexOf(ACTIVETHREAD.thread)) !== -1) {
+                  runtime.sequencer.activeThreadIndex = threadIndex - 1;
+                } else {
+                  // Fall back to yielding to end of tick.
+                  runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;
+                }
 
                 yield;
               }
