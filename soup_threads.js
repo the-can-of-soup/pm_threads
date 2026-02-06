@@ -1437,7 +1437,7 @@
                 // Only handle index input after replacing threads array so that length calculations are correct.
                 let ACTIVEINDEX = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.ACTIVEINDEX).asUnknown()});
 
-                // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value..
+                // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
                 if (ACTIVEINDEX < 0) {
                   // yield to first thread
                   runtime.sequencer.activeThreadIndex = -1;
@@ -1467,7 +1467,7 @@
                 // Only handle index input after replacing threads array so that length calculations are correct.
                 let ACTIVETHREAD = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.ACTIVETHREAD).asUnknown()});
 
-                // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value..
+                // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
                 let threadIndex;
                 if (ACTIVETHREAD.thread !== null && (threadIndex = runtime.threads.indexOf(ACTIVETHREAD.thread)) !== -1) {
                   runtime.sequencer.activeThreadIndex = threadIndex - 1;
