@@ -1760,6 +1760,11 @@
     setWorkTimer({TIME}, util) {
       TIME = Scratch.Cast.toNumber(TIME);
 
+      // Allow infinite values for now
+      // if (!Number.isFinite(TIME)) {
+      //   return;
+      // }
+
       if (util.sequencer.timer._pausedTime !== null) {
         util.sequencer.timer._pausedTime = TIME * 1000;
       } else {
