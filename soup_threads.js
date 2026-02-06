@@ -264,8 +264,15 @@
 
     uid = uid;
 
-    static handleIndexInput(INDEX, insertMode = false, constrain = false) {
-      // If insertMode is true, the "end" index will select the index after the last index.
+    /**
+     * Converts an arbitrary block input value from an "index" menu to a 0-based index for the threads array.
+     * 
+     * @static
+     * @param {*} INDEX - An arbitrary block input value from an "index" menu.
+     * @param {boolean} insertMode - If true, the "end" index will select the index after the last index. This is to allow inserting to the end of the array.
+     * @param {boolean} absoluteMode - If true, relative indexes such as "active index" and "previous index" will be ignored and instead treated as a generic invalid string.
+     */
+    static handleIndexInput(INDEX, insertMode = false, absoluteMode = false, constrain = false) {
 
       // Convert index to a 1-based integer
       switch (INDEX) {
@@ -281,18 +288,24 @@
 
         case 'previous index':
         case 'before previous':
-          INDEX = runtime.sequencer.activeThreadIndex;
-          break;
+          if (!absoluteMode) {
+            INDEX = runtime.sequencer.activeThreadIndex;
+            break;
+          }
 
         case 'active index':
         case 'before active':
-          INDEX = runtime.sequencer.activeThreadIndex + 1;
-          break;
+          if (!absoluteMode) {
+            INDEX = runtime.sequencer.activeThreadIndex + 1;
+            break;
+          }
 
         case 'next index':
         case 'before next':
-          INDEX = runtime.sequencer.activeThreadIndex + 2;
-          break;
+          if (!absoluteMode) {
+            INDEX = runtime.sequencer.activeThreadIndex + 2;
+            break;
+          }
 
         default:
           INDEX = Scratch.Cast.toNumber(INDEX);
@@ -765,7 +778,7 @@
               ACTIVEINDEX: {
                 type: Scratch.ArgumentType.NUMBER,
                 exemptFromNormalization: true,
-                menu: 'index',
+                menu: 'indexAbsolute',
                 defaultValue: 'start',
               },
             }
@@ -1096,6 +1109,23 @@
               },
             ],
           },
+          indexAbsolute: {
+            acceptReporters: true,
+            items: [
+              {
+                text: 'start',
+                value: 'start',
+              },
+              {
+                text: 'end',
+                value: 'end',
+              },
+              {
+                text: '(you can put an index here)',
+                value: '(you can put an index here)',
+              },
+            ],
+          },
           indexInsert: {
             acceptReporters: true,
             items: [
@@ -1118,6 +1148,23 @@
               {
                 text: 'before next',
                 value: 'before next',
+              },
+              {
+                text: '(you can put an index here)',
+                value: '(you can put an index here)',
+              },
+            ],
+          },
+          indexInsertAbsolute: {
+            acceptReporters: true,
+            items: [
+              {
+                text: 'before start',
+                value: 'before start',
+              },
+              {
+                text: 'after end',
+                value: 'after end',
               },
               {
                 text: '(you can put an index here)',
