@@ -1432,7 +1432,7 @@
                 THREADS = THREADS.filter((rawThread) => (rawThread !== null && runtime.threads.includes(rawThread)));
 
                 // Completely replace threads array via mutating only.
-                runtime.threads.splice(0, runtime.threads.length, ...THREADS.map((thread) => (thread.thread)));
+                runtime.threads.splice(0, runtime.threads.length, ...THREADS);
 
                 // Only handle index input after replacing threads array so that length calculations are correct.
                 let ACTIVEINDEX = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.ACTIVEINDEX).asUnknown()});
@@ -1462,7 +1462,7 @@
                 THREADS = THREADS.filter((rawThread) => (rawThread !== null && runtime.threads.includes(rawThread)));
 
                 // Completely replace threads array via mutating only.
-                runtime.threads.splice(0, runtime.threads.length, ...THREADS.map((thread) => (thread.thread)));
+                runtime.threads.splice(0, runtime.threads.length, ...THREADS);
 
                 // Only handle index input after replacing threads array so that length calculations are correct.
                 let ACTIVETHREAD = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.ACTIVETHREAD).asUnknown()});
