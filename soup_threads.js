@@ -1259,8 +1259,9 @@
           },
 
           setRunningThreadsActiveIndex(generator, block) {
+            debugger;
             generator.script.yields = true;
-
+            
             return {
               kind: 'stack',
               args: {
@@ -1423,7 +1424,7 @@
 
 
 
-          setRunningThreadsActiveThread(node, compiler, imports) {
+          setRunningThreadsActiveIndex(node, compiler, imports) {
             compiler.source += `
               {
                 let THREADS = vm.jwArray.Type.toArray(${compiler.descendInput(node.args.THREADS).asUnknown()}).array;
@@ -1452,8 +1453,8 @@
               }
             `;
           },
-          
-          setRunningThreadsActiveIndex(node, compiler, imports) {
+
+          setRunningThreadsActiveThread(node, compiler, imports) {
             compiler.source += `
               {
                 let THREADS = vm.jwArray.Type.toArray(${compiler.descendInput(node.args.THREADS).asUnknown()}).array;
