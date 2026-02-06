@@ -312,7 +312,7 @@ _Menus: `INDEX` uses [Index](#index) (get mode)_
 
 Yields and makes the thread at `INDEX` active.
 
-If `INDEX` is larger than the normally accepted range, will immediately end the tick.
+If `INDEX` is larger than the normally accepted range, will immediately end the tick. If `INDEX` is too small, will yield to the first thread.
 
 <details>
   <summary>Internal behavior</summary>
