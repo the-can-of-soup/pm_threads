@@ -32,8 +32,10 @@
     - [`yield to [ACTIVETHREAD]` -> Undefined](#yield-to-activethread---undefined)
     - [`yield to thread at (INDEX v)` -> Undefined](#yield-to-thread-at-index-v---undefined)
     - [`yield to end of tick` -> Undefined](#yield-to-end-of-tick---undefined)
-  - [Threads List](#threads-list)
+  - [Threads Array](#threads-array)
     - [`(threads)` -> Array\[Thread\]](#threads---arraythread)
+    - [`set threads to [THREADS] and yield to [ACTIVETHREAD]` -> Undefined](#set-threads-to-threads-and-yield-to-activethread---undefined)
+    - [`set threads to [THREADS] and yield to thread at (ACTIVEINDEX v)` -> Undefined](#set-threads-to-threads-and-yield-to-thread-at-activeindex-v---undefined)
   - [Atomic Loops](#atomic-loops)
     - [`repeat [TIMES] without yielding {SUBSTACK}` -> Undefined](#repeat-times-without-yielding-substack---undefined)
     - [`repeat until [CONDITION] without yielding {SUBSTACK}` -> Undefined](#repeat-until-condition-without-yielding-substack---undefined)
@@ -109,7 +111,7 @@ _Menus: `INDEX` uses [Index](#index) (get mode)_
 
 <img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/thread_at_start.png?raw=true">
 
-Returns the thread that is at `INDEX` in the threads list.
+Returns the thread that is at `INDEX` in the [threads array](#threads---arraythread).
 
 <details>
   <summary>Internal behavior</summary>
@@ -297,12 +299,14 @@ Yields and makes the previous thread active.
 ### `yield to [ACTIVETHREAD]` -> Undefined
 <img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/yield_to.png?raw=true">
 
-Yields and makes `ACTIVETHREAD` active. If `ACTIVETHREAD` is null or not in the [threads list](#threads---arraythread), does nothing.
+Yields and makes `ACTIVETHREAD` active.
+
+If `ACTIVETHREAD` is null or not in the [threads array](#threads---arraythread), instead yields to the [end of the tick](#yield-to-end-of-tick---undefined).
 
 <details>
   <summary>Internal behavior</summary>
   
-  Sets `sequencer.activeThreadIndex` to 1 less than the desired index before yielding. The decrement is because this value is always incremented by the engine after every yield.
+  If `ACTIVETHREAD` is valid, sets `sequencer.activeThreadIndex` to 1 less than the desired index before yielding. The decrement is because this value is always incremented by the engine after every yield. Otherwise, executes the behavior of [`yield to end of tick`](#yield-to-end-of-tick---undefined).
 </details>
 
 ### `yield to thread at (INDEX v)` -> Undefined
@@ -333,7 +337,7 @@ Yields and immediately ends the tick, skipping all threads that would normally s
 
 
 
-## Threads List
+## Threads Array
 
 ### `(threads)` -> Array\[Thread\]
 <img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/threads.png?raw=true">
@@ -344,6 +348,38 @@ Returns all threads that are currently alive and all threads that [exited natura
   <summary>Internal behavior</summary>
   
   Reads the `runtime.threads` array.
+</details>
+
+### `set threads to [THREADS] and yield to [ACTIVETHREAD]` -> Undefined
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/set_threads_to_and_yield_to.png?raw=true">
+
+Sets the [threads array](#threads---arraythread) to `THREADS` and then yields to `ACTIVETHREAD`.
+
+`THREADS` should be an array of unique non-null threads that are already in the [threads array](#threads---arraythread). Any duplicate threads, null threads, or threads not already in the threads array will be omitted.
+
+If `ACTIVETHREAD` is null or not in the [threads array](#threads---arraythread) after the operation, instead yields to the [end of the tick](#yield-to-end-of-tick---undefined).
+
+<details>
+  <summary>Internal behavior</summary>
+  
+  Replaces the entire contents of the `runtime.threads` array by mutating it. Then, executes the behavior of [`yield to [ACTIVETHREAD]`](#yield-to-activethread---undefined).
+</details>
+
+### `set threads to [THREADS] and yield to thread at (ACTIVEINDEX v)` -> Undefined
+_Menus: `ACTIVEINDEX` uses [Index](#index) (get mode & absolute mode)_
+
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/set_threads_to_and_yield_to_thread_at_start.png?raw=true">
+
+Sets the [threads array](#threads---arraythread) to `THREADS` and then yields to the thread at `ACTIVEINDEX`.
+
+`THREADS` should be an array of unique non-null threads that are already in the [threads array](#threads---arraythread). Any duplicate threads, null threads, or threads not already in the threads array will be omitted.
+
+If `ACTIVEINDEX` is larger than the normally accepted range, will immediately end the tick. If `ACTIVEINDEX` is too small, will yield to the first thread.
+
+<details>
+  <summary>Internal behavior</summary>
+  
+  Replaces the entire contents of the `runtime.threads` array by mutating it. Then, executes the behavior of [`yield to thread at (INDEX v)`](#yield-to-thread-at-index-v---undefined).
 </details>
 
 
@@ -585,21 +621,25 @@ The behavior and effects of this flag are described under [`<graphics updated>`]
 
 ### Index
 
-Depending on whether the argument is going to be used as a *get* index or an *insert* index, the menu items will be:
+Depending on whether the argument is going to be used as a _get_ index or an _insert_ index and whether _absolute mode_ is used, the menu items will be:
 
 | Get                         | Insert                      |
 |-----------------------------|-----------------------------|
 | start                       | before start                |
 | end                         | after end                   |
-| previous index              | before previous             |
-| active index                | before active               |
-| next index                  | before next                 |
+| previous index*             | before previous*            |
+| active index*               | before active*              |
+| next index*                 | before next*                |
 | (you can put an index here) | (you can put an index here) |
 
-For *get* indexes, the value can be overridden by an integer from `0` to the length of the threads list (inclusive).\
-For *insert* indexes, the value can be overridden by an integer from `0` to the length of the threads list + 1 (inclusive).
+*This item will not appear if _absolute mode_ is used.
 
-For the value `0`, the behavior of `end` or `after end` is used. Otherwise, the value is used as a 1-based index. In the case of *insert*, the operation will insert the thread(s) **before the specified index**.
+For *get* indexes, the value can be overridden by an integer from `0` to the length of the [threads array](#threads---arraythread) (inclusive).\
+For *insert* indexes, the value can be overridden by an integer from `0` to the length of the [threads array](#threads---arraythread) + 1 (inclusive).
+
+For the value `0`, the behavior of `end` or `after end` is used. Otherwise, the value is interpreted as a 1-based index.
+
+In the case of *insert*, the operation will insert the thread(s) **before the specified index**.
 
 ### Status Format
 
