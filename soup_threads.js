@@ -749,7 +749,7 @@
           },
           {
             opcode: 'setRunningThreadsActiveThread',
-            text: 'set threads to [THREADS] with active thread [ACTIVETHREAD]',
+            text: 'set threads to [THREADS] and yield to [ACTIVETHREAD]',
             ...CommandBlock,
             arguments: {
               THREADS: jwArray.Argument,
@@ -758,7 +758,7 @@
           },
           {
             opcode: 'setRunningThreadsActiveIndex',
-            text: 'set threads to [THREADS] with active index [ACTIVEINDEX]',
+            text: 'set threads to [THREADS] and yield to thread at [ACTIVEINDEX]',
             ...CommandBlock,
             arguments: {
               THREADS: jwArray.Argument,
