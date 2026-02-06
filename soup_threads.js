@@ -1259,9 +1259,8 @@
           },
 
           setRunningThreadsActiveIndex(generator, block) {
-            debugger;
             generator.script.yields = true;
-            
+
             return {
               kind: 'stack',
               args: {
