@@ -1482,7 +1482,7 @@
                 runtime.threads.splice(0, runtime.threads.length, ...THREADS);
 
                 // Only handle index input after replacing threads array so that length calculations are correct.
-                let ACTIVEINDEX = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.ACTIVEINDEX).asUnknown()});
+                let ACTIVEINDEX = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.ACTIVEINDEX).asUnknown()}, absoluteMode = true);
 
                 // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
                 if (ACTIVEINDEX < 0) {
