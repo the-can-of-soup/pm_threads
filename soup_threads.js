@@ -784,6 +784,21 @@
             }
           },
           {
+            opcode: 'moveThreadRelative',
+            text: '(not implemented) move thread [THREADONE] to [BEFOREORAFTER] [THREADTWO]',
+            ...CommandBlock,
+            arguments: {
+              THREADONE: Thread.Argument,
+              BEFOREORAFTER: {
+                type: Scratch.ArgumentType.STRING,
+                exemptFromNormalization: true,
+                menu: 'beforeOrAfter',
+                defaultValue: 'before',
+              },
+              THREADTWO: Thread.Argument,
+            }
+          },
+          {
             opcode: 'moveThread',
             text: '(not implemented) move thread [THREAD] to [INDEX]',
             ...CommandBlock,
@@ -798,12 +813,51 @@
             }
           },
           {
+            opcode: 'moveThreadByIndex',
+            text: '(not implemented) move thread at [INDEXONE] to [INDEXTWO]',
+            ...CommandBlock,
+            arguments: {
+              THREAD: Thread.Argument,
+              INDEXONE: {
+                type: Scratch.ArgumentType.NUMBER,
+                exemptFromNormalization: true,
+                menu: 'index',
+                defaultValue: 'end',
+              },
+              INDEXTWO: {
+                type: Scratch.ArgumentType.NUMBER,
+                exemptFromNormalization: true,
+                menu: 'indexInsert',
+                defaultValue: 'after end',
+              },
+            }
+          },
+          {
             opcode: 'swapThreads',
             text: '(not implemented) swap thread [THREADONE] with [THREADTWO]',
             ...CommandBlock,
             arguments: {
               THREADONE: Thread.Argument,
               THREADTWO: Thread.Argument,
+            }
+          },
+          {
+            opcode: 'swapThreadsByIndex',
+            text: '(not implemented) swap thread at [INDEXONE] with thread at [INDEXTWO]',
+            ...CommandBlock,
+            arguments: {
+              INDEXONE: {
+                type: Scratch.ArgumentType.NUMBER,
+                exemptFromNormalization: true,
+                menu: 'index',
+                defaultValue: 'end',
+              },
+              INDEXTWO: {
+                type: Scratch.ArgumentType.NUMBER,
+                exemptFromNormalization: true,
+                menu: 'index',
+                defaultValue: 'end',
+              },
             }
           },
 
@@ -1205,7 +1259,20 @@
                 value: 'enable',
               },
             ]
-          }
+          },
+          beforeOrAfter: {
+            acceptReporters: false,
+            items: [
+              {
+                text: 'before',
+                value: 'before',
+              },
+              {
+                text: 'after',
+                value: 'after',
+              },
+            ]
+          },
         },
       };
     }
