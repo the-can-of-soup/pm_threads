@@ -29,6 +29,10 @@
     - **TODO:** `<[THREAD] is suspended?>` -> Boolean
     - [`<[THREAD] was started by clicking in the editor?>` -> Boolean](#thread-was-started-by-clicking-in-the-editor---boolean)
     - [`<[THREAD] is a monitor updater?>` -> Boolean](#thread-is-a-monitor-updater---boolean)
+  - Thread Actions
+    - **TODO:** `kill thread [THREAD]` -> Undefined
+    - **TODO:** `suspend thread [THREAD]` -> Undefined
+    - **TODO:** `resume thread [THREAD]` -> Undefined
   - [Yielding](#yielding)
     - [`yield to next thread` -> Undefined](#yield-to-next-thread---undefined)
     - [`yield [TIMES] times` -> Undefined](#yield-times-times---undefined)
@@ -42,10 +46,6 @@
     - **TODO:** `run [MESSAGE v] immediately and return` -> Undefined
     - **TODO:** `(last broadcast)` -> Array\[Thread\]
     - **TODO:** `(last broadcast)` -> Thread
-  - Thread Actions
-    - **TODO:** `kill thread [THREAD]` -> Undefined
-    - **TODO:** `suspend thread [THREAD]` -> Undefined
-    - **TODO:** `resume thread [THREAD]` -> Undefined
   - [Threads Array](#threads-array)
     - [`(threads)` -> Array\[Thread\]](#threads---arraythread)
     - **TODO:** `(threads in (TARGET v))` -> Array\[Thread\]
