@@ -607,6 +607,33 @@
           '---',
 
           {
+            opcode: 'killThread',
+            text: '(not implemented) kill thread [THREAD]',
+            ...CommandBlock,
+            arguments: {
+              THREAD: Thread.Argument,
+            }
+          },
+          {
+            opcode: 'pauseThread',
+            text: '(not implemented) suspend thread [THREAD]',
+            ...CommandBlock,
+            arguments: {
+              THREAD: Thread.Argument,
+            }
+          },
+          {
+            opcode: 'unpauseThread',
+            text: '(not implemented) resume thread [THREAD]',
+            ...CommandBlock,
+            arguments: {
+              THREAD: Thread.Argument,
+            }
+          },
+
+          '---',
+
+          {
             opcode: 'yield',
             text: 'yield to next thread',
             ...CommandBlock,
@@ -717,33 +744,6 @@
           '---',
 
           {
-            opcode: 'killThread',
-            text: '(not implemented) kill thread [THREAD]',
-            ...CommandBlock,
-            arguments: {
-              THREAD: Thread.Argument,
-            }
-          },
-          {
-            opcode: 'pauseThread',
-            text: '(not implemented) suspend thread [THREAD]',
-            ...CommandBlock,
-            arguments: {
-              THREAD: Thread.Argument,
-            }
-          },
-          {
-            opcode: 'unpauseThread',
-            text: '(not implemented) resume thread [THREAD]',
-            ...CommandBlock,
-            arguments: {
-              THREAD: Thread.Argument,
-            }
-          },
-
-          '---',
-
-          {
             opcode: 'getThreads',
             ...jwArray.Block,
             disableMonitor: false,
@@ -755,8 +755,10 @@
             text: '(not implemented) threads in [TARGET]',
             arguments: {
               TARGET: {
-                ...jwTargets.Argument,
-                exemptFromNormalization: true, // not included in jwTargets.Argument for some reason
+                shape: jwTargets.Argument.shape, // Do not include "check" parameter from jwTargets.Argument because that breaks menu
+                exemptFromNormalization: true,
+                // fillIn: 'menu_target',
+                menu: 'target',
               },
             }
           },
@@ -783,6 +785,7 @@
               },
             }
           },
+          /*
           {
             opcode: 'moveThreadRelative',
             text: '(not implemented) move thread [THREADONE] to [BEFOREORAFTER] [THREADTWO]',
@@ -798,6 +801,7 @@
               THREADTWO: Thread.Argument,
             }
           },
+          */
           {
             opcode: 'moveThread',
             text: '(not implemented) move thread [THREAD] to [INDEX]',
@@ -812,6 +816,7 @@
               },
             }
           },
+          /*
           {
             opcode: 'moveThreadByIndex',
             text: '(not implemented) move thread at [INDEXONE] to [INDEXTWO]',
@@ -832,6 +837,7 @@
               },
             }
           },
+          */
           {
             opcode: 'swapThreads',
             text: '(not implemented) swap thread [THREADONE] with [THREADTWO]',
@@ -841,6 +847,7 @@
               THREADTWO: Thread.Argument,
             }
           },
+          /*
           {
             opcode: 'swapThreadsByIndex',
             text: '(not implemented) swap thread at [INDEXONE] with thread at [INDEXTWO]',
@@ -860,6 +867,7 @@
               },
             }
           },
+          */
 
           '---',
 
