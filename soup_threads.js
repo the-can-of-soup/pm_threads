@@ -204,12 +204,14 @@
     Type: ThreadType,
     Block: {
         blockType: Scratch.BlockType.REPORTER,
-        blockShape: Scratch.BlockShape.ARROW,
+        // blockShape: Scratch.BlockShape.ARROW,
+        blockShape: 'soupThreads-wave',
         forceOutputType: 'soupThread',
         disableMonitor: true,
     },
     Argument: {
-        shape: Scratch.BlockShape.ARROW,
+        // shape: Scratch.BlockShape.ARROW,
+        shape: 'soupThreads-wave',
         check: ['soupThread'],
         exemptFromNormalization: true,
     }
@@ -269,8 +271,10 @@
      * 
      * @static
      * @param {*} INDEX - An arbitrary block input value from an "index" menu.
-     * @param {boolean} insertMode - If true, the "end" index will select the index after the last index. This is to allow inserting to the end of the array.
-     * @param {boolean} absoluteMode - If true, relative indexes such as "active index" and "previous index" will be ignored and instead treated as a generic invalid string.
+     * @param {boolean} insertMode - If true, the "end" index will select the index after the last index.
+     *     This is to allow inserting to the end of the array.
+     * @param {boolean} absoluteMode - If true, relative indexes such as "active index" and "previous index"
+     *     will be ignored and instead treated as a generic invalid string.
      */
     static handleIndexInput(INDEX, insertMode = false, absoluteMode = false, constrain = false) {
 
@@ -318,16 +322,155 @@
       return constrain ? Math.max(0, Math.min(unconstrained, end)) : unconstrained;
     }
 
+    /**
+     * Generates the `leftPath` and `rightPath` functions for a custom block shape definition.
+     * 
+     * @static
+     * @param {string} path - An SVG path of the full block shape will all commands relative.
+     *     There should be a "l 0 0" command immediately before the first command and after the last command of
+     *     both sides.
+     *     The "h 0" and "v 0" commands can be used to begin and end an unscaled section respectively.
+     *     All commands in an unscaled section (between "h 0" and "v 0") will not have their coordinates scaled as
+     *     the block changes size.
+     *     Finally, the "c 0 <offset> 0 0 0 0" command pattern indicates that the magnitude of the next
+     *     "v" command's parameter should be overwritten by the height of the block minus `offset`. This is intended
+     *     to be used for the line separating the top and bottom of the block so that it stretches vertically.
+     * @returns {Object} An object containing the `leftPath` and `rightPath` keys; to be merged with the custom
+     *     shape definition.
+     */
+    static generateCustomShapeEdges(path) {
+      const RelativePathOpcodes = [
+        'm', 'l', 'h', 'v', 'c', 's', 'q', 't', 'a', 'z',
+      ];
+      const AbsolutePathOpcodes = [
+        'M', 'L', 'H', 'V', 'C', 'S', 'Q', 'T', 'A', 'Z',
+      ]
+
+      // Split path into commands
+      const allWords = path.split(' ');
+      let allCommands = [];
+      let commandIdx = -1;
+      for (let word of allWords) {
+        if (AbsolutePathOpcodes.includes(word)) {
+          throw new Error('Cannot generate custom shape edges from a path with an absolute command');
+        } else if (RelativePathOpcodes.includes(word)) {
+          allCommands.push([word]);
+          commandIdx += 1;
+        } else {
+          allCommands[commandIdx].push(word);
+        }
+      }
+
+      // Split into parts with "l 0 0" command
+      // Also remove all "z" commands
+      let commandsByPart = [[]];
+      let partIdx = 0;
+      for (let command of allCommands) {
+        if (command[0] === 'l' && command[1] === '0' && command[2] === '0') {
+          commandsByPart.push([]);
+          partIdx += 1;
+        } else if (command[0] !== 'z') {
+          commandsByPart[partIdx].push(command);
+        }
+      }
+
+      // Split into edges (every other part)
+      let commandsByEdge = [];
+      for (let i = 1; i < commandsByPart.length; i += 2) {
+        commandsByEdge.push(commandsByPart[i]);
+      }
+
+      // Generate functions for each edge
+      let functionsByEdge = [];
+      for (let i = 0; i < commandsByEdge.length; i++) {
+        const edgeCommands = commandsByEdge[i];
+        const isRightEdge = i === 0;
+
+        functionsByEdge.push(function(block) {
+          const edgeWidth = isRightEdge ? block.edgeShapeWidth_ : block.height / 2;
+          const scalingFactor = edgeWidth / 16;
+          const height = edgeWidth * 2;
+
+          // Generate result commands
+          let resultCommands = [];
+          let unscaledSection = false;
+          let separatorLine = false;
+          let separatorLineOffset = null;
+          for (const command of edgeCommands) {
+            let specialCommand = true;
+
+            // Handle special commands
+            if (command[0] === 'h' && command[1] === '0') {
+              // "h 0" command; begin unscaled section
+              unscaledSection = true;
+            } else if (command[0] === 'v' && command[1] === '0') {
+              // "v 0" command; end unscaled section
+              unscaledSection = false;
+            } else if (command[0] === 'c' && command[1] === '0' && command[3] === '0' && command[4] === '0' && command[5] === '0' && command[6] === '0') {
+              // "c 0 <offset> 0 0 0 0" command pattern
+              separatorLineOffset = Number.parseFloat(command[2]);
+              separatorLine = true;
+            } else {
+              specialCommand = false;
+            }
+
+            // Handle normal commands
+            if (!specialCommand) {
+              if (command[0] === 'v' && separatorLine) {
+                let sign = Math.sign(Number.parseFloat(command[1]));
+                resultCommands.push(['v', (sign * (height - separatorLineOffset)).toString()]);
+                separatorLine = false;
+              } else if (unscaledSection) {
+                resultCommands.push(command);
+              } else if (command[0] === 'a') {
+                // Arc command; only arguments 0, 1, 5, 6 should be scaled
+                let scaledCommand = [command[0]];
+                for (let i of [0, 1, 5, 6]) {
+                  scaledCommand.push((Number.parseFloat(command[i]) * scalingFactor).toString());
+                }
+                resultCommands.push(scaledCommand);
+              } else {
+                // All arguments should be scaled
+                let scaledCommand = [command[0]];
+                for (let i = 1; i < command.length; i++) {
+                  scaledCommand.push((Number.parseFloat(command[i]) * scalingFactor).toString());
+                }
+                resultCommands.push(scaledCommand);
+              }
+            }
+          }
+
+          // Combine result commands to a string
+          let resultCommandStrings = resultCommands.map((command) => (command.join(' ')));
+          let resultCommandsAsString = resultCommandStrings.join(' ');
+          return [resultCommandsAsString];
+        });
+      }
+
+      return {
+        leftPath: functionsByEdge[1],
+        rightPath: functionsByEdge[0],
+      };
+    }
+
   }
 
   class SoupThreadsExtension {
 
     constructor() {
+      // Store reference to SoupThreadsUtil
+      vm.SoupThreadsUtil = SoupThreadsUtil;
+
       // Register compiled blocks
       runtime.registerCompiledExtensionBlocks('soupThreads', this.getCompileInfo());
 
-      // Store reference to SoupThreadsUtil
-      vm.SoupThreadsUtil = SoupThreadsUtil;
+      // Register custom shapes
+      Scratch.gui.getBlockly().then(function(ScratchBlocks) {
+        let shapeInfo = SoupThreadsExtension.getShapeInfo();
+        for (let shapeId in shapeInfo) {
+          ScratchBlocks.BlockSvg.registerCustomShape(`soupThreads-${shapeId}`, shapeInfo[shapeId]);
+        }
+      });
 
       // Register thread type
       vm.SoupThreads = Thread;
@@ -376,6 +519,28 @@
         runtime.soupThreadsTickFromStart = 0;
         runtime.soupThreadsFrameFromStart = 0;
       })
+    }
+
+    static getShapeInfo() {
+      // https://docs.penguinmod.com/development/extensions/api/blocks/custom-block-shape/
+      // https://yqnn.github.io/svg-path-editor/
+
+      return {
+        wave: {
+          emptyInputPath: 'm 16 0 h 16 c 2 -0.5 2 -1 4 -1 c 4 0 4 2 8 2 c 2 0 2 -0.5 4 -1 l 0 32 c -2 0.5 -2 1 -4 1 c -4 0 -4 -2 -8 -2 c -2 0 -2 0.5 -4 1 h 0 h -16 c -2 0.5 -2 1 -4 1 c -4 0 -4 -2 -8 -2 h 0 c -2 0 -2 0.5 -4 1 l 0 -32 c 2 -0.5 2 -1 4 -1 c 4 0 4 2 8 2 c 2 0 2 -0.5 4 -1 z',
+          emptyInputWidth: 12 * ScratchBlocks.BlockSvg.GRID_UNIT,
+
+          // See docstring of generateCustomShapeEdges for info
+          ...SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 l 0 0 h 0 c 2 -0.5 2 -1 4 -1 c 4 0 4 2 8 2 c 2 0 2 -0.5 4 -1 v 0 c 0 0 0 0 0 0 v 32 h 0 c -2 0.5 -2 1 -4 1 c -4 0 -4 -2 -8 -2 c -2 0 -2 0.5 -4 1 v 0 l 0 0 h -16 l 0 0 h 0 c -2 0.5 -2 1 -4 1 c -4 0 -4 -2 -8 -2 h 0 c -2 0 -2 0.5 -4 1 v 0 c 0 0 0 0 0 0 v -32 h 0 c 2 -0.5 2 -1 4 -1 c 4 0 4 2 8 2 c 2 0 2 -0.5 4 -1 v 0 l 0 0 z'),
+
+          // Patches bug where reporter blocks with branches will move to the right as they get taller.
+          // Copied from here: https://github.com/Dicuo/Iterators-Extension/blob/849b32e5b1566e2710cfbdffa00d24c1a1e4e94a/Iterators%20Extension.js#L503-L506
+          // div got it from jwklong. no clue why this works but lets just roll with it
+          outputLeftPadding(block) {
+            return block.inputList.some(i => i.type == ScratchBlocks.NEXT_STATEMENT) ? -block.height/2 + 22 : 0;
+          },
+        },
+      };
     }
 
     getInfo() {
