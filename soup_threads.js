@@ -608,7 +608,7 @@
 
           {
             opcode: 'killThread',
-            text: '(not implemented) kill thread [THREAD]',
+            text: '(not implemented) kill [THREAD]',
             ...CommandBlock,
             arguments: {
               THREAD: Thread.Argument,
@@ -616,7 +616,7 @@
           },
           {
             opcode: 'pauseThread',
-            text: '(not implemented) suspend thread [THREAD]',
+            text: '(not implemented) suspend [THREAD]',
             ...CommandBlock,
             arguments: {
               THREAD: Thread.Argument,
@@ -624,7 +624,7 @@
           },
           {
             opcode: 'unpauseThread',
-            text: '(not implemented) resume thread [THREAD]',
+            text: '(not implemented) resume [THREAD]',
             ...CommandBlock,
             arguments: {
               THREAD: Thread.Argument,
@@ -788,7 +788,7 @@
           /*
           {
             opcode: 'moveThreadRelative',
-            text: '(not implemented) move thread [THREADONE] to [BEFOREORAFTER] [THREADTWO]',
+            text: '(not implemented) move [THREADONE] to [BEFOREORAFTER] [THREADTWO]',
             ...CommandBlock,
             arguments: {
               THREADONE: Thread.Argument,
@@ -804,7 +804,7 @@
           */
           {
             opcode: 'moveThread',
-            text: '(not implemented) move thread [THREAD] to [INDEX]',
+            text: '(not implemented) move [THREAD] to [INDEX]',
             ...CommandBlock,
             arguments: {
               THREAD: Thread.Argument,
@@ -840,7 +840,7 @@
           */
           {
             opcode: 'swapThreads',
-            text: '(not implemented) swap thread [THREADONE] with [THREADTWO]',
+            text: '(not implemented) swap [THREADONE] with [THREADTWO]',
             ...CommandBlock,
             arguments: {
               THREADONE: Thread.Argument,
