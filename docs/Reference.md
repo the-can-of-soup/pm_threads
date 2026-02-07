@@ -30,9 +30,9 @@
     - [`<[THREAD] was started by clicking in the editor?>` -> Boolean](#thread-was-started-by-clicking-in-the-editor---boolean)
     - [`<[THREAD] is a monitor updater?>` -> Boolean](#thread-is-a-monitor-updater---boolean)
   - Thread Actions
-    - **TODO:** `kill thread [THREAD]` -> Undefined
-    - **TODO:** `suspend thread [THREAD]` -> Undefined
-    - **TODO:** `resume thread [THREAD]` -> Undefined
+    - **TODO:** `kill [THREAD]` -> Undefined
+    - **TODO:** `suspend [THREAD]` -> Undefined
+    - **TODO:** `resume [THREAD]` -> Undefined
   - [Yielding](#yielding)
     - [`yield to next thread` -> Undefined](#yield-to-next-thread---undefined)
     - [`yield [TIMES] times` -> Undefined](#yield-times-times---undefined)
@@ -51,8 +51,8 @@
     - **TODO:** `(threads in (TARGET v))` -> Array\[Thread\]
     - [`set threads to [THREADS] and yield to [ACTIVETHREAD]` -> Undefined](#set-threads-to-threads-and-yield-to-activethread---undefined)
     - [`set threads to [THREADS] and yield to thread at (ACTIVEINDEX v)` -> Undefined](#set-threads-to-threads-and-yield-to-thread-at-activeindex-v---undefined)
-    - **TODO:** `move thread [THREAD] to (INDEX v)` -> Undefined
-    - **TODO:** `swap thread [THREADONE] with [THREADTWO]` -> Undefined
+    - **TODO:** `move [THREAD] to (INDEX v)` -> Undefined
+    - **TODO:** `swap [THREADONE] with [THREADTWO]` -> Undefined
   - [Atomic Loops](#atomic-loops)
     - [`repeat [TIMES] without yielding {SUBSTACK}` -> Undefined](#repeat-times-without-yielding-substack---undefined)
     - [`repeat until [CONDITION] without yielding {SUBSTACK}` -> Undefined](#repeat-until-condition-without-yielding-substack---undefined)
