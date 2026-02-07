@@ -732,12 +732,12 @@
           },
           {
             opcode: 'getLastBroadcastThreads',
-            text: '(not implemented) last broadcast',
+            text: '(not implemented) last broadcast threads',
             ...jwArray.Block,
           },
           {
             opcode: 'getLastBroadcastFirstThread',
-            text: '(not implemented) last broadcast',
+            text: '(not implemented) first thread from last broadcast',
             ...Thread.Block,
           },
 
