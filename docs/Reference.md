@@ -11,6 +11,9 @@
     - [`(active index)` -> Number](#active-index---number)
     - [`(null thread)` -> Thread](#null-thread---thread)
     - [`(thread at (INDEX v))` -> Thread](#thread-at-index-v---thread)
+  - Thread Builders
+    - **TODO:** `new thread in (TARGET v) moved to (INDEX v)` -> Undefined
+    - **TODO:** `(new thread in (TARGET v) moved to (INDEX v))` -> Thread
   - [Thread Properties](#thread-properties)
     - [`(target of [THREAD])` -> Target](#target-of-thread---target)
     - [`(id of [THREAD])` -> String](#id-of-thread---string)
@@ -23,6 +26,7 @@
     - [`<[THREAD] is alive?>` -> Boolean](#thread-is-alive---boolean)
     - [`<[THREAD] exited naturally?>` -> Boolean](#thread-exited-naturally---boolean)
     - [`<[THREAD] was killed?>` -> Boolean](#thread-was-killed---boolean)
+    - **TODO:** `<[THREAD] is suspended?>` -> Boolean
     - [`<[THREAD] was started by clicking in the editor?>` -> Boolean](#thread-was-started-by-clicking-in-the-editor---boolean)
     - [`<[THREAD] is a monitor updater?>` -> Boolean](#thread-is-a-monitor-updater---boolean)
   - [Yielding](#yielding)
@@ -32,10 +36,23 @@
     - [`yield to [ACTIVETHREAD]` -> Undefined](#yield-to-activethread---undefined)
     - [`yield to thread at (INDEX v)` -> Undefined](#yield-to-thread-at-index-v---undefined)
     - [`yield to end of tick` -> Undefined](#yield-to-end-of-tick---undefined)
+  - Broadcasts
+    - **TODO:** `broadcast [MESSAGE v] to (INDEX v)` -> Undefined
+    - **TODO:** `broadcast [MESSAGE v] to (INDEX v) and wait` -> Undefined
+    - **TODO:** `run [MESSAGE v] immediately and return` -> Undefined
+    - **TODO:** `(last broadcast)` -> Array\[Thread\]
+    - **TODO:** `(last broadcast)` -> Thread
+  - Thread Actions
+    - **TODO:** `kill thread [THREAD]` -> Undefined
+    - **TODO:** `suspend thread [THREAD]` -> Undefined
+    - **TODO:** `resume thread [THREAD]` -> Undefined
   - [Threads Array](#threads-array)
     - [`(threads)` -> Array\[Thread\]](#threads---arraythread)
+    - **TODO:** `(threads in (TARGET v))` -> Array\[Thread\]
     - [`set threads to [THREADS] and yield to [ACTIVETHREAD]` -> Undefined](#set-threads-to-threads-and-yield-to-activethread---undefined)
     - [`set threads to [THREADS] and yield to thread at (ACTIVEINDEX v)` -> Undefined](#set-threads-to-threads-and-yield-to-thread-at-activeindex-v---undefined)
+    - **TODO:** `move thread [THREAD] to (INDEX v)` -> Undefined
+    - **TODO:** `swap thread [THREADONE] with [THREADTWO]` -> Undefined
   - [Atomic Loops](#atomic-loops)
     - [`repeat [TIMES] without yielding {SUBSTACK}` -> Undefined](#repeat-times-without-yielding-substack---undefined)
     - [`repeat until [CONDITION] without yielding {SUBSTACK}` -> Undefined](#repeat-until-condition-without-yielding-substack---undefined)
@@ -46,6 +63,8 @@
     - [`set [VARIABLE] in [THREAD] to [VALUE]` -> Undefined](#set-variable-in-thread-to-value---undefined)
     - [`(variables in [THREAD])` -> Array\[String\]](#variables-in-thread---arraystring)
     - [`delete [VARIABLE] in [THREAD]` -> Undefined](#delete-variable-in-thread---undefined)
+  - Events
+    - **TODO:** `immediately after [THREAD] dies` -> Undefined
   - [Counters](#counters)
     - [`(tick # from init)` -> Number](#tick--from-init---number)
     - [`(frame # from init)` -> Number](#frame--from-init---number)
