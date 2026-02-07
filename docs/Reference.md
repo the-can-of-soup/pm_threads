@@ -44,8 +44,8 @@
     - **TODO:** `broadcast [MESSAGE v] to (INDEX v)` -> Undefined
     - **TODO:** `broadcast [MESSAGE v] to (INDEX v) and wait` -> Undefined
     - **TODO:** `run [MESSAGE v] immediately and return` -> Undefined
-    - **TODO:** `(last broadcast)` -> Array\[Thread\]
-    - **TODO:** `(last broadcast)` -> Thread
+    - **TODO:** `(last broadcast threads)` -> Array\[Thread\]
+    - **TODO:** `(first thread from last broadcast)` -> Thread
   - [Threads Array](#threads-array)
     - [`(threads)` -> Array\[Thread\]](#threads---arraythread)
     - **TODO:** `(threads in (TARGET v))` -> Array\[Thread\]
