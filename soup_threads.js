@@ -205,13 +205,15 @@
     Block: {
         blockType: Scratch.BlockType.REPORTER,
         // blockShape: Scratch.BlockShape.ARROW,
-        blockShape: 'soupThreads-wave',
+        // blockShape: 'soupThreads-wave',
+        blockShape: 'soupThreads-flag',
         forceOutputType: 'soupThread',
         disableMonitor: true,
     },
     Argument: {
         // shape: Scratch.BlockShape.ARROW,
-        shape: 'soupThreads-wave',
+        // shape: 'soupThreads-wave',
+        shape: 'soupThreads-flag',
         check: ['soupThread'],
         exemptFromNormalization: true,
     }
@@ -527,17 +529,14 @@
 
       const BlockSvg = ScratchBlocks.BlockSvg;
 
-      // const wavePath = 'm 16 0 h 16 l 0 0 h 0 c 2 -0.5 2 -1 4 -1 c 4 0 4 2 8 2 c 2 0 2 -0.5 4 -1 v 0 c 0 0 0 0 0 0 v 32 h 0 c -2 0.5 -2 1 -4 1 c -4 0 -4 -2 -8 -2 c -2 0 -2 0.5 -4 1 v 0 l 0 0 h -16 l 0 0 h 0 c -2 0.5 -2 1 -4 1 c -4 0 -4 -2 -8 -2 h 0 c -2 0 -2 0.5 -4 1 v 0 c 0 0 0 0 0 0 v -32 h 0 c 2 -0.5 2 -1 4 -1 c 4 0 4 2 8 2 c 2 0 2 -0.5 4 -1 v 0 l 0 0 z';
-      const wavePath = 'm 32 0 h 16 l 0 0 h 0 c 3 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 v 0 c 0 0 0 0 0 0 v 32 h 0 c -4 1 -4 2 -8 2 c -9 0 -9 -4 -16 -4 c -4 0 -4 1 -8 2 v 0 l 0 0 h -16 l 0 0 h 0 c -4 1 -4 2 -8 2 c -8 0 -8 -4 -16 -4 c -4 0 -4 1 -8 2 v 0 c 0 0 0 0 0 0 v -32 h 0 c 4 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 v 0 l 0 0 z';
-
       return {
+
         wave: {
-          // emptyInputPath: 'm 16 0 h 16 c 2 -0.5 2 -1 4 -1 c 4 0 4 2 8 2 c 2 0 2 -0.5 4 -1 l 0 32 c -2 0.5 -2 1 -4 1 c -4 0 -4 -2 -8 -2 c -2 0 -2 0.5 -4 1 h 0 h -16 c -2 0.5 -2 1 -4 1 c -4 0 -4 -2 -8 -2 h 0 c -2 0 -2 0.5 -4 1 l 0 -32 c 2 -0.5 2 -1 4 -1 c 4 0 4 2 8 2 c 2 0 2 -0.5 4 -1 z',
-          emptyInputPath: wavePath,
+          emptyInputPath: 'm 16 0 h 16 l 0 0 h 0 c 3 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 v 0 c 0 0 0 0 0 0 v 32 h 0 c -4 1 -4 2 -8 2 c -9 0 -9 -4 -16 -4 c -4 0 -4 1 -8 2 v 0 l 0 0 h -16 l 0 0 h 0 c -4 1 -4 2 -8 2 c -8 0 -8 -4 -16 -4 c -4 0 -4 1 -8 2 v 0 c 0 0 0 0 0 0 v -32 h 0 c 4 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 v 0 l 0 0 z',
           emptyInputWidth: 20 * BlockSvg.GRID_UNIT,
 
           // See docstring of generateCustomShapeEdges for info
-          ...SoupThreadsUtil.generateCustomShapeEdges(wavePath),
+          ...SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 l 0 0 h 0 c 3 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 v 0 c 0 0 0 0 0 0 v 32 h 0 c -4 1 -4 2 -8 2 c -9 0 -9 -4 -16 -4 c -4 0 -4 1 -8 2 v 0 l 0 0 h -16 l 0 0 h 0 c -4 1 -4 2 -8 2 c -8 0 -8 -4 -16 -4 c -4 0 -4 1 -8 2 v 0 c 0 0 0 0 0 0 v -32 h 0 c 4 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 v 0 l 0 0 z'),
 
           // Negative values allow for shape edges to overlap with start and end of block text in reporters
           blockPaddingStart(block, otherShape, firstInput, firstField, row) {
@@ -564,6 +563,43 @@
             return padding;
           },
         },
+
+        flag: {
+          // emptyInputPath: 'm 16 0 c 3 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 c 0 0 0 0 0 0 v 32 c -4 1 -4 2 -8 2 c -9 0 -9 -4 -16 -4 c -4 0 -4 1 -8 2 l 0 4 c 0 1 -1 2 -2 2 c -1 0 -2 -1 -2 -2 l 0 -4 v -32 c 0 -1 1 -2 2 -2 c 1 0 2 1 2 2 z',
+          emptyInputPath: 'm 4 0 c 3 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 c 0 0 0 0 0 0 v 28 c -4 1 -4 2 -8 2 c -9 0 -9 -4 -16 -4 c -4 0 -4 1 -8 2 l 0 4 c 0 1 -1 2 -2 2 c -1 0 -2 -1 -2 -2 v -32 c 0 -1 1 -2 2 -2 c 1 0 2 1 2 2 z',
+          emptyInputWidth: 9 * BlockSvg.GRID_UNIT,
+
+          // See docstring of generateCustomShapeEdges for info
+          // ...SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 l 0 0 h 0 c 3 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 v 0 c 0 0 0 0 0 0 v 32 h 0 c -4 1 -4 2 -8 2 c -9 0 -9 -4 -16 -4 c -4 0 -4 1 -8 2 v 0 l 0 0 h -16 l 0 0 h 0 c -2 0 -2 -2 -4 -2 l 0 6 c 0 1 -1 2 -2 2 c -1 0 -2 -1 -2 -2 l 0 -4 v 0 c 0 0 0 0 0 0 v -32 h 0 c 0 -1 1 -2 2 -2 c 1 0 2 1 2 2 l 0 2 c 2 0 2 -2 4 -2 v 0 l 0 0 z'),
+          // ...SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 l 0 0 h 0 c 3 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 v 0 c 0 0 0 0 0 0 v 32 h 0 c -4 1 -4 2 -8 2 c -9 0 -9 -4 -16 -4 c -4 0 -4 1 -8 2 v 0 l 0 0 h -16 l 0 0 h 0 c -6 0 -6 -8 -12 -8 l 0 8 c 0 1 -1 2 -2 2 c -1 0 -2 -1 -2 -2 v 0 c 0 0 0 0 0 0 v -32 h 0 c 0 -1 1 -2 2 -2 c 1 0 2 1 2 2 l 0 4 c 6 0 6 -4 12 -4 v 0 l 0 0 z'),
+          ...SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 l 0 0 h 0 c 3 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 v 0 c 0 0 0 0 0 0 v 32 h 0 c -4 1 -4 2 -8 2 c -9 0 -9 -4 -16 -4 c -4 0 -4 1 -8 2 v 0 l 0 0 h -16 l 0 0 h 0 l 0 2 c 0 1 -1 2 -2 2 c -1 0 -2 -1 -2 -2 v 0 v -2 c 0 0 0 0 0 0 v -32 h 0 c 0 -1 1 -2 2 -2 c 1 0 2 1 2 2 v 0 l 0 0 z'),
+
+          // Negative values allow for shape edges to overlap with start and end of block text in reporters
+          blockPaddingStart(block, otherShape, firstInput, firstField, row) {
+            return 0 * BlockSvg.GRID_UNIT;
+          },
+          blockPaddingEnd(block, otherShape, lastInput, lastField, row) {
+            return -5 * BlockSvg.GRID_UNIT;
+          },
+
+          outputLeftPadding(block) {
+            let padding = 0;
+
+            // Patches bug where reporter blocks with branches will move to the right as they get taller.
+            // Copied from here: https://github.com/Dicuo/Iterators-Extension/blob/849b32e5b1566e2710cfbdffa00d24c1a1e4e94a/Iterators%20Extension.js#L503-L506
+            // div got it from jwklong. no clue why this works but lets just roll with it
+            let hasASubstack = block.inputList.some(i => i.type == ScratchBlocks.NEXT_STATEMENT);
+            if (hasASubstack) {
+              padding += -block.height/2 + (5.5 * BlockSvg.GRID_UNIT);
+            }
+
+            // Prevents reporters from going off the left edge of the palette.
+            padding += (hasASubstack) ? (-4.5 * BlockSvg.GRID_UNIT) : (-2.5 * BlockSvg.GRID_UNIT);
+
+            return padding;
+          },
+        }
+
       };
     }
 
