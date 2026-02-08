@@ -466,7 +466,7 @@
 
       // Register custom shapes
       Scratch.gui.getBlockly().then(function(ScratchBlocks) {
-        let shapeInfo = SoupThreadsExtension.getShapeInfo();
+        let shapeInfo = SoupThreadsExtension.getShapeInfo(ScratchBlocks);
         for (let shapeId in shapeInfo) {
           ScratchBlocks.BlockSvg.registerCustomShape(`soupThreads-${shapeId}`, shapeInfo[shapeId]);
         }
@@ -521,23 +521,47 @@
       })
     }
 
-    static getShapeInfo() {
+    static getShapeInfo(ScratchBlocks) {
       // https://docs.penguinmod.com/development/extensions/api/blocks/custom-block-shape/
       // https://yqnn.github.io/svg-path-editor/
 
+      const BlockSvg = ScratchBlocks.BlockSvg;
+
+      // const wavePath = 'm 16 0 h 16 l 0 0 h 0 c 2 -0.5 2 -1 4 -1 c 4 0 4 2 8 2 c 2 0 2 -0.5 4 -1 v 0 c 0 0 0 0 0 0 v 32 h 0 c -2 0.5 -2 1 -4 1 c -4 0 -4 -2 -8 -2 c -2 0 -2 0.5 -4 1 v 0 l 0 0 h -16 l 0 0 h 0 c -2 0.5 -2 1 -4 1 c -4 0 -4 -2 -8 -2 h 0 c -2 0 -2 0.5 -4 1 v 0 c 0 0 0 0 0 0 v -32 h 0 c 2 -0.5 2 -1 4 -1 c 4 0 4 2 8 2 c 2 0 2 -0.5 4 -1 v 0 l 0 0 z';
+      const wavePath = 'm 32 0 h 16 l 0 0 h 0 c 3 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 v 0 c 0 0 0 0 0 0 v 32 h 0 c -4 1 -4 2 -8 2 c -9 0 -9 -4 -16 -4 c -4 0 -4 1 -8 2 v 0 l 0 0 h -16 l 0 0 h 0 c -4 1 -4 2 -8 2 c -8 0 -8 -4 -16 -4 c -4 0 -4 1 -8 2 v 0 c 0 0 0 0 0 0 v -32 h 0 c 4 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 v 0 l 0 0 z';
+
       return {
         wave: {
-          emptyInputPath: 'm 16 0 h 16 c 2 -0.5 2 -1 4 -1 c 4 0 4 2 8 2 c 2 0 2 -0.5 4 -1 l 0 32 c -2 0.5 -2 1 -4 1 c -4 0 -4 -2 -8 -2 c -2 0 -2 0.5 -4 1 h 0 h -16 c -2 0.5 -2 1 -4 1 c -4 0 -4 -2 -8 -2 h 0 c -2 0 -2 0.5 -4 1 l 0 -32 c 2 -0.5 2 -1 4 -1 c 4 0 4 2 8 2 c 2 0 2 -0.5 4 -1 z',
-          emptyInputWidth: 12 * ScratchBlocks.BlockSvg.GRID_UNIT,
+          // emptyInputPath: 'm 16 0 h 16 c 2 -0.5 2 -1 4 -1 c 4 0 4 2 8 2 c 2 0 2 -0.5 4 -1 l 0 32 c -2 0.5 -2 1 -4 1 c -4 0 -4 -2 -8 -2 c -2 0 -2 0.5 -4 1 h 0 h -16 c -2 0.5 -2 1 -4 1 c -4 0 -4 -2 -8 -2 h 0 c -2 0 -2 0.5 -4 1 l 0 -32 c 2 -0.5 2 -1 4 -1 c 4 0 4 2 8 2 c 2 0 2 -0.5 4 -1 z',
+          emptyInputPath: wavePath,
+          emptyInputWidth: 20 * BlockSvg.GRID_UNIT,
 
           // See docstring of generateCustomShapeEdges for info
-          ...SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 l 0 0 h 0 c 2 -0.5 2 -1 4 -1 c 4 0 4 2 8 2 c 2 0 2 -0.5 4 -1 v 0 c 0 0 0 0 0 0 v 32 h 0 c -2 0.5 -2 1 -4 1 c -4 0 -4 -2 -8 -2 c -2 0 -2 0.5 -4 1 v 0 l 0 0 h -16 l 0 0 h 0 c -2 0.5 -2 1 -4 1 c -4 0 -4 -2 -8 -2 h 0 c -2 0 -2 0.5 -4 1 v 0 c 0 0 0 0 0 0 v -32 h 0 c 2 -0.5 2 -1 4 -1 c 4 0 4 2 8 2 c 2 0 2 -0.5 4 -1 v 0 l 0 0 z'),
+          ...SoupThreadsUtil.generateCustomShapeEdges(wavePath),
 
-          // Patches bug where reporter blocks with branches will move to the right as they get taller.
-          // Copied from here: https://github.com/Dicuo/Iterators-Extension/blob/849b32e5b1566e2710cfbdffa00d24c1a1e4e94a/Iterators%20Extension.js#L503-L506
-          // div got it from jwklong. no clue why this works but lets just roll with it
+          // Negative values allow for shape edges to overlap with start and end of block text in reporters
+          blockPaddingStart(block, otherShape, firstInput, firstField, row) {
+            return -5 * BlockSvg.GRID_UNIT;
+          },
+          blockPaddingEnd(block, otherShape, lastInput, lastField, row) {
+            return -5 * BlockSvg.GRID_UNIT;
+          },
+
           outputLeftPadding(block) {
-            return block.inputList.some(i => i.type == ScratchBlocks.NEXT_STATEMENT) ? -block.height/2 + 22 : 0;
+            let padding = 0;
+
+            // Patches bug where reporter blocks with branches will move to the right as they get taller.
+            // Copied from here: https://github.com/Dicuo/Iterators-Extension/blob/849b32e5b1566e2710cfbdffa00d24c1a1e4e94a/Iterators%20Extension.js#L503-L506
+            // div got it from jwklong. no clue why this works but lets just roll with it
+            let hasASubstack = block.inputList.some(i => i.type == ScratchBlocks.NEXT_STATEMENT);
+            if (hasASubstack) {
+              padding += -block.height/2 + (5.5 * BlockSvg.GRID_UNIT);
+            }
+
+            // Prevents reporters from going off the left edge of the palette.
+            padding += (hasASubstack) ? (2.5 * BlockSvg.GRID_UNIT) : (4.5 * BlockSvg.GRID_UNIT);
+
+            return padding;
           },
         },
       };
@@ -651,6 +675,27 @@
               },
             }
           },
+          /*
+          {
+            opcode: 'builderSecondSubstackLolwut',
+            text: ['(renderer testing) builder with a', 'second substack lolwut??', '[ICON]'],
+            alignments: [
+              null, // text
+              null, // branch
+              null, // text 2
+              null, // branch 2
+              Scratch.ArgumentAlignment.RIGHT, // icon
+            ],
+            ...Thread.Block,
+            branches: [{}, {}],
+            arguments: {
+              ICON: {
+                type: Scratch.ArgumentType.IMAGE,
+                dataURI: AsyncIcon,
+              },
+            }
+          },
+          */
 
           '---',
 
