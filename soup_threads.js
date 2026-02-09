@@ -204,16 +204,16 @@
     Type: ThreadType,
     Block: {
         blockType: Scratch.BlockType.REPORTER,
-        // blockShape: Scratch.BlockShape.ARROW,
+        blockShape: Scratch.BlockShape.ARROW,
         // blockShape: 'soupThreads-wave',
-        blockShape: 'soupThreads-flag',
+        // blockShape: 'soupThreads-flag',
         forceOutputType: 'soupThread',
         disableMonitor: true,
     },
     Argument: {
-        // shape: Scratch.BlockShape.ARROW,
+        shape: Scratch.BlockShape.ARROW,
         // shape: 'soupThreads-wave',
-        shape: 'soupThreads-flag',
+        // shape: 'soupThreads-flag',
         check: ['soupThread'],
         exemptFromNormalization: true,
     }
