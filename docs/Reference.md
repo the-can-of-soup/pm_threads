@@ -51,7 +51,7 @@
     - [`(threads in (TARGET v))` -> Array\[Thread\]](#threads-in-target-v---arraythread)
     - [`set threads to [THREADS] and yield to [ACTIVETHREAD]` -> Undefined](#set-threads-to-threads-and-yield-to-activethread---undefined)
     - [`set threads to [THREADS] and yield to thread at (ACTIVEINDEX v)` -> Undefined](#set-threads-to-threads-and-yield-to-thread-at-activeindex-v---undefined)
-    - **TODO:** `move [THREAD] to (INDEX v)` -> Undefined
+    - [`move [THREAD] to (INDEX v)` -> Undefined](#move-thread-to-index-v---undefined)
     - **TODO:** `swap [THREADONE] with [THREADTWO]` -> Undefined
   - [Atomic Loops](#atomic-loops)
     - [`repeat [TIMES] without yielding {SUBSTACK}` -> Undefined](#repeat-times-without-yielding-substack---undefined)
@@ -389,6 +389,8 @@ Sets the [threads array](#threads---arraythread) to `THREADS` and then yields to
 
 `THREADS` should be an array of unique non-null threads that are already in the [threads array](#threads---arraythread). Any duplicate threads, null threads, or threads not already in the threads array will be omitted.
 
+If a running thread is omitted from `THREADS`, it will be killed and put into limbo[^1].
+
 If `ACTIVETHREAD` is null or not in the [threads array](#threads---arraythread) after the operation, instead yields to the [end of the tick](#yield-to-end-of-tick---undefined).
 
 <details>
@@ -406,12 +408,27 @@ Sets the [threads array](#threads---arraythread) to `THREADS` and then yields to
 
 `THREADS` should be an array of unique non-null threads that are already in the [threads array](#threads---arraythread). Any duplicate threads, null threads, or threads not already in the threads array will be omitted.
 
+If a running thread is omitted from `THREADS`, it will be killed and put into limbo[^1].
+
 If `ACTIVEINDEX` is larger than the normally accepted range, will immediately end the tick. If `ACTIVEINDEX` is too small, will yield to the first thread.
 
 <details>
   <summary>Internal behavior</summary>
   
   Replaces the entire contents of the `runtime.threads` array by mutating it. Then, executes the behavior of [`yield to thread at (INDEX v)`](#yield-to-thread-at-index-v---undefined).
+</details>
+
+### `move [THREAD] to (INDEX v)` -> Undefined
+_Menus: `INDEX` uses [Index](#index) (insert mode)_
+
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/move_to_after_end.png?raw=true">
+
+Moves `THREAD` to `INDEX` if it is in the [threads array](#threads---arraythread).
+
+<details>
+  <summary>Internal behavior</summary>
+  
+  If `INDEX` is less than or equal to the index of `THREAD`, removes `THREAD` from the threads array and then inserts it at `INDEX`. Otherwise, inserts it at `INDEX` and _then_ removes `THREAD` from the threads array. Then, if `sequencer.activeThreadIndex` was equal to the index of `THREAD`, sets it to `INDEX`. Otherwise, if it was greater than or equal to `INDEX`, increments it. This is to ensure that the active thread remains unchanged.
 </details>
 
 
@@ -703,6 +720,7 @@ The value can be overridden by a target or target ID.
     - When <img alt="blue flag" style="height: 1em;" src="https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/flag.svg"> is clicked, all previously running threads will enter limbo.
     - When <img alt="stop sign" style="height: 1em;" src="https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/stop.svg"> is clicked, all previously running threads will enter limbo.
     - When a stack restarts because its hat is triggered again, the old thread enters limbo.
+    - When [`set threads to [THREADS] and yield to [ACTIVETHREAD]`](#set-threads-to-threads-and-yield-to-activethread---undefined) or [`set threads to [THREADS] and yield to thread at (ACTIVEINDEX v)`](#set-threads-to-threads-and-yield-to-thread-at-activeindex-v---undefined) is used to kill a thread, that thread enters limbo.
 
 [^2]: There are some exceptions where a thread is considered "killed" even though it caused its own termination:
     - When a thread runs `stop [all v]`, it is considered killed.
