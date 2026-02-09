@@ -1909,7 +1909,7 @@
                     // Insert the thread.
                     runtime.threads.splice(INDEX, 0, THREAD.thread);
 
-                    // Remove the thread.
+                    // Remove the old reference to the thread.
                     runtime.threads.splice(threadIndex, 1);
                   }
 
