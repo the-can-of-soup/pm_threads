@@ -31,7 +31,7 @@
 
   const vm = Scratch.vm;
   const runtime = vm.runtime;
-  const RawThread = vm.exports.Thread;
+  const RawThreadType = vm.exports.Thread;
 
   let jwArray;
   let jwTargets;
@@ -116,7 +116,7 @@
         return `Null thread`;
       }
       let result = ThreadStatus[this.thread.status];
-      if (this.thread.status !== RawThread.STATUS_DONE && !runtime.threads.includes(this.thread)) {
+      if (this.thread.status !== RawThreadType.STATUS_DONE && !runtime.threads.includes(this.thread)) {
         result += ` (limbo)`;
       }
       result += ` thread`;
@@ -196,7 +196,7 @@
       // Thread is considered killed if its status is not "completed"
       // because dead threads are only not "completed" if they are
       // in limbo.
-      return this.thread.isKilled || this.thread.status !== RawThread.STATUS_DONE;
+      return this.thread.isKilled || this.thread.status !== RawThreadType.STATUS_DONE;
     }
   }
 
@@ -244,21 +244,21 @@
   };
 
   const ThreadStatus = {
-    [RawThread.STATUS_RUNNING]: 'Running',
-    [RawThread.STATUS_PROMISE_WAIT]: 'Waiting for promise',
-    [RawThread.STATUS_YIELD]: 'Yielded',
-    [RawThread.STATUS_YIELD_TICK]: 'Yielded for one tick',
-    [RawThread.STATUS_DONE]: 'Completed',
-    [RawThread.STATUS_PAUSED]: 'Suspended',
+    [RawThreadType.STATUS_RUNNING]: 'Running',
+    [RawThreadType.STATUS_PROMISE_WAIT]: 'Waiting for promise',
+    [RawThreadType.STATUS_YIELD]: 'Yielded',
+    [RawThreadType.STATUS_YIELD_TICK]: 'Yielded for one tick',
+    [RawThreadType.STATUS_DONE]: 'Completed',
+    [RawThreadType.STATUS_PAUSED]: 'Suspended',
   };
 
   const ThreadStatusInternalNames = {
-    [RawThread.STATUS_RUNNING]: 'STATUS_RUNNING',
-    [RawThread.STATUS_PROMISE_WAIT]: 'STATUS_PROMISE_WAIT',
-    [RawThread.STATUS_YIELD]: 'STATUS_YIELD',
-    [RawThread.STATUS_YIELD_TICK]: 'STATUS_YIELD_TICK',
-    [RawThread.STATUS_DONE]: 'STATUS_DONE',
-    [RawThread.STATUS_PAUSED]: 'STATUS_PAUSED',
+    [RawThreadType.STATUS_RUNNING]: 'STATUS_RUNNING',
+    [RawThreadType.STATUS_PROMISE_WAIT]: 'STATUS_PROMISE_WAIT',
+    [RawThreadType.STATUS_YIELD]: 'STATUS_YIELD',
+    [RawThreadType.STATUS_YIELD_TICK]: 'STATUS_YIELD_TICK',
+    [RawThreadType.STATUS_DONE]: 'STATUS_DONE',
+    [RawThreadType.STATUS_PAUSED]: 'STATUS_PAUSED',
   }
 
   class SoupThreadsUtil {
@@ -2130,7 +2130,7 @@
       // - The thread is in the threads list (it died this tick if its status is STATUS_DONE).
       // - The thread's status is not STATUS_DONE.
 
-      return runtime.threads.includes(THREAD.thread) && THREAD.thread.status !== RawThread.STATUS_DONE;
+      return runtime.threads.includes(THREAD.thread) && THREAD.thread.status !== RawThreadType.STATUS_DONE;
     }
 
     isFinished({THREAD}, util) {
@@ -2149,7 +2149,7 @@
       // - The thread's status is STATUS_DONE.
 
       if (runtime.threads.includes(THREAD.thread)) {
-        return THREAD.thread.status === RawThread.STATUS_DONE;
+        return THREAD.thread.status === RawThreadType.STATUS_DONE;
       }
       if (THREAD.deadThreadWasKilled()) {
         return false;
