@@ -48,7 +48,7 @@
     - **TODO:** `(first thread from last broadcast)` -> Thread
   - [Threads Array](#threads-array)
     - [`(threads)` -> Array\[Thread\]](#threads---arraythread)
-    - **TODO:** `(threads in (TARGET v))` -> Array\[Thread\]
+    - [`(threads in (TARGET v))` -> Array\[Thread\]](#threads-in-target-v---arraythread)
     - [`set threads to [THREADS] and yield to [ACTIVETHREAD]` -> Undefined](#set-threads-to-threads-and-yield-to-activethread---undefined)
     - [`set threads to [THREADS] and yield to thread at (ACTIVEINDEX v)` -> Undefined](#set-threads-to-threads-and-yield-to-thread-at-activeindex-v---undefined)
     - **TODO:** `move [THREAD] to (INDEX v)` -> Undefined
@@ -369,6 +369,19 @@ Returns all threads that are currently alive and all threads that [exited natura
   Reads the `runtime.threads` array.
 </details>
 
+### `(threads in (TARGET v))` -> Array\[Thread\]
+_Menus: `TARGET` uses [Target](#target)_
+
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/threads_in_this_target.png?raw=true">
+
+Returns all threads in `TARGET` that are currently alive and all threads in `TARGET` that [exited naturally](#thread-exited-naturally---boolean) this tick in their execution order.
+
+<details>
+  <summary>Internal behavior</summary>
+  
+  Reads the `runtime.threads` array and then filters by target ID.
+</details>
+
 ### `set threads to [THREADS] and yield to [ACTIVETHREAD]` -> Undefined
 <img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/set_threads_to_and_yield_to.png?raw=true">
 
@@ -674,6 +687,15 @@ In the case of *insert*, the operation will insert the thread(s) **before the sp
 |------------|
 | enable     |
 | disable    |
+
+### Target
+
+| Menu Items       |
+|------------------|
+| this target      |
+| \<sprite names\> |
+
+The value can be overridden by a target or target ID.
 
 
 
