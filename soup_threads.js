@@ -277,11 +277,11 @@
      *     This is to allow inserting to the end of the array.
      * @param {boolean} absoluteMode - If true, relative indexes such as "active index" and "previous index"
      *     will be ignored and instead treated as a generic invalid string.
+     * @returns {number} - A 0-based index to be used on the threads array.
      */
     static handleIndexInput(INDEX, insertMode = false, absoluteMode = false, constrain = false) {
-
       // Convert index to a 1-based integer
-      switch (INDEX) {
+      switch (Scratch.Cast.toString(INDEX)) {
         case 'start':
         case 'before start':
           INDEX = 1;
@@ -322,6 +322,29 @@
       let end = runtime.threads.length - 1 + insertMode;
       let unconstrained = INDEX === 0 ? end : INDEX - 1;
       return constrain ? Math.max(0, Math.min(unconstrained, end)) : unconstrained;
+    }
+
+    /**
+     * Converts an arbitrary block input value from a "target" menu to an ID of an existing target or `null`.
+     * 
+     * @static
+     * @param {*} TARGET - An arbitrary block input value from a "target" menu.
+     * @param {Object} thisTarget - The current raw target being operated on.
+     * @returns {?string} - ID of an existing target or `null` if input is invalid.
+     */
+    static handleTargetInput(TARGET, thisTarget) {
+      if (Scratch.Cast.toString(TARGET) === 'this target') {
+        return thisTarget.id;
+      }
+
+      if (!(TARGET instanceof jwTargets.Type)) {
+        TARGET = jwTargets.Type.toTarget(TARGET);
+      }
+
+      if (vm.runtime.targets.some((rawTarget) => (rawTarget.id === TARGET.targetId))) {
+        return TARGET.targetId;
+      }
+      return null;
     }
 
     /**
@@ -714,6 +737,7 @@
               },
             }
           },
+          /*
           {
             opcode: 'builderSecondSubstackLolwut',
             text: ['(renderer testing) builder with a', 'second substack lolwut??', '[ICON]'],
@@ -733,6 +757,7 @@
               },
             }
           },
+          */
 
           '---',
 
@@ -999,7 +1024,7 @@
           {
             opcode: 'getThreadsInTarget',
             ...jwArray.Block,
-            text: '(not implemented) threads in [TARGET]',
+            text: 'threads in [TARGET]',
             arguments: {
               TARGET: {
                 shape: jwTargets.Argument.shape, // Do not include "check" parameter from jwTargets.Argument because that breaks menu
@@ -2118,7 +2143,24 @@
 
 
     getThreads({}, util) {
-      return new jwArray.Type(runtime.threads.map((rawThread) => new ThreadType(rawThread)));
+      return new jwArray.Type(
+        runtime.threads
+        .map((rawThread) => (new ThreadType(rawThread)))
+      );
+    }
+
+    getThreadsInTarget({TARGET}, util) {
+      TARGET = SoupThreadsUtil.handleTargetInput(TARGET, util.target);
+
+      if (TARGET === null) {
+        return new jwArray.Type();
+      }
+
+      return new jwArray.Type(
+        runtime.threads
+        .filter((rawThread) => (rawThread.target.id === TARGET))
+        .map((rawThread) => (new ThreadType(rawThread)))
+      );
     }
 
 
