@@ -361,7 +361,7 @@ Yields and immediately ends the tick, skipping all threads that would normally s
 ### `(threads)` -> Array\[Thread\]
 <img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/threads.png?raw=true">
 
-Returns all threads that are currently alive and all threads that [exited naturally](#thread-exited-naturally---boolean) this tick in their execution order.
+Returns all threads that are currently alive or [exited naturally](#thread-exited-naturally---boolean) this tick in their execution order.
 
 <details>
   <summary>Internal behavior</summary>
@@ -374,7 +374,7 @@ _Menus: `TARGET` uses [Target](#target)_
 
 <img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/threads_in_this_target.png?raw=true">
 
-Returns all threads in `TARGET` that are currently alive and all threads in `TARGET` that [exited naturally](#thread-exited-naturally---boolean) this tick in their execution order.
+Returns all threads in `TARGET` that are currently alive or [exited naturally](#thread-exited-naturally---boolean) this tick in their execution order.
 
 <details>
   <summary>Internal behavior</summary>
