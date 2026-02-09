@@ -389,7 +389,7 @@ Sets the [threads array](#threads---arraythread) to `THREADS` and then yields to
 
 `THREADS` should be an array of unique non-null threads that are already in the [threads array](#threads---arraythread). Any duplicate threads, null threads, or threads not already in the threads array will be omitted.
 
-If a running thread is omitted from `THREADS`, it will be killed and put into limbo[^1].
+If a thread previously in the [threads array](#threads---arraythread) is not included in `THREADS`, it will be killed and put into limbo[^1].
 
 If `ACTIVETHREAD` is null or not in the [threads array](#threads---arraythread) after the operation, instead yields to the [end of the tick](#yield-to-end-of-tick---undefined).
 
@@ -408,7 +408,7 @@ Sets the [threads array](#threads---arraythread) to `THREADS` and then yields to
 
 `THREADS` should be an array of unique non-null threads that are already in the [threads array](#threads---arraythread). Any duplicate threads, null threads, or threads not already in the threads array will be omitted.
 
-If a running thread is omitted from `THREADS`, it will be killed and put into limbo[^1].
+If a thread previously in the [threads array](#threads---arraythread) is not included in `THREADS`, it will be killed and put into limbo[^1].
 
 If `ACTIVEINDEX` is larger than the normally accepted range, will immediately end the tick. If `ACTIVEINDEX` is too small, will yield to the first thread.
 
