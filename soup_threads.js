@@ -1076,7 +1076,7 @@
           */
           {
             opcode: 'moveThread',
-            text: '(not implemented) move [THREAD] to [INDEX]',
+            text: 'move [THREAD] to [INDEX]',
             ...CommandBlock,
             arguments: {
               THREAD: Thread.Argument,
@@ -1664,6 +1664,16 @@
             };
           },
 
+          moveThread(generator, block) {
+            return {
+              kind: 'stack',
+              args: {
+                THREAD: generator.descendInputOfBlock(block, 'THREAD'),
+                INDEX: generator.descendInputOfBlock(block, 'INDEX'),
+              }
+            };
+          },
+
 
 
           repeatAtomic(generator, block) {
@@ -1739,7 +1749,7 @@
           multiYield(node, compiler, imports) {
             compiler.source += `
               {
-                let TIMES = ${compiler.descendInput(node.args.TIMES).asNumber()};
+                let TIMES = (${compiler.descendInput(node.args.TIMES).asNumber()});
 
                 for (let i = 0; i < TIMES; i++) {
                   yield;
@@ -1871,6 +1881,47 @@
                 }
 
                 yield;
+              }
+            `;
+          },
+
+          moveThread(node, compiler, imports) {
+            compiler.source += `
+              {
+                let THREAD = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREAD).asUnknown()});
+
+                let threadIndex;
+                if (THREAD.thread !== null && (threadIndex = runtime.threads.indexOf(THREAD.thread)) !== -1) {
+                  let INDEX = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.INDEX).asUnknown()}, true, false, true);
+
+                  // Move the thread
+                  if (INDEX <= threadIndex) {
+                    // Moving backwards (or to the same position)
+
+                    // Remove the thread.
+                    runtime.threads.splice(threadIndex, 1);
+
+                    // Insert the thread.
+                    runtime.threads.splice(INDEX, 0, THREAD.thread);
+                  } else {
+                    // Moving forwards
+
+                    // Insert the thread.
+                    runtime.threads.splice(INDEX, 0, THREAD.thread);
+
+                    // Remove the thread.
+                    runtime.threads.splice(threadIndex, 1);
+                  }
+
+                  // Update activeThreadIndex if the active thread moved
+                  if (threadIndex === runtime.sequencer.activeThreadIndex) {
+                    // The active thread was directly moved.
+                    runtime.sequencer.activeThreadIndex = INDEX;
+                  } else if (INDEX <= runtime.sequencer.activeThreadIndex) {
+                    // The active thread was indirectly moved.
+                    runtime.sequencer.activeThreadIndex += 1;
+                  }
+                }
               }
             `;
           },
