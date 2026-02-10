@@ -9,8 +9,10 @@
 | `false`                  | `false`    | `false`               | `false`                | `false`                        | `true`                   | `true`  |
 | `false`                  | `false`    | `true`                | `true`                 | `false`                        | `false`                  | `false` |
 | `false`                  | `true`     | `false`               | `false`                | `false`                        | `true`                   | `true`  |
-| `false`                  | `true`     | `true`                | `true`                 | `false`                        | `false`                  | `false` |
+| `false`                  | `true`     | `true`                | `true`[^1]             | `false`                        | `false`[^1]              | `false` |
 | `true`                   | `false`    | `false`               | `false`                | `true`                         | `false`                  | `false` |
 | `true`                   | `false`    | `true`                | `false`                | `true`                         | `false`                  | `false` |
 | `true`                   | `true`     | `false`               | `false`                | `false`                        | `true`                   | `false` |
-| `true`                   | `true`     | `true`                | `false`                | `true`                         | `false`                  | `false` |
+| `true`                   | `true`     | `true`                | `false`                | `true`[^1]                     | `false`[^1]              | `false` |
+
+[^1]: Subject to change.
