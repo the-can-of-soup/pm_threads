@@ -30,7 +30,7 @@
     - [`<[THREAD] was started by clicking in the editor?>` -> Boolean](#thread-was-started-by-clicking-in-the-editor---boolean)
     - [`<[THREAD] is a monitor updater?>` -> Boolean](#thread-is-a-monitor-updater---boolean)
   - Thread Actions
-    - **TODO:** `kill [THREAD]` -> Undefined
+    - [`kill [THREAD]` -> Undefined](#kill-thread---undefined)
     - **TODO:** `suspend [THREAD]` -> Undefined
     - **TODO:** `resume [THREAD]` -> Undefined
   - [Yielding](#yielding)
@@ -298,6 +298,21 @@ Returns `true` if `THREAD` was started by the engine to check the value of a rep
 
 
 
+## Thread Actions
+
+### `kill [THREAD]` -> Undefined
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/kill.png?raw=true">
+
+Kills `THREAD`, and then yields if `THREAD` was the active thread.
+
+<details>
+  <summary>Internal behavior</summary>
+  
+  Sets `isKilled` to `true` and `status` to [4 (completed)](#status-statusformat-v-of-thread---number) in the raw thread.
+</details>
+
+
+
 ## Yielding
 
 ### `yield to next thread` -> Undefined
@@ -367,7 +382,7 @@ Yields and immediately ends the tick, skipping all threads that would normally s
 ### `(threads)` -> Array\[Thread\]
 <img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/threads.png?raw=true">
 
-Returns all threads that are currently alive or [exited naturally](#thread-exited-naturally---boolean) this tick in their execution order.
+Returns all threads that are currently alive and most[^5] threads that exited this tick in their execution order.
 
 <details>
   <summary>Internal behavior</summary>
@@ -380,7 +395,7 @@ _Menus: `TARGET` uses [Target](#target)_
 
 <img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/threads_in_this_target.png?raw=true">
 
-Returns all threads in `TARGET` that are currently alive or [exited naturally](#thread-exited-naturally---boolean) this tick in their execution order.
+Returns all threads in `TARGET` that are currently alive and most[^5] threads that exited this tick in their execution order.
 
 <details>
   <summary>Internal behavior</summary>
@@ -747,3 +762,5 @@ The value can be overridden by a target or target ID.
 [^3]: The contents of the loop will **NOT** be run with warp mode (all at once); only the loop itself has this behavior.
 
 [^4]: This block will yield after a loop if the editor is frozen and warp timer is enabled to prevent crashes.
+
+[^5]: Threads that entered limbo[^1] this tick are not present.
