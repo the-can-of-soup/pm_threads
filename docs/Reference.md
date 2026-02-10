@@ -308,7 +308,7 @@ Kills `THREAD`, and then yields if `THREAD` was the active thread.
 <details>
   <summary>Internal behavior</summary>
   
-  Sets `isKilled` to `true` and `status` to [4 (completed)](#status-statusformat-v-of-thread---number) in the raw thread.
+  Calls `runtime._stopThread` on the raw thread of `THREAD`.
 </details>
 
 
