@@ -29,7 +29,7 @@
     - **TODO:** `<[THREAD] is suspended?>` -> Boolean
     - [`<[THREAD] was started by clicking in the editor?>` -> Boolean](#thread-was-started-by-clicking-in-the-editor---boolean)
     - [`<[THREAD] is a monitor updater?>` -> Boolean](#thread-is-a-monitor-updater---boolean)
-  - Thread Actions
+  - [Thread Actions](#thread-actions)
     - [`kill [THREAD]` -> Undefined](#kill-thread---undefined)
     - **TODO:** `suspend [THREAD]` -> Undefined
     - **TODO:** `resume [THREAD]` -> Undefined
@@ -763,4 +763,4 @@ The value can be overridden by a target or target ID.
 
 [^4]: This block will yield after a loop if the editor is frozen and warp timer is enabled to prevent crashes.
 
-[^5]: Threads that entered limbo[^1] this tick are not present.
+[^5]: Threads that entered limbo[^1] this tick are not present in the [threads array](#threads---arraythread).
