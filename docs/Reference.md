@@ -251,6 +251,7 @@ Returns `true` if `THREAD` is dead, but was not killed, i.e. it exited of its ow
   - All of:
     - The raw thread is in the `runtime.threads` array (therefore it died this tick if its status is [4](#status-statusformat-v-of-thread---number)).
     - The thread's status is [4 (completed)](#status-statusformat-v-of-thread---number).
+    - The raw thread's `isKilled` key is `false`.
 </details>
 
 ### `<[THREAD] was killed?>` -> Boolean
@@ -261,11 +262,16 @@ Returns `true` if `THREAD` exited due to an external cause.[^2]
 <details>
   <summary>Internal behavior</summary>
   
-  Returns `true` if:
-  - The raw thread is not in the `runtime.threads` array (therefore it is dead).
-  - Either:
+  Returns `true` if either:
+  - All of:
+    - The raw thread is not in the `runtime.threads` array (therefore it is dead).
+    - Either:
+      - The raw thread's `isKilled` key is `true`.
+      - The raw thead's `status` key is not 4 (completed). This catches limbo[^1] cases in which killed threads have `isKilled` set to `false` and `status` unchanged.
+  - All of:
+    - The raw thread is in the `runtime.threads` array (therefore it died this tick if its status is [4](#status-statusformat-v-of-thread---number)).
+    - The thread's status is [4 (completed)](#status-statusformat-v-of-thread---number).
     - The raw thread's `isKilled` key is `true`.
-    - The raw thead's `status` key is not 4 (completed). This catches limbo[^1] cases in which killed threads have `isKilled` set to `false` and `status` unchanged.
 </details>
 
 ### `<[THREAD] was started by clicking in the editor?>` -> Boolean
