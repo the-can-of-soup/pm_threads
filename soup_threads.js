@@ -10,6 +10,8 @@
 
 // TO-DO
 //
+// - Rewrite all JSgen functions to remove comments and whitespace from the compiled source
+// - Make all blocks compiled
 // - Yell at @jwklong until they fix the lip that is happening in the `builder` block
 
 // NOTES
@@ -880,7 +882,7 @@
 
           {
             opcode: 'killThread',
-            text: '(not implemented) kill [THREAD]',
+            text: 'kill [THREAD]',
             ...CommandBlock,
             arguments: {
               THREAD: Thread.Argument,
@@ -1581,6 +1583,19 @@
       return {
         ir: {
 
+          killThread(generator, block) {
+            generator.script.yields = true;
+
+            return {
+              kind: 'stack',
+              args: {
+                THREAD: generator.descendInputOfBlock(block, 'THREAD'),
+              }
+            };
+          },
+
+
+
           yield(generator, block) {
             generator.script.yields = true;
 
@@ -1747,6 +1762,27 @@
 
         },
         js: {
+
+          killThread(node, compiler, imports) {
+            compiler.source += `
+              {
+                let THREAD = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREAD).asUnknown()});
+
+                if (THREAD.thread !== null && THREAD.thread.status !== vm.exports.Thread.STATUS_DONE && runtime.threads.includes(THREAD.thread)) {
+                  THREAD.thread.isKilled = true;
+                  THREAD.thread.status = vm.exports.Thread.STATUS_DONE;
+
+                  // Yield if active thread was killed.
+                  let threadIndex = runtime.threads.indexOf(THREAD.thread);
+                  if (threadIndex !== -1 && threadIndex === runtime.sequencer.activeThreadIndex) {
+                    yield;
+                  }
+                }
+              }
+            `;
+          },
+
+
 
           yield(node, compiler, imports) {
             compiler.source += `
@@ -2182,14 +2218,12 @@
       // OR
       // - The thread *is* in the threads list (it died this tick if its status is STATUS_DONE).
       // - The thread's status is STATUS_DONE.
+      // - The thread's `isKilled` property is `false`.
 
       if (runtime.threads.includes(THREAD.thread)) {
-        return THREAD.thread.status === RawThreadType.STATUS_DONE;
+        return THREAD.thread.status === RawThreadType.STATUS_DONE && !THREAD.thread.isKilled;
       }
-      if (THREAD.deadThreadWasKilled()) {
-        return false;
-      }
-      return true;
+      return !THREAD.deadThreadWasKilled();
     }
 
     isKilled({THREAD}, util) {
@@ -2203,9 +2237,15 @@
       //
       // - The thread is not in the threads list (it is dead).
       // - The thread was killed (as defined in `deadThreadWasKilled()`).
+      // OR
+      // - The thread *is* in the threads list (it died this tick if its status is STATUS_DONE).
+      // - The thread's status is STATUS_DONE.
+      // - The thread's `isKilled` property is `true`.
 
-      // Order of AND swapped for optimization, but should be read in reverse.
-      return THREAD.deadThreadWasKilled() && !runtime.threads.includes(THREAD.thread);
+      if (runtime.threads.includes(THREAD.thread)) {
+        return THREAD.thread.status === RawThreadType.STATUS_DONE && THREAD.thread.isKilled;
+      }
+      return THREAD.deadThreadWasKilled();
     }
 
     isStackClick({THREAD}, util) {
