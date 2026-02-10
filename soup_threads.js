@@ -1769,8 +1769,8 @@
                 let THREAD = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREAD).asUnknown()});
 
                 if (THREAD.thread !== null && THREAD.thread.status !== vm.exports.Thread.STATUS_DONE && runtime.threads.includes(THREAD.thread)) {
-                  THREAD.thread.isKilled = true;
-                  THREAD.thread.status = vm.exports.Thread.STATUS_DONE;
+                  // Sets isKilled to true, sets status to STATUS_DONE, clears some other properties
+                  runtime._stopThread(THREAD.thread);
 
                   // Yield if active thread was killed.
                   let threadIndex = runtime.threads.indexOf(THREAD.thread);
