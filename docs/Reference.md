@@ -52,7 +52,7 @@
     - [`set threads to [THREADS] and yield to [ACTIVETHREAD]` -> Undefined](#set-threads-to-threads-and-yield-to-activethread---undefined)
     - [`set threads to [THREADS] and yield to thread at (ACTIVEINDEX v)` -> Undefined](#set-threads-to-threads-and-yield-to-thread-at-activeindex-v---undefined)
     - [`move [THREAD] to (INDEX v)` -> Undefined](#move-thread-to-index-v---undefined)
-    - **TODO:** `swap [THREADONE] with [THREADTWO]` -> Undefined
+    - [`swap [THREADONE] with [THREADTWO]` -> Undefined](#swap-threadone-with-threadtwo---undefined)
   - [Atomic Loops](#atomic-loops)
     - [`repeat [TIMES] without yielding {SUBSTACK}` -> Undefined](#repeat-times-without-yielding-substack---undefined)
     - [`repeat until [CONDITION] without yielding {SUBSTACK}` -> Undefined](#repeat-until-condition-without-yielding-substack---undefined)
@@ -429,6 +429,17 @@ Moves `THREAD` to `INDEX` if it is in the [threads array](#threads---arraythread
   <summary>Internal behavior</summary>
   
   If `INDEX` is less than or equal to the index of `THREAD`, removes `THREAD` from the threads array and then inserts it at `INDEX`. Otherwise, inserts it at `INDEX` and _then_ removes `THREAD` from the threads array. Then, if `sequencer.activeThreadIndex` was equal to the index of `THREAD`, sets it to `INDEX`. Otherwise, if it was greater than or equal to `INDEX`, increments it. This is to ensure that the active thread remains unchanged.
+</details>
+
+### `swap [THREADONE] with [THREADTWO]` -> Undefined
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/swap_with.png?raw=true">
+
+Swaps the positions of `THREADONE` and `THREADTWO` if they are distinct threads in the [threads array](#threads---arraythread).
+
+<details>
+  <summary>Internal behavior</summary>
+
+  Swaps the positions of `THREADONE` and `THREADTWO` in `runtime.threads`.
 </details>
 
 
