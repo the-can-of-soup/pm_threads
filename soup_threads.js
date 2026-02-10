@@ -1112,7 +1112,7 @@
           */
           {
             opcode: 'swapThreads',
-            text: '(not implemented) swap [THREADONE] with [THREADTWO]',
+            text: 'swap [THREADONE] with [THREADTWO]',
             ...CommandBlock,
             arguments: {
               THREADONE: Thread.Argument,
@@ -1674,6 +1674,16 @@
             };
           },
 
+          swapThreads(generator, block) {
+            return {
+              kind: 'stack',
+              args: {
+                THREADONE: generator.descendInputOfBlock(block, 'THREADONE'),
+                THREADTWO: generator.descendInputOfBlock(block, 'THREADTWO'),
+              }
+            };
+          },
+
 
 
           repeatAtomic(generator, block) {
@@ -1920,6 +1930,31 @@
                   } else if (INDEX <= runtime.sequencer.activeThreadIndex) {
                     // The active thread was indirectly moved.
                     runtime.sequencer.activeThreadIndex += 1;
+                  }
+                }
+              }
+            `;
+          },
+
+          swapThreads(node, compiler, imports) {
+            compiler.source += `
+              let THREADONE = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREADONE).asUnknown()});
+              let THREADTWO = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREADTWO).asUnknown()});
+
+              if (THREADONE.thread !== null && THREADTWO.thread !== null) {
+                let threadIndex1 = runtime.threads.indexOf(THREADONE.thread);
+                let threadIndex2 = runtime.threads.indexOf(THREADTWO.thread);
+
+                if (threadIndex1 !== -1 && threadIndex2 !== -1 && threadIndex1 !== threadIndex2) {
+                  // Swap threads
+                  runtime.threads[threadIndex1] = THREADTWO.thread;
+                  runtime.threads[threadIndex2] = THREADONE.thread;
+
+                  // Update activeThreadIndex if the active thread moved
+                  if (runtime.sequencer.activeThreadIndex === threadIndex1) {
+                    runtime.sequencer.activeThreadIndex = threadIndex2;
+                  } else if (runtime.sequencer.activeThreadIndex === threadIndex2) {
+                    runtime.sequencer.activeThreadIndex = threadIndex1;
                   }
                 }
               }
