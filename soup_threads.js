@@ -10,7 +10,6 @@
 
 // TO-DO
 //
-// - Rewrite all JSgen functions to remove comments and whitespace from the compiled source
 // - Make all blocks compiled
 // - Yell at @jwklong until they fix the lip that is happening in the `builder` block
 
