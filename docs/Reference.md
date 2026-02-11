@@ -636,7 +636,7 @@ Enables or disables [warp mode](#warp-mode---boolean) for `SUBSTACK`.
 ### `(work time)` -> Number
 <img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/work_time.png?raw=true">
 
-Returns the amount of time in seconds before the sequencer will end the frame and rerender.
+Returns the amount of time in seconds that the sequencer is allotted for execution every frame.
 
 <details>
   <summary>Internal behavior</summary>
@@ -647,7 +647,7 @@ Returns the amount of time in seconds before the sequencer will end the frame an
 ### `(work timer)` -> Number
 <img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/work_timer.png?raw=true">
 
-Returns the time elapsed so far this frame. This timer is used by the sequencer to know when to end the frame and rerender.
+Returns the time elapsed for execution so far this frame. After every tick, if this timer is greater than or equal to [`(work time)`](#work-time---number), no more ticks will execute that frame.
 
 <details>
   <summary>Internal behavior</summary>
