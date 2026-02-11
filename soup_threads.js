@@ -1949,6 +1949,8 @@
             // The active thread was indirectly moved.
             compiler.source += `runtime.sequencer.activeThreadIndex += 1;`;
             compiler.source += `}`;
+
+            compiler.source += `}`;
           },
 
           swapThreads(node, compiler, imports) {
@@ -1976,7 +1978,6 @@
             compiler.source += `runtime.sequencer.activeThreadIndex = ${threadIndex1};`;
             compiler.source += `}`;
 
-            compiler.source += `}`;
             compiler.source += `}`;
             compiler.source += `}`;
           },
