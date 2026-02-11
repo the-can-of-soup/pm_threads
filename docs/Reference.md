@@ -647,7 +647,7 @@ Returns the amount of time in seconds that the sequencer is allotted for executi
 ### `(work timer)` -> Number
 <img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/work_timer.png?raw=true">
 
-Returns the time elapsed for execution so far this frame. After every tick, if this timer is greater than or equal to [`(work time)`](#work-time---number), no more ticks will execute that frame.
+Returns the time elapsed for execution so far this frame. Before every tick, if this timer is greater than or equal to [`(work time)`](#work-time---number), no more ticks will execute that frame, and the rest of the frame time is given to the renderer.
 
 <details>
   <summary>Internal behavior</summary>
