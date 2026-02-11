@@ -1764,317 +1764,296 @@
         js: {
 
           killThread(node, compiler, imports) {
-            compiler.source += `
-              {
-                let THREAD = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREAD).asUnknown()});
+            compiler.source += `{`;
+            compiler.source += `let THREAD = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREAD).asUnknown()});`;
 
-                if (THREAD.thread !== null && THREAD.thread.status !== vm.exports.Thread.STATUS_DONE && runtime.threads.includes(THREAD.thread)) {
-                  // Sets isKilled to true, sets status to STATUS_DONE, clears some other properties
-                  runtime._stopThread(THREAD.thread);
+            compiler.source += `if (THREAD.thread !== null && THREAD.thread.status !== vm.exports.Thread.STATUS_DONE && runtime.threads.includes(THREAD.thread)) {`;
 
-                  // Yield if active thread was killed.
-                  let threadIndex = runtime.threads.indexOf(THREAD.thread);
-                  if (threadIndex !== -1 && threadIndex === runtime.sequencer.activeThreadIndex) {
-                    yield;
-                  }
-                }
-              }
-            `;
+            // Sets isKilled to true, sets status to STATUS_DONE, clears some other properties
+            compiler.source += `runtime._stopThread(THREAD.thread);`;
+
+            // Yield if active thread was killed.
+            compiler.source += `let threadIndex = runtime.threads.indexOf(THREAD.thread);`;
+            compiler.source += `if (threadIndex !== -1 && threadIndex === runtime.sequencer.activeThreadIndex) {`;
+            compiler.source += `yield;`;
+            compiler.source += `}`;
+
+            compiler.source += `}`;
+            compiler.source += `}`;
           },
 
 
 
           yield(node, compiler, imports) {
-            compiler.source += `
-              {
-                yield;
-              }
-            `;
+            compiler.source += `yield;`;
           },
 
           multiYield(node, compiler, imports) {
-            compiler.source += `
-              {
-                let TIMES = (${compiler.descendInput(node.args.TIMES).asNumber()});
+            compiler.source += `{`;
 
-                for (let i = 0; i < TIMES; i++) {
-                  yield;
-                }
-              }
-            `;
+            compiler.source += `for (let i = 0; i < (${compiler.descendInput(node.args.TIMES).asNumber()}); i++) {`;
+            compiler.source += `yield;`
+            compiler.source += `}`;
+
+            compiler.source += `}`;
           },
 
           yieldBack(node, compiler, imports) {
-            compiler.source += `
-              {
-                // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
-                // Will yield to end of the tick if the current thread is at the start.
-                if (runtime.sequencer.activeThreadIndex <= 0) {
-                  runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;
-                } else {
-                  runtime.sequencer.activeThreadIndex -= 2;
-                }
+            compiler.source += `{`;
 
-                yield;
-              }
-            `;
+            // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
+            // Will yield to end of the tick if the current thread is at the start.
+            compiler.source += `if (runtime.sequencer.activeThreadIndex <= 0) {`;
+            compiler.source += `runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;`;
+            compiler.source += `} else {`;
+            compiler.source += `runtime.sequencer.activeThreadIndex -= 2;`;
+            compiler.source += `}`;
+
+            compiler.source += `yield;`;
+
+            compiler.source += `}`;
           },
 
           yieldToThread(node, compiler, imports) {
-            compiler.source += `
-              {
-                let ACTIVETHREAD = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.ACTIVETHREAD).asUnknown()});
+            compiler.source += `{`;
 
-                let threadIndex;
-                if (ACTIVETHREAD.thread !== null && (threadIndex = runtime.threads.indexOf(ACTIVETHREAD.thread)) !== -1) {
-                  // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
-                  runtime.sequencer.activeThreadIndex = threadIndex - 1;
-                } else {
-                  // Fall back to yielding to end of tick.
-                  runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;
-                }
+            compiler.source += `let ACTIVETHREAD = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.ACTIVETHREAD).asUnknown()});`;
 
-                yield;
-              }
-            `;
+            // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
+
+            compiler.source += `let threadIndex;`;
+            compiler.source += `if (ACTIVETHREAD.thread !== null && (threadIndex = runtime.threads.indexOf(ACTIVETHREAD.thread)) !== -1) {`;
+            compiler.source += `runtime.sequencer.activeThreadIndex = threadIndex - 1;`;
+            compiler.source += `} else {`;
+            // Fall back to yielding to end of tick.
+            compiler.source += `runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;`;
+            compiler.source += `}`;
+
+            compiler.source += `yield;`;
+
+            compiler.source += `}`;
           },
 
           yieldToIndex(node, compiler, imports) {
-            compiler.source += `
-              {
-                let ACTIVEINDEX = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.ACTIVEINDEX).asUnknown()});
+            compiler.source += `{`;
 
-                // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
-                if (ACTIVEINDEX < 0) {
-                  // yield to first thread
-                  runtime.sequencer.activeThreadIndex = -1;
-                } else if (ACTIVEINDEX >= runtime.threads.length) {
-                  // yield to end of tick
-                  runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;
-                } else {
-                  runtime.sequencer.activeThreadIndex = ACTIVEINDEX - 1;
-                }
+            compiler.source += `let ACTIVEINDEX = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.ACTIVEINDEX).asUnknown()});`;
 
-                yield;
-              }
-            `;
+            // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
+
+            compiler.source += `if (ACTIVEINDEX < 0) {`;
+            // yield to first thread
+            compiler.source += `runtime.sequencer.activeThreadIndex = -1;`;
+            compiler.source += `} else if (ACTIVEINDEX >= runtime.threads.length) {`;
+            // yield to end of tick
+            compiler.source += `runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;`;
+            compiler.source += `} else {`;
+            compiler.source += `runtime.sequencer.activeThreadIndex = ACTIVEINDEX - 1;`;
+            compiler.source += `}`;
+
+            compiler.source += `yield;`;
+
+            compiler.source += `}`;
           },
 
           yieldToEnd(node, compiler, imports) {
-            compiler.source += `
-              {
-                // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
-                runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;
+            // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
+            compiler.source += `runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;`;
 
-                yield;
-              }
-            `;
+            compiler.source += `yield;`;
           },
 
 
 
           setRunningThreadsActiveIndex(node, compiler, imports) {
-            compiler.source += `
-              {
-                let THREADS = vm.jwArray.Type.toArray(${compiler.descendInput(node.args.THREADS).asUnknown()}).array;
-                THREADS = THREADS.map((thread) => (vm.SoupThreads.Type.toThread(thread)).thread);
-                THREADS = Array.from(new Set(THREADS));
-                THREADS = THREADS.filter((rawThread) => (rawThread !== null && runtime.threads.includes(rawThread)));
+            compiler.source += `{`;
 
-                // Completely replace threads array via mutating only.
-                runtime.threads.splice(0, runtime.threads.length, ...THREADS);
+            compiler.source += `let THREADS = vm.jwArray.Type.toArray(${compiler.descendInput(node.args.THREADS).asUnknown()}).array;`;
+            compiler.source += `THREADS = THREADS.map((thread) => (vm.SoupThreads.Type.toThread(thread)).thread);`;
+            compiler.source += `THREADS = Array.from(new Set(THREADS));`;
+            compiler.source += `THREADS = THREADS.filter((rawThread) => (rawThread !== null && runtime.threads.includes(rawThread)));`;
 
-                // Only handle index input after replacing threads array so that length calculations are correct.
-                let ACTIVEINDEX = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.ACTIVEINDEX).asUnknown()}, false, true);
+            // Completely replace threads array via mutating only.
+            compiler.source += `runtime.threads.splice(0, runtime.threads.length, ...THREADS);`;
 
-                // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
-                if (ACTIVEINDEX < 0) {
-                  // yield to first thread
-                  runtime.sequencer.activeThreadIndex = -1;
-                } else if (ACTIVEINDEX >= runtime.threads.length) {
-                  // yield to end of tick
-                  runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;
-                } else {
-                  runtime.sequencer.activeThreadIndex = ACTIVEINDEX - 1;
-                }
+            // Only handle index input after replacing threads array so that length calculations are correct.
+            // insertMode = false, absoluteMode = true
+            compiler.source += `let ACTIVEINDEX = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.ACTIVEINDEX).asUnknown()}, false, true);`;
 
-                yield;
-              }
-            `;
+            // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
+
+            compiler.source += `if (ACTIVEINDEX < 0) {`;
+            // yield to first thread
+            compiler.source += `runtime.sequencer.activeThreadIndex = -1;`;
+            compiler.source += `} else if (ACTIVEINDEX >= runtime.threads.length) {`;
+            // yield to end of tick
+            compiler.source += `runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;`;
+            compiler.source += `} else {`;
+            compiler.source += `runtime.sequencer.activeThreadIndex = ACTIVEINDEX - 1;`;
+            compiler.source += `}`;
+
+            compiler.source += `yield;`;
+
+            compiler.source += `}`;
           },
 
           setRunningThreadsActiveThread(node, compiler, imports) {
-            compiler.source += `
-              {
-                let THREADS = vm.jwArray.Type.toArray(${compiler.descendInput(node.args.THREADS).asUnknown()}).array;
-                THREADS = THREADS.map((thread) => (vm.SoupThreads.Type.toThread(thread)).thread);
-                THREADS = Array.from(new Set(THREADS));
-                THREADS = THREADS.filter((rawThread) => (rawThread !== null && runtime.threads.includes(rawThread)));
+            compiler.source += `{`;
 
-                // Completely replace threads array via mutating only.
-                runtime.threads.splice(0, runtime.threads.length, ...THREADS);
+            compiler.source += `let THREADS = vm.jwArray.Type.toArray(${compiler.descendInput(node.args.THREADS).asUnknown()}).array;`;
+            compiler.source += `THREADS = THREADS.map((thread) => (vm.SoupThreads.Type.toThread(thread)).thread);`;
+            compiler.source += `THREADS = Array.from(new Set(THREADS));`;
+            compiler.source += `THREADS = THREADS.filter((rawThread) => (rawThread !== null && runtime.threads.includes(rawThread)));`;
 
-                // Only handle index input after replacing threads array so that length calculations are correct.
-                let ACTIVETHREAD = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.ACTIVETHREAD).asUnknown()});
+            // Completely replace threads array via mutating only.
+            compiler.source += `runtime.threads.splice(0, runtime.threads.length, ...THREADS);`;
 
-                // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
-                let threadIndex;
-                if (ACTIVETHREAD.thread !== null && (threadIndex = runtime.threads.indexOf(ACTIVETHREAD.thread)) !== -1) {
-                  runtime.sequencer.activeThreadIndex = threadIndex - 1;
-                } else {
-                  // Fall back to yielding to end of tick.
-                  runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;
-                }
+            compiler.source += `let ACTIVETHREAD = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.ACTIVETHREAD).asUnknown()});`;
 
-                yield;
-              }
-            `;
+            // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
+
+            compiler.source += `let threadIndex;`;
+            compiler.source += `if (ACTIVETHREAD.thread !== null && (threadIndex = runtime.threads.indexOf(ACTIVETHREAD.thread)) !== -1) {`;
+            compiler.source += `runtime.sequencer.activeThreadIndex = threadIndex - 1;`;
+            compiler.source += `} else {`;
+            // Fall back to yielding to end of tick.
+            compiler.source += `runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;`;
+            compiler.source += `}`;
+
+            compiler.source += `yield;`;
+
+            compiler.source += `}`;
           },
 
           moveThread(node, compiler, imports) {
-            compiler.source += `
-              {
-                let THREAD = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREAD).asUnknown()});
+            compiler.source += `{`;
 
-                let threadIndex;
-                if (THREAD.thread !== null && (threadIndex = runtime.threads.indexOf(THREAD.thread)) !== -1) {
-                  let INDEX = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.INDEX).asUnknown()}, true, false, true);
+            compiler.source += `let THREAD = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREAD).asUnknown()});`;
 
-                  // Move the thread
-                  if (INDEX <= threadIndex) {
-                    // Moving backwards (or to the same position)
+            compiler.source += `let threadIndex;`;
+            compiler.source += `if (THREAD.thread !== null && (threadIndex = runtime.threads.indexOf(THREAD.thread)) !== -1) {`;
+            // insertMode = true, absoluteMode = false, constrain = true
+            compiler.source += `let INDEX = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.INDEX).asUnknown()}, true, false, true);`;
 
-                    // Remove the thread.
-                    runtime.threads.splice(threadIndex, 1);
+            // Move the thread
 
-                    // Insert the thread.
-                    runtime.threads.splice(INDEX, 0, THREAD.thread);
-                  } else {
-                    // Moving forwards
+            compiler.source += `if (INDEX <= threadIndex) {`;
 
-                    // Insert the thread.
-                    runtime.threads.splice(INDEX, 0, THREAD.thread);
+            // Moving backwards (or to the same position)
+            // Remove the thread.
+            compiler.source += `runtime.threads.splice(threadIndex, 1);`;
+            // Insert the thread.
+            compiler.source += `runtime.threads.splice(INDEX, 0, THREAD.thread);`;
 
-                    // Remove the old reference to the thread.
-                    runtime.threads.splice(threadIndex, 1);
-                  }
+            compiler.source += `} else {`;
 
-                  // Update activeThreadIndex if the active thread moved
-                  if (threadIndex === runtime.sequencer.activeThreadIndex) {
-                    // The active thread was directly moved.
-                    runtime.sequencer.activeThreadIndex = INDEX;
-                  } else if (INDEX <= runtime.sequencer.activeThreadIndex) {
-                    // The active thread was indirectly moved.
-                    runtime.sequencer.activeThreadIndex += 1;
-                  }
-                }
-              }
-            `;
+            // Moving forwards
+            // Insert the thread.
+            compiler.source += `runtime.threads.splice(INDEX, 0, THREAD.thread);`;
+            // Remove the old reference to the thread.
+            compiler.source += `runtime.threads.splice(threadIndex, 1);`;
+
+            compiler.source += `}`;
+
+            // Update activeThreadIndex if the active thread moved
+
+            compiler.source += `if (threadIndex === runtime.sequencer.activeThreadIndex) {`;
+            // The active thread was directly moved.
+            compiler.source += `runtime.sequencer.activeThreadIndex = INDEX;`;
+            compiler.source += `} else if (INDEX <= runtime.sequencer.activeThreadIndex) {`;
+            // The active thread was indirectly moved.
+            compiler.source += `runtime.sequencer.activeThreadIndex += 1;`;
+            compiler.source += `}`;
+
+            compiler.source += `}`;
           },
 
           swapThreads(node, compiler, imports) {
-            compiler.source += `
-              let THREADONE = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREADONE).asUnknown()});
-              let THREADTWO = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREADTWO).asUnknown()});
+            compiler.source += `{`;
 
-              if (THREADONE.thread !== null && THREADTWO.thread !== null) {
-                let threadIndex1 = runtime.threads.indexOf(THREADONE.thread);
-                let threadIndex2 = runtime.threads.indexOf(THREADTWO.thread);
+            compiler.source += `let THREADONE = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREADONE).asUnknown()});`;
+            compiler.source += `let THREADTWO = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREADTWO).asUnknown()});`;
 
-                if (threadIndex1 !== -1 && threadIndex2 !== -1 && threadIndex1 !== threadIndex2) {
-                  // Swap threads
-                  runtime.threads[threadIndex1] = THREADTWO.thread;
-                  runtime.threads[threadIndex2] = THREADONE.thread;
+            compiler.source += `if (THREADONE.thread !== null && THREADTWO.thread !== null) {`;
+            compiler.source += `let threadIndex1 = runtime.threads.indexOf(THREADONE.thread);`;
+            compiler.source += `let threadIndex2 = runtime.threads.indexOf(THREADTWO.thread);`;
 
-                  // Update activeThreadIndex if the active thread moved
-                  if (runtime.sequencer.activeThreadIndex === threadIndex1) {
-                    runtime.sequencer.activeThreadIndex = threadIndex2;
-                  } else if (runtime.sequencer.activeThreadIndex === threadIndex2) {
-                    runtime.sequencer.activeThreadIndex = threadIndex1;
-                  }
-                }
-              }
-            `;
+            compiler.source += `if (threadIndex1 !== -1 && threadIndex2 !== -1 && threadIndex1 !== threadIndex2) {`;
+
+            // Swap threads
+            compiler.source += `runtime.threads[threadIndex1] = THREADTWO.thread;`;
+            compiler.source += `runtime.threads[threadIndex2] = THREADONE.thread;`;
+
+            // Update activeThreadIndex if the active thread moved
+            compiler.source += `if (runtime.sequencer.activeThreadIndex === threadIndex1) {`;
+            compiler.source += `runtime.sequencer.activeThreadIndex = threadIndex2;`;
+            compiler.source += `} else if (runtime.sequencer.activeThreadIndex === threadIndex2) {`;
+            compiler.source += `runtime.sequencer.activeThreadIndex = threadIndex1;`;
+            compiler.source += `}`;
+
+            compiler.source += `}`;
+            compiler.source += `}`;
+            compiler.source += `}`;
           },
 
 
 
           repeatAtomic(node, compiler, imports) {
-            compiler.source += `
-              {
-                let TIMES = ${compiler.descendInput(node.args.TIMES).asNumber()};
+            compiler.source += `{`;
+            compiler.source += `for (let i = 0; i < (${compiler.descendInput(node.args.TIMES).asNumber()}); i++) {`;
 
-                for (let i = 0; i < TIMES; i++) {
-            `;
-            compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads_repeatAtomic')); // true means this is a loop
+            compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads.repeatAtomic')); // true means this is a loop
+
             if (runtime.compilerOptions.warpTimer) {
-              compiler.source += `
-                if (isStuck()) {
-                  yield;
-                }
-              `;
+              compiler.source += `if (isStuck()) {`;
+              compiler.source += `yield;`;
+              compiler.source += `}`;
             }
-            compiler.source += `
-                }
-              }
-            `;
+
+            compiler.source += `}`;
+            compiler.source += `}`;
           },
 
           repeatUntilAtomic(node, compiler, imports) {
-            compiler.source += `
-              {
-                while (!(${compiler.descendInput(node.args.CONDITION).asBoolean()})) {
-            `;
-            compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads_repeatUntilAtomic')); // true means this is a loop
+            compiler.source += `while (!(${compiler.descendInput(node.args.CONDITION).asBoolean()})) {`;
+
+            compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads.repeatUntilAtomic')); // true means this is a loop
+
             if (runtime.compilerOptions.warpTimer) {
-              compiler.source += `
-                if (isStuck()) {
-                  yield;
-                }
-              `;
+              compiler.source += `if (isStuck()) {`;
+              compiler.source += `yield;`;
+              compiler.source += `}`;
             }
-            compiler.source += `
-                }
-              }
-            `;
+
+            compiler.source += `}`;
           },
 
           repeatWhileAtomic(node, compiler, imports) {
-            compiler.source += `
-              {
-                while (${compiler.descendInput(node.args.CONDITION).asBoolean()}) {
-            `;
-            compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads_repeatWhileAtomic')); // true means this is a loop
+            compiler.source += `while (${compiler.descendInput(node.args.CONDITION).asBoolean()}) {`;
+
+            compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads.repeatWhileAtomic')); // true means this is a loop
+
             if (runtime.compilerOptions.warpTimer) {
-              compiler.source += `
-                if (isStuck()) {
-                  yield;
-                }
-              `;
+              compiler.source += `if (isStuck()) {`;
+              compiler.source += `yield;`;
+              compiler.source += `}`;
             }
-            compiler.source += `
-                }
-              }
-            `;
+
+            compiler.source += `}`;
           },
 
           repeatForeverAtomic(node, compiler, imports) {
-            compiler.source += `
-              {
-                while (true) {
-            `;
+            compiler.source += `while (true) {`;
+
             compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads.repeatForeverAtomic')); // true means this is a loop
+
             if (runtime.compilerOptions.warpTimer) {
-              compiler.source += `
-                if (isStuck()) {
-                  yield;
-                }
-              `;
+              compiler.source += `if (isStuck()) {`;
+              compiler.source += `yield;`;
+              compiler.source += `}`;
             }
-            compiler.source += `
-                }
-              }
-            `;
+
+            compiler.source += `}`;
           },
 
 
