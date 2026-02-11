@@ -10,6 +10,8 @@
 
 // TO-DO
 //
+// - Make "yield to previous thread" yield to current thread if the active thread is at the start (instead of yielding to end of tick)
+// - Rename "yield to next thread" to "yield"
 // - Make all blocks compiled
 // - Yell at @jwklong until they fix the lip that is happening in the `builder` block
 
@@ -1915,23 +1917,24 @@
             compiler.source += `let ${threadIndex};`;
             compiler.source += `if (${THREAD}.thread !== null && (${threadIndex} = runtime.threads.indexOf(${THREAD}.thread)) !== -1) {`;
             // insertMode = true, absoluteMode = false, constrain = true
-            compiler.source += `let INDEX = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.INDEX).asUnknown()}, true, false, true);`;
+            let INDEX = compiler.localVariables.next();
+            compiler.source += `let ${INDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.INDEX).asUnknown()}, true, false, true);`;
 
             // Move the thread
 
-            compiler.source += `if (INDEX <= ${threadIndex}) {`;
+            compiler.source += `if (${INDEX} <= ${threadIndex}) {`;
 
             // Moving backwards (or to the same position)
             // Remove the thread.
             compiler.source += `runtime.threads.splice(${threadIndex}, 1);`;
             // Insert the thread.
-            compiler.source += `runtime.threads.splice(INDEX, 0, ${THREAD}.thread);`;
+            compiler.source += `runtime.threads.splice(${INDEX}, 0, ${THREAD}.thread);`;
 
             compiler.source += `} else {`;
 
             // Moving forwards
             // Insert the thread.
-            compiler.source += `runtime.threads.splice(INDEX, 0, ${THREAD}.thread);`;
+            compiler.source += `runtime.threads.splice(${INDEX}, 0, ${THREAD}.thread);`;
             // Remove the old reference to the thread.
             compiler.source += `runtime.threads.splice(${threadIndex}, 1);`;
 
@@ -1941,8 +1944,8 @@
 
             compiler.source += `if (${threadIndex} === runtime.sequencer.activeThreadIndex) {`;
             // The active thread was directly moved.
-            compiler.source += `runtime.sequencer.activeThreadIndex = INDEX;`;
-            compiler.source += `} else if (INDEX <= runtime.sequencer.activeThreadIndex) {`;
+            compiler.source += `runtime.sequencer.activeThreadIndex = ${INDEX};`;
+            compiler.source += `} else if (${INDEX} <= runtime.sequencer.activeThreadIndex) {`;
             // The active thread was indirectly moved.
             compiler.source += `runtime.sequencer.activeThreadIndex += 1;`;
             compiler.source += `}`;
