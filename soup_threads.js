@@ -1978,6 +1978,7 @@
 
             compiler.source += `}`;
             compiler.source += `}`;
+            compiler.source += `}`;
           },
 
 
