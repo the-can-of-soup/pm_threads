@@ -10,8 +10,6 @@
 
 // TO-DO
 //
-// - Make "yield to previous thread" yield to current thread if the active thread is at the start (instead of yielding to end of tick)
-// - Rename "yield to next thread" to "yield"
 // - Make all blocks compiled
 // - Yell at @jwklong until they fix the lip that is happening in the `builder` block
 
@@ -910,7 +908,7 @@
 
           {
             opcode: 'yield',
-            text: 'yield to next thread',
+            text: 'yield',
             ...CommandBlock,
           },
           {
@@ -1797,11 +1795,12 @@
 
           yieldBack(node, compiler, imports) {
             // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
-            // Will yield to end of the tick if the current thread is at the start.
+            // Will yield to current thread if the current thread is at the start.
             compiler.source += `if (runtime.sequencer.activeThreadIndex <= 0) {`;
             compiler.source += `runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;`;
             compiler.source += `} else {`;
-            compiler.source += `runtime.sequencer.activeThreadIndex -= 2;`;
+            // Yield to current thread
+            compiler.source += `runtime.sequencer.activeThreadIndex--;`;
             compiler.source += `}`;
 
             compiler.source += `yield;`;
