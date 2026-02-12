@@ -34,7 +34,7 @@
     - **TODO:** `suspend [THREAD]` -> Undefined
     - **TODO:** `resume [THREAD]` -> Undefined
   - [Yielding](#yielding)
-    - [`yield to next thread` -> Undefined](#yield-to-next-thread---undefined)
+    - [`yield` -> Undefined](#yield---undefined)
     - [`yield [TIMES] times` -> Undefined](#yield-times-times---undefined)
     - [`yield to previous thread` -> Undefined](#yield-to-previous-thread---undefined)
     - [`yield to [ACTIVETHREAD]` -> Undefined](#yield-to-activethread---undefined)
@@ -315,7 +315,7 @@ Kills `THREAD`, and then yields if `THREAD` was the active thread.
 
 ## Yielding
 
-### `yield to next thread` -> Undefined
+### `yield` -> Undefined
 <img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/yield_to_next_thread.png?raw=true">
 
 Yields.
@@ -328,12 +328,12 @@ Yields `TIMES` times.
 ### `yield to previous thread` -> Undefined
 <img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/yield_to_previous_thread.png?raw=true">
 
-Yields and makes the previous thread active.
+Yields and makes the previous thread active. If there is no previous thread (the first thread is active), yields and makes the active thread active (effectively cancelling the yield in most cases).
 
 <details>
   <summary>Internal behavior</summary>
   
-  Decrements `sequencer.activeThreadIndex` twice before yielding. The second decrement is because this value is always incremented by the engine after every yield.
+  Decrements `sequencer.activeThreadIndex` twice before yielding (or once if the first thread is active). The extra decrement is because this value is always incremented by the engine after every yield.
 </details>
 
 ### `yield to [ACTIVETHREAD]` -> Undefined
