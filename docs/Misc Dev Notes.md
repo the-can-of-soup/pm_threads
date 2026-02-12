@@ -21,5 +21,8 @@
 
 - If after a tick there are no threads in `runtime.threads`, the frame immediately ends and a redraw is triggered after the frame time is met.
 - If before a frame there are no threads in `runtime.threads`, no ticks will occurr that frame; instead, the frame immediately ends and a redraw is triggered after the frame time is met.
-- Monitor updater threads are always at the end of the threads array.
-- Monitor updater threads appear to exit on the same tick they are started (if they are the only thread in `runtime.threads`, this means there are now 0 threads, immediately ending the frame and having the same effect as if graphics updated was always `true`); then, a new monitor updater thread takes its place. It is unconfirmed whether a new monitor updater thread spawns on the next tick or the next frame, or some other condition altogether.
+
+## Monitor updater threads
+
+- Monitor updater threads are added to the end of `runtime.threads` before the start of every _frame_.
+- Monitor updater threads exit immediately after being stepped once. If they were the only thread in `runtime.threads`, this means there are now 0 threads, immediately ending the frame and having the same effect as if graphics updated was `true`.
