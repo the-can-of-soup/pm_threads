@@ -78,6 +78,7 @@
     - [`<graphics updated>` -> Boolean](#graphics-updated---boolean)
     - [`set graphics updated to <VALUE>` -> Undefined](#set-graphics-updated-to-value---undefined)
   - [Work Timer](#work-timer)
+    - [`(frame time)` -> Number](#frame-time---number)
     - [`(work time)` -> Number](#work-time---number)
     - [`(work timer)` -> Number](#work-timer---number)
     - [`set work timer to [TIME]` -> Undefined](#set-work-timer-to-time---undefined)
@@ -632,6 +633,17 @@ Enables or disables [warp mode](#warp-mode---boolean) for `SUBSTACK`.
 
 
 ## Work Timer
+
+### `(frame time)` -> Number
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/frame_time.png?raw=true">
+
+Returns the ideal time in seconds between every frame.
+
+<details>
+  <summary>Internal behavior</summary>
+
+  Reads `runtime.currentStepTime`.
+</details>
 
 ### `(work time)` -> Number
 <img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/work_time.png?raw=true">
