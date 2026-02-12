@@ -317,7 +317,7 @@ Kills `THREAD`, and then yields if `THREAD` was the active thread.
 ## Yielding
 
 ### `yield` -> Undefined
-<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/yield_to_next_thread.png?raw=true">
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/yield.png?raw=true">
 
 Yields.
 
