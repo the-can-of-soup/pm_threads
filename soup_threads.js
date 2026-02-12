@@ -1390,6 +1390,12 @@
           { blockType: Scratch.BlockType.LABEL, text: "Threads - DANGEROUS" },
 
           {
+            opcode: 'getFrameTime',
+            text: 'frame time',
+            ...ReporterBlock,
+            disableMonitor: false,
+          },
+          {
             opcode: 'getWorkTime',
             text: 'work time',
             ...ReporterBlock,
@@ -2337,13 +2343,17 @@
 
 
 
-    getWorkTimer({}, util) {
-      return util.sequencer.timer.timeElapsed() / 1000;
+    getFrameTime({}, util) {
+      return runtime.currentStepTime / 1000;
     }
 
     getWorkTime({}, util) {
       // Fall back to calculating work time immediately instead of at the start of the frame
       return (util.sequencer.soupThreadsWorkTime ?? 0.75 * runtime.currentStepTime) / 1000;
+    }
+
+    getWorkTimer({}, util) {
+      return util.sequencer.timer.timeElapsed() / 1000;
     }
 
     setWorkTimer({TIME}, util) {
