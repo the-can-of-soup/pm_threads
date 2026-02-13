@@ -10,6 +10,10 @@
 
 // TO-DO
 //
+// - Add "last measured work time" block
+// - Document "last measured frame time" block, document renamed "work time" and "frame time" blocks
+// - Finish implementing suspend/resume blocks (apply patch for when pause button is clicked to prevent threads from being doubly paused)
+// - Figure out *exactly* what happens when a hat block is restarted
 // - Make all blocks compiled
 // - Yell at @jwklong until they fix the lip that is happening in the `builder` block
 
@@ -264,10 +268,56 @@
 
   class SoupThreadsUtil {
 
-    ThreadType = ThreadType;
-    ThreadStatus = ThreadStatus;
+    static ThreadType = ThreadType;
+    static ThreadStatus = ThreadStatus;
 
-    uid = uid;
+    static uid = uid;
+    static originalPauseThread = RawThreadType.prototype.pause;
+    static originalUnpauseThread = RawThreadType.prototype.play;
+
+    /**
+     * Should be called as a raw thread to pause it in the name of the extension.
+     */
+    static pauseThreadAsSoupThreads() {
+      this.soupThreadsPaused = true;
+      if (this.nonSoupThreadsPaused) {
+        return;
+      }
+      SoupThreadsUtil.originalPauseThread.call(this);
+    }
+
+    /**
+     * Should be called as a raw thread to unpause it in the name of the extension.
+     */
+    static unpauseThreadAsSoupThreads() {
+      this.soupThreadsPaused = false;
+      if (this.nonSoupThreadsPaused) {
+        return;
+      }
+      SoupThreadsUtil.originalUnpauseThread.call(this);
+    }
+
+    /**
+     * Will override RawThreadType.prototype.pause.
+     */
+    static pauseThreadOverride() {
+      this.nonSoupThreadsPaused = true;
+      if (this.soupThreadsPaused) {
+        return;
+      }
+      SoupThreadsUtil.originalPauseThread.call(this);
+    }
+
+    /**
+     * Will override RawThreadType.prototype.play.
+     */
+    static unpauseThreadOverride() {
+      this.nonSoupThreadsPaused = false;
+      if (this.soupThreadsPaused) {
+        return;
+      }
+      SoupThreadsUtil.originalUnpauseThread.call(this);
+    }
 
     /**
      * Converts an arbitrary block input value from an "index" menu to a 0-based index for the threads array.
@@ -487,6 +537,10 @@
       // Store reference to SoupThreadsUtil
       vm.SoupThreadsUtil = SoupThreadsUtil;
 
+      // Patch thread pause and resume functions
+      RawThreadType.prototype.pause = SoupThreadsUtil.pauseThreadOverride;
+      RawThreadType.prototype.play = SoupThreadsUtil.unpauseThreadOverride;
+
       // Register compiled blocks
       runtime.registerCompiledExtensionBlocks('soupThreads', this.getCompileInfo());
 
@@ -518,6 +572,8 @@
       runtime.soupThreadsTickFromStart = 0;
       runtime.soupThreadsFrameFromStart = 0;
       runtime.soupThreadsTickWithinFrame = 0;
+      runtime.soupThreadsFrameStartTime = null;
+      runtime.soupThreadsLastFrameStartTime = null;
 
       // Register event listeners
       runtime.on('BEFORE_EXECUTE', function() {
@@ -531,6 +587,9 @@
         // Calculate work time
         // Mimics this line from sequencer.js: https://github.com/PenguinMod/PenguinMod-Vm/blob/b88731f3f93ed36d2b57024f8e8d758b6b60b54e/src/engine/sequencer.js#L74
         runtime.sequencer.soupThreadsWorkTime = 0.75 * runtime.currentStepTime;
+
+        runtime.soupThreadsLastFrameStartTime = runtime.soupThreadsFrameStartTime;
+        runtime.soupThreadsFrameStartTime = Date.now();
       });
       runtime.on('BEFORE_TICK', function() {
         // Runs before every tick
@@ -854,7 +913,7 @@
           },
           {
             opcode: 'isPaused',
-            text: '(not implemented) [THREAD] is suspended?',
+            text: '(not implemented) [THREAD] was paused manually?',
             ...BooleanBlock,
             arguments: {
               THREAD: Thread.Argument,
@@ -889,7 +948,7 @@
           },
           {
             opcode: 'pauseThread',
-            text: '(not implemented) suspend [THREAD]',
+            text: 'pause [THREAD]',
             ...CommandBlock,
             arguments: {
               THREAD: Thread.Argument,
@@ -897,7 +956,7 @@
           },
           {
             opcode: 'unpauseThread',
-            text: '(not implemented) resume [THREAD]',
+            text: 'resume [THREAD]',
             ...CommandBlock,
             arguments: {
               THREAD: Thread.Argument,
@@ -1387,17 +1446,23 @@
             }
           },
 
-          { blockType: Scratch.BlockType.LABEL, text: "Threads - DANGEROUS" },
+          '---',
 
           {
             opcode: 'getFrameTime',
-            text: 'frame time',
+            text: 'target frame time',
+            ...ReporterBlock,
+            disableMonitor: false,
+          },
+          {
+            opcode: 'getLastFrameMeasuredTime',
+            text: 'last measured frame time',
             ...ReporterBlock,
             disableMonitor: false,
           },
           {
             opcode: 'getWorkTime',
-            text: 'work time',
+            text: 'target work time',
             ...ReporterBlock,
             disableMonitor: false,
           },
@@ -1407,6 +1472,9 @@
             ...ReporterBlock,
             disableMonitor: false,
           },
+
+          { blockType: Scratch.BlockType.LABEL, text: "Threads - DANGEROUS" },
+
           {
             opcode: 'setWorkTimer',
             text: 'set work timer to [TIME]',
@@ -1599,6 +1667,26 @@
             };
           },
 
+          pauseThread(generator, block) {
+            generator.script.yields = true;
+
+            return {
+              kind: 'stack',
+              args: {
+                THREAD: generator.descendInputOfBlock(block, 'THREAD'),
+              }
+            };
+          },
+
+          unpauseThread(generator, block) {
+            return {
+              kind: 'stack',
+              args: {
+                THREAD: generator.descendInputOfBlock(block, 'THREAD'),
+              }
+            };
+          },
+
 
 
           yield(generator, block) {
@@ -1778,11 +1866,35 @@
             compiler.source += `runtime._stopThread(${THREAD}.thread);`;
 
             // Yield if active thread was killed.
-            compiler.source += `let threadIndex = runtime.threads.indexOf(${THREAD}.thread);`;
-            compiler.source += `if (threadIndex !== -1 && threadIndex === runtime.sequencer.activeThreadIndex) {`;
+            compiler.source += `if (${THREAD}.thread === runtime.sequencer.activeThread) {`;
             compiler.source += `yield;`;
             compiler.source += `}`;
 
+            compiler.source += `}`;
+          },
+
+          pauseThread(node, compiler, imports) {
+            let THREAD = compiler.localVariables.next();
+            compiler.source += `let ${THREAD} = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREAD).asUnknown()});`;
+
+            compiler.source += `if (${THREAD}.thread !== null && !${THREAD}.thread.soupThreadsPaused) {`;
+
+            compiler.source += `vm.SoupThreadsUtil.pauseThreadAsSoupThreads.call(${THREAD}.thread);`;
+
+            // Yield if active thread was paused.
+            compiler.source += `if (${THREAD}.thread === runtime.sequencer.activeThread) {`;
+            compiler.source += `yield;`;
+            compiler.source += `}`;
+
+            compiler.source += `}`;
+          },
+
+          unpauseThread(node, compiler, imports) {
+            let THREAD = compiler.localVariables.next();
+            compiler.source += `let ${THREAD} = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREAD).asUnknown()});`;
+
+            compiler.source += `if (${THREAD}.thread !== null && ${THREAD}.thread.soupThreadsPaused) {`;
+            compiler.source += `vm.SoupThreadsUtil.unpauseThreadAsSoupThreads.call(${THREAD}.thread);`;
             compiler.source += `}`;
           },
 
@@ -2345,6 +2457,13 @@
 
     getFrameTime({}, util) {
       return runtime.currentStepTime / 1000;
+    }
+
+    getLastFrameMeasuredTime({}, util) {
+      if (runtime.soupThreadsFrameStartTime === null || runtime.soupThreadsLastFrameStartTime === null) {
+        return '';
+      }
+      return (runtime.soupThreadsFrameStartTime - runtime.soupThreadsLastFrameStartTime) / 1000;
     }
 
     getWorkTime({}, util) {
