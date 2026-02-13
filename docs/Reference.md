@@ -180,7 +180,7 @@ Returns the current status code of `THREAD`, the status code in text format if `
 | 2        | Yielded              | `STATUS_YIELD`        | Behavior unknown                                             |
 | 3        | Yielded for one tick | `STATUS_YIELD_TICK`   | Behavior unknown                                             |
 | 4        | Completed            | `STATUS_DONE`         | The thread is "dead", i.e. it will never run code again.[^1] |
-| 5        | Suspended            | `STATUS_PAUSED`       | Behavior unknown                                             |
+| 5        | Paused               | `STATUS_PAUSED`       | Behavior unknown                                             |
 
 <details>
   <summary>Internal behavior</summary>
