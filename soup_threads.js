@@ -11,8 +11,8 @@
 // TO-DO
 //
 // - Add "last measured work time" block
-// - Document "last measured frame time" block, document renamed "work time" and "frame time" blocks
-// - Finish implementing suspend/resume blocks (apply patch for when pause button is clicked to prevent threads from being doubly paused)
+// - Document "last measured frame time" block
+// - Add "<[THREAD] is in limbo?>" block
 // - Figure out *exactly* what happens when a hat block is restarted
 // - Make all blocks compiled
 // - Yell at @jwklong until they fix the lip that is happening in the `builder` block
@@ -913,7 +913,7 @@
           },
           {
             opcode: 'isPaused',
-            text: '(not implemented) [THREAD] was paused manually?',
+            text: '[THREAD] was paused manually?',
             ...BooleanBlock,
             arguments: {
               THREAD: Thread.Argument,
@@ -2327,6 +2327,15 @@
         return THREAD.thread.status === RawThreadType.STATUS_DONE && THREAD.thread.isKilled;
       }
       return THREAD.deadThreadWasKilled();
+    }
+
+    isPaused({THREAD}, util) {
+      THREAD = ThreadType.toThread(THREAD);
+
+      if (THREAD.thread === null) {
+        return false;
+      }
+      return THREAD.thread.soupThreadsPaused ?? false;
     }
 
     isStackClick({THREAD}, util) {
