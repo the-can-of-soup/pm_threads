@@ -2461,7 +2461,7 @@
 
     getLastFrameMeasuredTime({}, util) {
       if (runtime.soupThreadsFrameStartTime === null || runtime.soupThreadsLastFrameStartTime === null) {
-        return '';
+        return 0;
       }
       return (runtime.soupThreadsFrameStartTime - runtime.soupThreadsLastFrameStartTime) / 1000;
     }
