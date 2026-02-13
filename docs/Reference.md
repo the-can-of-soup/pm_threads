@@ -26,13 +26,13 @@
     - [`<[THREAD] is alive?>` -> Boolean](#thread-is-alive---boolean)
     - [`<[THREAD] exited naturally?>` -> Boolean](#thread-exited-naturally---boolean)
     - [`<[THREAD] was killed?>` -> Boolean](#thread-was-killed---boolean)
-    - **TODO:** `<[THREAD] is suspended?>` -> Boolean
+    - **TODO:** `<[THREAD] was paused manually?>` -> Boolean
     - [`<[THREAD] was started by clicking in the editor?>` -> Boolean](#thread-was-started-by-clicking-in-the-editor---boolean)
     - [`<[THREAD] is a monitor updater?>` -> Boolean](#thread-is-a-monitor-updater---boolean)
   - [Thread Actions](#thread-actions)
     - [`kill [THREAD]` -> Undefined](#kill-thread---undefined)
-    - **TODO:** `suspend [THREAD]` -> Undefined
-    - **TODO:** `resume [THREAD]` -> Undefined
+    - [`pause [THREAD]` -> Undefined](#pause-thread---undefined)
+    - [`resume [THREAD]` -> Undefined](#resume-thread---undefined)
   - [Yielding](#yielding)
     - [`yield` -> Undefined](#yield---undefined)
     - [`yield [TIMES] times` -> Undefined](#yield-times-times---undefined)
@@ -77,9 +77,10 @@
   - [Graphics Updated](#graphics-updated)
     - [`<graphics updated>` -> Boolean](#graphics-updated---boolean)
     - [`set graphics updated to <VALUE>` -> Undefined](#set-graphics-updated-to-value---undefined)
-  - [Work Timer](#work-timer)
-    - [`(frame time)` -> Number](#frame-time---number)
-    - [`(work time)` -> Number](#work-time---number)
+  - [Timers](#timers)
+    - [`(target frame time)` -> Number](#target-frame-time---number)
+    - [`(last measured frame time)` -> Number](#last-measured-frame-time---number)
+    - [`(target work time)` -> Number](#work-time---number)
     - [`(work timer)` -> Number](#work-timer---number)
     - [`set work timer to [TIME]` -> Undefined](#set-work-timer-to-time---undefined)
 - [Menus](#menus)
@@ -311,6 +312,16 @@ Kills `THREAD`, and then yields if `THREAD` was the active thread.
   
   Calls `runtime._stopThread` on the raw thread of `THREAD`.
 </details>
+
+### `pause [THREAD]` -> Undefined
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/pause.png?raw=true">
+
+Pauses `THREAD`, and then yields if `THREAD` was the active thread.
+
+### `resume [THREAD]` -> Undefined
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/resume.png?raw=true">
+
+Unpauses `THREAD`.
 
 
 
@@ -632,10 +643,10 @@ Enables or disables [warp mode](#warp-mode---boolean) for `SUBSTACK`.
 
 
 
-## Work Timer
+## Timers
 
-### `(frame time)` -> Number
-<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/frame_time.png?raw=true">
+### `(target frame time)` -> Number
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/target_frame_time.png?raw=true">
 
 Returns the ideal time in seconds between every frame.
 
@@ -645,8 +656,19 @@ Returns the ideal time in seconds between every frame.
   Reads `runtime.currentStepTime`.
 </details>
 
-### `(work time)` -> Number
-<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/work_time.png?raw=true">
+### `(last measured frame time)` -> Number
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/last_measured_frame_time.png?raw=true">
+
+Returns the duration in seconds of the previous frame, or `0` if this is the first frame.
+
+<details>
+  <summary>Internal behavior</summary>
+
+  Measures the time with `Date.now()` on every `BEFORE_EXECUTE` event. This block returns the time difference between the last two event calls.
+</details>
+
+### `(target work time)` -> Number
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/target_work_time.png?raw=true">
 
 Returns the amount of time in seconds that the sequencer is allotted for execution every frame.
 
@@ -659,7 +681,7 @@ Returns the amount of time in seconds that the sequencer is allotted for executi
 ### `(work timer)` -> Number
 <img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/work_timer.png?raw=true">
 
-Returns the time elapsed for execution so far this frame. Before every tick, if this timer is greater than or equal to [`(work time)`](#work-time---number), no more ticks will execute that frame, and the rest of the frame time is given to the renderer.
+Returns the time elapsed for execution so far this frame. Before every tick, if this timer is greater than or equal to [`(target work time)`](#target-work-time---number), no more ticks will execute that frame, and the rest of the frame time is given to the renderer.
 
 <details>
   <summary>Internal behavior</summary>
