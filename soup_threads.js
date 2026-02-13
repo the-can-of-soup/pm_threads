@@ -254,7 +254,7 @@
     [RawThreadType.STATUS_YIELD]: 'Yielded',
     [RawThreadType.STATUS_YIELD_TICK]: 'Yielded for one tick',
     [RawThreadType.STATUS_DONE]: 'Completed',
-    [RawThreadType.STATUS_PAUSED]: 'Suspended',
+    [RawThreadType.STATUS_PAUSED]: 'Paused',
   };
 
   const ThreadStatusInternalNames = {
