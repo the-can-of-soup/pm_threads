@@ -26,7 +26,7 @@
     - [`<[THREAD] is alive?>` -> Boolean](#thread-is-alive---boolean)
     - [`<[THREAD] exited naturally?>` -> Boolean](#thread-exited-naturally---boolean)
     - [`<[THREAD] was killed?>` -> Boolean](#thread-was-killed---boolean)
-    - **TODO:** `<[THREAD] was paused manually?>` -> Boolean
+    - [`<[THREAD] was paused manually?>` -> Boolean](#thread-was-paused-manually---boolean)
     - [`<[THREAD] was started by clicking in the editor?>` -> Boolean](#thread-was-started-by-clicking-in-the-editor---boolean)
     - [`<[THREAD] is a monitor updater?>` -> Boolean](#thread-is-a-monitor-updater---boolean)
   - [Thread Actions](#thread-actions)
@@ -173,14 +173,14 @@ _Menus: `STATUSFORMAT` uses [Status Format](#status-format)_
 
 Returns the current status code of `THREAD`, the status code in text format if `STATUSFORMAT` is "text", or the internal name of the status code if `STATUSFORMAT` is "internal name". These are the possible values:
 
-| Status # | Status text          | Internal name         | Description                                                  |
-|----------|----------------------|-----------------------|--------------------------------------------------------------|
-| 0        | Running              | `STATUS_RUNNING`      | The default status of a thread.[^1]                          |
-| 1        | Waiting for promise  | `STATUS_PROMISE_WAIT` | Behavior unknown                                             |
-| 2        | Yielded              | `STATUS_YIELD`        | Behavior unknown                                             |
-| 3        | Yielded for one tick | `STATUS_YIELD_TICK`   | Behavior unknown                                             |
-| 4        | Completed            | `STATUS_DONE`         | The thread is "dead", i.e. it will never run code again.[^1] |
-| 5        | Paused               | `STATUS_PAUSED`       | Behavior unknown                                             |
+| Status # | Status text          | Internal name         | Description                                                                                                                    |
+|----------|----------------------|-----------------------|--------------------------------------------------------------------------------------------------------------------------------|
+| 0        | Running              | `STATUS_RUNNING`      | The default status of a thread.[^1]                                                                                            |
+| 1        | Waiting for promise  | `STATUS_PROMISE_WAIT` | Behavior unknown                                                                                                               |
+| 2        | Yielded              | `STATUS_YIELD`        | Behavior unknown                                                                                                               |
+| 3        | Yielded for one tick | `STATUS_YIELD_TICK`   | Behavior unknown                                                                                                               |
+| 4        | Completed            | `STATUS_DONE`         | The thread is "dead", i.e. it will never run code again.[^1]                                                                   |
+| 5        | Paused               | `STATUS_PAUSED`       | The thread is paused either from the [`pause [THREAD]`](#pause-thread---undefined) block, the pause button, or another source. |
 
 <details>
   <summary>Internal behavior</summary>
@@ -274,6 +274,17 @@ Returns `true` if `THREAD` exited due to an external cause.[^2]
     - The raw thread is in the `runtime.threads` array (therefore it died this tick if its status is [4](#status-statusformat-v-of-thread---number)).
     - The thread's status is [4 (completed)](#status-statusformat-v-of-thread---number).
     - The raw thread's `isKilled` key is `true`.
+</details>
+
+### `<[THREAD] was paused manually?>` -> Boolean
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/was_paused_manually.png?raw=true">
+
+Returns `true` if `THREAD` was paused by the [`pause [THREAD]`](#pause-thread---undefined) block.
+
+<details>
+  <summary>Internal behavior</summary>
+  
+  Returns the custom `soupThreadsPaused` key from the raw thread object (or `false` if it is not present).
 </details>
 
 ### `<[THREAD] was started by clicking in the editor?>` -> Boolean
