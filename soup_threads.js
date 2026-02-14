@@ -868,20 +868,20 @@
           '---',
 
           {
+            opcode: 'isThread',
+            text: '[VALUE] is a thread?',
+            ...BooleanBlock,
+            arguments: {
+              VALUE: EmptyArgument,
+            }
+          },
+          {
             opcode: 'threadsEqual',
             text: '[THREADONE] is [THREADTWO]',
             ...BooleanBlock,
             arguments: {
               THREADONE: Thread.Argument,
               THREADTWO: Thread.Argument,
-            }
-          },
-          {
-            opcode: 'isThread',
-            text: '[VALUE] is a thread?',
-            ...BooleanBlock,
-            arguments: {
-              VALUE: EmptyArgument,
             }
           },
           {
@@ -2264,15 +2264,15 @@
 
 
 
+    isThread({VALUE}, util) {
+      return VALUE instanceof ThreadType;
+    }
+
     threadsEqual({THREADONE, THREADTWO}, util) {
       THREADONE = ThreadType.toThread(THREADONE);
       THREADTWO = ThreadType.toThread(THREADTWO);
 
       return THREADONE.getId() === THREADTWO.getId();
-    }
-
-    isThread({VALUE}, util) {
-      return VALUE instanceof ThreadType;
     }
 
     isNull({THREAD}, util) {
