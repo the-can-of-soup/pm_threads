@@ -80,7 +80,8 @@
   - [Timers](#timers)
     - [`(target frame time)` -> Number](#target-frame-time---number)
     - [`(last measured frame time)` -> Number](#last-measured-frame-time---number)
-    - [`(target work time)` -> Number](#work-time---number)
+    - [`(target work time)` -> Number](#target-work-time---number)
+    - [`(last measured work time)` -> Number](#last-measured-work-time---number)
     - [`(work timer)` -> Number](#work-timer---number)
     - [`set work timer to [TIME]` -> Undefined](#set-work-timer-to-time---undefined)
 - [Menus](#menus)
@@ -687,6 +688,17 @@ Returns the amount of time in seconds that the sequencer is allotted for executi
   <summary>Internal behavior</summary>
 
   Before the start of every frame, reads `runtime.currentStepTime`, multiplies by 75% (as done [here↗](https://github.com/PenguinMod/PenguinMod-Vm/blob/b88731f3f93ed36d2b57024f8e8d758b6b60b54e/src/engine/sequencer.js#L74)), and stores it to be retrieved every time this block is run.
+</details>
+
+### `(last measured work time)` -> Number
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/last_measured_work_time.png?raw=true">
+
+Returns the duration in seconds of the execution phase of the previous frame. This includes all time that code is being executed, but not the time that the renderer is redrawing the stage or waiting for the next frame.
+
+<details>
+  <summary>Internal behavior</summary>
+
+  Measures the time with `Date.now()` on every `BEFORE_EXECUTE` and `AFTER_EXECUTE` event. This block returns the time difference between the last `AFTER_EXECUTE` and `BEFORE_EXECUTE` event calls.
 </details>
 
 ### `(work timer)` -> Number
