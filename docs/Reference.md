@@ -43,7 +43,7 @@
     - [`yield to end of tick` -> Undefined](#yield-to-end-of-tick---undefined)
   - [Broadcasts](#broadcasts)
     - [`broadcast [MESSAGE v] to (INDEX v)` -> Undefined](#broadcast-message-v-to-index-v---undefined)
-    - **TODO:** `broadcast [MESSAGE v] to (INDEX v) and wait` -> Undefined
+    - [`broadcast [MESSAGE v] to (INDEX v) and wait` -> Undefined](#broadcast-message-v-to-index-v-and-wait---undefined)
     - **TODO:** `run [MESSAGE v] immediately and return` -> Undefined
     - **TODO:** `(last broadcast threads)` -> Array\[Thread\]
     - **TODO:** `(first thread from last broadcast)` -> Thread
@@ -431,6 +431,13 @@ _Menus: `INDEX` uses [Index](#index) (insert mode)_
 Broadcasts `MESSAGE` and then moves all new threads that were created to `INDEX`.
 
 Any preexisting threads with a `when I receive [MESSAGE v]` hat block will be restarted and moved to `INDEX` as well.
+
+### `broadcast [MESSAGE v] to (INDEX v) and wait` -> Undefined
+_Menus: `INDEX` uses [Index](#index) (insert mode)_
+
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/broadcast_message1_to_after_end_and_wait.png?raw=true">
+
+Executes the behavior of [`broadcast [MESSAGE v] to (INDEX v)`](#broadcast-message-v-to-index-v---undefined), and then yields until all threads that were created are not [alive](#thread-is-alive---boolean).
 
 
 
