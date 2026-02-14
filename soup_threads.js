@@ -10,7 +10,6 @@
 
 // TO-DO
 //
-// - Add "<[THREAD] is in limbo?>" block
 // - Figure out *exactly* what happens when a hat block is restarted
 // - Figure out *exactly* what happens when an async block is run
 // - Make all blocks compiled
@@ -919,6 +918,14 @@
           {
             opcode: 'isPaused',
             text: '[THREAD] was paused manually?',
+            ...BooleanBlock,
+            arguments: {
+              THREAD: Thread.Argument,
+            }
+          },
+          {
+            opcode: 'isLimbo',
+            text: '[THREAD] is in limbo?',
             ...BooleanBlock,
             arguments: {
               THREAD: Thread.Argument,
@@ -2347,6 +2354,24 @@
         return false;
       }
       return THREAD.thread.soupThreadsPaused ?? false;
+    }
+
+    isLimbo({THREAD}, util) {
+      THREAD = ThreadType.toThread(THREAD);
+
+      if (THREAD.thread === null) {
+        return false;
+      }
+
+      // Returns true if:
+      //
+      // - The thread is not in the threads list (it is dead).
+      // - The thread's status is not STATUS_DONE.
+      //
+      // Note: the case where dead threads are in the threads list are not considered,
+      // as those threads always have status STATUS_DONE.
+
+      return THREAD.thread.status !== RawThreadType.STATUS_DONE && !runtime.threads.includes(THREAD.thread);
     }
 
     isStackClick({THREAD}, util) {
