@@ -27,6 +27,7 @@
     - [`<[THREAD] exited naturally?>` -> Boolean](#thread-exited-naturally---boolean)
     - [`<[THREAD] was killed?>` -> Boolean](#thread-was-killed---boolean)
     - [`<[THREAD] was paused manually?>` -> Boolean](#thread-was-paused-manually---boolean)
+    - [`<[THREAD] is in limbo?>` -> Boolean](#thread-is-in-limbo---boolean)
     - [`<[THREAD] was started by clicking in the editor?>` -> Boolean](#thread-was-started-by-clicking-in-the-editor---boolean)
     - [`<[THREAD] is a monitor updater?>` -> Boolean](#thread-is-a-monitor-updater---boolean)
   - [Thread Actions](#thread-actions)
@@ -286,6 +287,25 @@ Returns `true` if `THREAD` was paused by the [`pause [THREAD]`](#pause-thread---
   <summary>Internal behavior</summary>
   
   Returns the custom `soupThreadsPaused` key from the raw thread object (or `false` if it is not present).
+</details>
+
+### `<[THREAD] is in limbo?>` -> Boolean
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/is_in_limbo.png?raw=true">
+
+Returns `true` if `THREAD` is in limbo.
+
+In many cases when a thread is stopped, it will enter limbo. Limbo is when a dead thread's [status](#status-statusformat-v-of-thread---number) does not get set to 4 (completed). Some known cases where a thread enters limbo:
+  - When <img alt="blue flag" style="height: 1em;" src="https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/flag.svg"> is clicked, all previously running threads will enter limbo.
+  - When <img alt="stop sign" style="height: 1em;" src="https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/stop.svg"> is clicked, all previously running threads will enter limbo.
+  - When a stack restarts because its hat is triggered again, the old thread enters limbo.
+  - When [`set threads to [THREADS] and yield to [ACTIVETHREAD]`](#set-threads-to-threads-and-yield-to-activethread---undefined) or [`set threads to [THREADS] and yield to thread at (ACTIVEINDEX v)`](#set-threads-to-threads-and-yield-to-thread-at-activeindex-v---undefined) is used to kill a thread, that thread enters limbo.
+
+<details>
+  <summary>Internal behavior</summary>
+  
+  Returns `true` if:
+  - The raw thread is not in the `runtime.threads` array (therefore it is dead).
+  - The thread's status is not [4 (completed)](#status-statusformat-v-of-thread---number).
 </details>
 
 ### `<[THREAD] was started by clicking in the editor?>` -> Boolean
@@ -805,11 +825,7 @@ The value can be overridden by a target or target ID.
 
 
 
-[^1]: Status is not a reliable indicator for whether a thread is alive. To reliably check if a thread is alive, instead you should use [`<[THREAD] is alive?>`](#thread-is-alive---boolean). This is because in many cases when a thread is stopped, it will enter limbo. Limbo is when a dead thread's [status](#status-statusformat-v-of-thread---number) does not get set to 4. Some known cases where a thread enters limbo:
-    - When <img alt="blue flag" style="height: 1em;" src="https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/flag.svg"> is clicked, all previously running threads will enter limbo.
-    - When <img alt="stop sign" style="height: 1em;" src="https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/stop.svg"> is clicked, all previously running threads will enter limbo.
-    - When a stack restarts because its hat is triggered again, the old thread enters limbo.
-    - When [`set threads to [THREADS] and yield to [ACTIVETHREAD]`](#set-threads-to-threads-and-yield-to-activethread---undefined) or [`set threads to [THREADS] and yield to thread at (ACTIVEINDEX v)`](#set-threads-to-threads-and-yield-to-thread-at-activeindex-v---undefined) is used to kill a thread, that thread enters limbo.
+[^1]: Status is not a reliable indicator for whether a thread is alive. To reliably check if a thread is alive, instead you should use [`<[THREAD] is alive?>`](#thread-is-alive---boolean). This is because of [limbo](#thread-is-in-limbo---boolean).
 
 [^2]: There are some exceptions where a thread is considered "killed" even though it caused its own termination:
     - When a thread runs `stop [all v]`, it is considered killed.
