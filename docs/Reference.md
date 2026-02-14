@@ -44,7 +44,7 @@
   - [Broadcasts](#broadcasts)
     - [`broadcast [MESSAGE v] to (INDEX v)` -> Undefined](#broadcast-message-v-to-index-v---undefined)
     - [`broadcast [MESSAGE v] to (INDEX v) and wait` -> Undefined](#broadcast-message-v-to-index-v-and-wait---undefined)
-    - **TODO:** `run [MESSAGE v] immediately and return` -> Undefined
+    - [`step [MESSAGE v] immediately and return` -> Undefined](#step-message-v-immediately-and-return---undefined)
     - **TODO:** `(last broadcast threads)` -> Array\[Thread\]
     - **TODO:** `(first thread from last broadcast)` -> Thread
   - [Threads Array](#threads-array)
@@ -438,6 +438,15 @@ _Menus: `INDEX` uses [Index](#index) (insert mode)_
 <img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/broadcast_message1_to_after_end_and_wait.png?raw=true">
 
 Executes the behavior of [`broadcast [MESSAGE v] to (INDEX v)`](#broadcast-message-v-to-index-v---undefined), and then yields until all threads that were created are not [alive](#thread-is-alive---boolean).
+
+### `step [MESSAGE v] immediately and return` -> Undefined
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/step_message1_immediately_and_return.png?raw=true">
+
+Broadcasts `MESSAGE`, moves all new threads to immediately before the active thread, yields, and makes the first new thread active.
+
+Any preexisting threads with a `when I receive [MESSAGE v]` hat block will be restarted and moved to before the active thread as well.
+
+This has the effect of immediately stepping all new threads once after broadcast, and then stepping the active thread again (as if no yield happened).
 
 
 
