@@ -45,8 +45,8 @@
     - [`broadcast [MESSAGE v] to (INDEX v)` -> Undefined](#broadcast-message-v-to-index-v---undefined)
     - [`broadcast [MESSAGE v] to (INDEX v) and wait` -> Undefined](#broadcast-message-v-to-index-v-and-wait---undefined)
     - [`step [MESSAGE v] immediately and return` -> Undefined](#step-message-v-immediately-and-return---undefined)
-    - **TODO:** `(last broadcast threads)` -> Array\[Thread\]
-    - **TODO:** `(first thread from last broadcast)` -> Thread
+    - [`(last broadcast threads)` -> Array\[Thread\]](#last-broadcast-threads---arraythread)
+    - [`(first thread from last broadcast)` -> Thread](#first-thread-from-last-broadcast---thread)
   - [Threads Array](#threads-array)
     - [`(threads)` -> Array\[Thread\]](#threads---arraythread)
     - [`(threads in (TARGET v))` -> Array\[Thread\]](#threads-in-target-v---arraythread)
@@ -447,6 +447,28 @@ Broadcasts `MESSAGE`, moves all new threads to immediately before the active thr
 Any preexisting threads with a `when I receive [MESSAGE v]` hat block will be restarted and moved to before the active thread as well.
 
 This has the effect of immediately stepping all new threads once after broadcast, and then stepping the active thread again (as if no yield happened).
+
+### `(last broadcast threads)` -> Array\[Thread\]
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/last_broadcast_threads.png?raw=true">
+
+Returns an array of all threads that were started by the most recent broadcast (or an empty array if no broadcasts have happened yet). Broadcasts from any target using any method will be counted.
+
+<details>
+  <summary>Internal behavior</summary>
+  
+  On every `HATS_STARTED` event where hats with the opcode `event_whenbroadcastreceived` are started, all new threads are stored to be retrieved later by this block.
+</details>
+
+### `(first thread from last broadcast)` -> Thread
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/first_thread_from_last_broadcast.png?raw=true">
+
+Returns the first thread that was started by the most recent broadcast (or the null thread if no broadcasts have happened yet or the most recent broadcast didn't start any threads). Broadcasts from any target using any method will be counted.
+
+<details>
+  <summary>Internal behavior</summary>
+  
+  On every `HATS_STARTED` event where hats with the opcode `event_whenbroadcastreceived` are started, all new threads are stored to be retrieved later by this block.
+</details>
 
 
 
