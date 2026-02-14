@@ -10,10 +10,9 @@
 
 // TO-DO
 //
-// - Add "last measured work time" block
-// - Document "last measured frame time" block
 // - Add "<[THREAD] is in limbo?>" block
 // - Figure out *exactly* what happens when a hat block is restarted
+// - Figure out *exactly* what happens when an async block is run
 // - Make all blocks compiled
 // - Yell at @jwklong until they fix the lip that is happening in the `builder` block
 
@@ -574,6 +573,7 @@
       runtime.soupThreadsTickWithinFrame = 0;
       runtime.soupThreadsFrameStartTime = null;
       runtime.soupThreadsLastFrameStartTime = null;
+      runtime.soupThreadsLastFrameWorkEndTime = null;
 
       // Register event listeners
       runtime.on('BEFORE_EXECUTE', function() {
@@ -591,6 +591,11 @@
         runtime.soupThreadsLastFrameStartTime = runtime.soupThreadsFrameStartTime;
         runtime.soupThreadsFrameStartTime = Date.now();
       });
+      runtime.on('AFTER_EXECUTE', function() {
+        // Runs after every frame but before redraw and sleep until end of frame time
+
+        runtime.soupThreadsLastFrameWorkEndTime = Date.now();
+      })
       runtime.on('BEFORE_TICK', function() {
         // Runs before every tick
 
@@ -1463,6 +1468,12 @@
           {
             opcode: 'getWorkTime',
             text: 'target work time',
+            ...ReporterBlock,
+            disableMonitor: false,
+          },
+          {
+            opcode: 'getLastFrameMeasuredWorkTime',
+            text: 'last measured work time',
             ...ReporterBlock,
             disableMonitor: false,
           },
@@ -2478,6 +2489,13 @@
     getWorkTime({}, util) {
       // Fall back to calculating work time immediately instead of at the start of the frame
       return (util.sequencer.soupThreadsWorkTime ?? 0.75 * runtime.currentStepTime) / 1000;
+    }
+
+    getLastFrameMeasuredWorkTime({}, util) {
+      if (runtime.soupThreadsLastFrameStartTime === null || runtime.soupThreadsLastFrameWorkEndTime === null) {
+        return 0;
+      }
+      return (runtime.soupThreadsLastFrameWorkEndTime - runtime.soupThreadsLastFrameStartTime) / 1000;
     }
 
     getWorkTimer({}, util) {
