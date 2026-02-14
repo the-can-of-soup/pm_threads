@@ -573,8 +573,10 @@
       runtime.soupThreadsFrameStartTime = null;
       runtime.soupThreadsLastFrameStartTime = null;
       runtime.soupThreadsLastFrameWorkEndTime = null;
+      runtime.soupThreadsLastBroadcastRawThreads = [];
 
       // Register event listeners
+
       runtime.on('BEFORE_EXECUTE', function() {
         // Runs before every frame
 
@@ -590,11 +592,13 @@
         runtime.soupThreadsLastFrameStartTime = runtime.soupThreadsFrameStartTime;
         runtime.soupThreadsFrameStartTime = Date.now();
       });
+
       runtime.on('AFTER_EXECUTE', function() {
         // Runs after every frame but before redraw and sleep until end of frame time
 
         runtime.soupThreadsLastFrameWorkEndTime = Date.now();
       })
+
       runtime.on('BEFORE_TICK', function() {
         // Runs before every tick
 
@@ -602,12 +606,21 @@
         runtime.soupThreadsTickFromStart += 1;
         runtime.soupThreadsTickWithinFrame += 1;
       });
+
       runtime.on('PROJECT_START', function() {
         // Runs when blue flag clicked, after state has been reset
 
         runtime.soupThreadsTickFromStart = 0;
         runtime.soupThreadsFrameFromStart = 0;
-      })
+      });
+
+      runtime.on('HATS_STARTED', function(requestedHatOpcode, optMatchFields, optTarget, newThreads) {
+        // Runs when runtime.startHats or util.startHats is called
+
+        if (requestedHatOpcode === 'event_whenbroadcastreceived') {
+          runtime.soupThreadsLastBroadcastRawThreads = newThreads;
+        }
+      });
     }
 
     static getShapeInfo(ScratchBlocks) {
@@ -1076,12 +1089,12 @@
           },
           {
             opcode: 'getLastBroadcastThreads',
-            text: '(not implemented) last broadcast threads',
+            text: 'last broadcast threads',
             ...jwArray.Block,
           },
           {
             opcode: 'getLastBroadcastFirstThread',
-            text: '(not implemented) first thread from last broadcast',
+            text: 'first thread from last broadcast',
             ...Thread.Block,
           },
 
@@ -2538,6 +2551,22 @@
         return false;
       }
       return THREAD.thread.updateMonitor;
+    }
+
+
+
+    getLastBroadcastThreads({}, util) {
+      return new jwArray.Type(
+        runtime.soupThreadsLastBroadcastRawThreads
+        .map((rawThread) => (new ThreadType(rawThread)))
+      );
+    }
+
+    getLastBroadcastFirstThread({}, util) {
+      if (runtime.soupThreadsLastBroadcastRawThreads.length === 0) {
+        return new ThreadType();
+      }
+      return new ThreadType(runtime.soupThreadsLastBroadcastRawThreads[0]);
     }
 
 
