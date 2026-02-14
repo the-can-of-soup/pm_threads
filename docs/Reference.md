@@ -41,8 +41,8 @@
     - [`yield to [ACTIVETHREAD]` -> Undefined](#yield-to-activethread---undefined)
     - [`yield to thread at (INDEX v)` -> Undefined](#yield-to-thread-at-index-v---undefined)
     - [`yield to end of tick` -> Undefined](#yield-to-end-of-tick---undefined)
-  - Broadcasts
-    - **TODO:** `broadcast [MESSAGE v] to (INDEX v)` -> Undefined
+  - [Broadcasts](#broadcasts)
+    - [`broadcast [MESSAGE v] to (INDEX v)` -> Undefined](#broadcast-message-v-to-index-v---undefined)
     - **TODO:** `broadcast [MESSAGE v] to (INDEX v) and wait` -> Undefined
     - **TODO:** `run [MESSAGE v] immediately and return` -> Undefined
     - **TODO:** `(last broadcast threads)` -> Array\[Thread\]
@@ -418,6 +418,19 @@ Yields and immediately ends the tick, skipping all threads that would normally s
   
   Sets `sequencer.activeThreadIndex` to 1 less than the length of `runtime.threads` before yielding. The engine increments the active thread index after every yield, so then it is left at the length of `runtime.threads`, causing the loop in the sequencer to exit, completing the tick.
 </details>
+
+
+
+## Broadcasts
+
+### `broadcast [MESSAGE v] to (INDEX v)` -> Undefined
+_Menus: `INDEX` uses [Index](#index) (insert mode)_
+
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/broadcast_message1_to_after_end.png?raw=true">
+
+Broadcasts `MESSAGE` and then moves all new threads that were created to `INDEX`.
+
+Any preexisting threads with a `when I receive [MESSAGE v]` hat block will be restarted and moved to `INDEX` as well.
 
 
 
