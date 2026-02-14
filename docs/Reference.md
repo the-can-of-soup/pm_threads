@@ -20,8 +20,8 @@
     - [`(status [STATUSFORMAT v] of [THREAD])` -> Number](#status-statusformat-v-of-thread---number)
     - [`(index of [THREAD])` -> Number](#index-of-thread---number)
   - [Boolean Thread Operators](#boolean-thread-operators)
-    - [`<[THREADONE] is [THREADTWO]>` -> Boolean](#threadone-is-threadtwo---boolean)
     - [`<[VALUE] is a thread?>` -> Boolean](#value-is-a-thread---boolean)
+    - [`<[THREADONE] is [THREADTWO]>` -> Boolean](#threadone-is-threadtwo---boolean)
     - [`<[THREAD] is null?>` -> Boolean](#thread-is-null---boolean)
     - [`<[THREAD] is alive?>` -> Boolean](#thread-is-alive---boolean)
     - [`<[THREAD] exited naturally?>` -> Boolean](#thread-exited-naturally---boolean)
@@ -204,6 +204,11 @@ Returns the index of `THREAD` in the [list of threads](#threads---arraythread).
 
 ## Boolean Thread Operators
 
+### `<[VALUE] is a thread?>` -> Boolean
+<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/is_a_thread.png?raw=true">
+
+Returns `true` if `VALUE` is a thread, otherwise returns `false`.
+
 ### `<[THREADONE] is [THREADTWO]>` -> Boolean
 <img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/is.png?raw=true">
 
@@ -216,11 +221,6 @@ Note that the `<[] = []>` block in Operators is not meant for this, as that bloc
   
   Uses the `soupThreadId` key of the raw thread objects to compare the threads.
 </details>
-
-### `<[VALUE] is a thread?>` -> Boolean
-<img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/is_a_thread.png?raw=true">
-
-Returns `true` if `VALUE` is a thread, otherwise returns `false`.
 
 ### `<[THREAD] is null?>` -> Boolean
 <img src="https://github.com/the-can-of-soup/pm_threads/blob/main/assets/blocks/is_null.png?raw=true">
