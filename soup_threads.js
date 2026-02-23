@@ -17,8 +17,9 @@
 // - Make thread vars stored in a map instead of an object
 // - Figure out *exactly* what happens when a hat block is restarted
 // - Figure out *exactly* what happens when an async block is run
-// - Make all blocks compiled
+// - Make compat atomic loops (atomic "for" loops for looping through arrays, objects, sets, etc.)
 // - Yell at @jwklong until they fix the lip that is happening in the `builder` block
+// - Make all blocks compiled
 
 // NOTES
 //
