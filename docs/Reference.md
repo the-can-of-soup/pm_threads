@@ -13,7 +13,7 @@
     - [`(thread at (INDEX v))` -> Thread](#thread-at-index-v---thread)
   - [Thread Builders](#thread-builders)
     - [`new thread in (TARGET v) inserted (INDEX v) {SUBSTACK}` -> Undefined](#new-thread-in-target-v-inserted-index-v-substack---undefined)
-    - **TODO:** `(new thread in (TARGET v) inserted (INDEX v) {SUBSTACK})` -> Thread
+    - [`(new thread in (TARGET v) inserted (INDEX v) {SUBSTACK})` -> Thread](#new-thread-in-target-v-inserted-index-v-substack---thread)
   - [Thread Properties](#thread-properties)
     - [`(target of [THREAD])` -> Target](#target-of-thread---target)
     - [`(id of [THREAD])` -> String](#id-of-thread---string)
@@ -165,6 +165,15 @@ Creates a new thread that will execute in `TARGET`; then, inserts it into the [t
   
   Uses `runtime._pushThread` to create a new thread at the end of the [threads array](#threads---arraythread) containing the contents of `SUBSTACK`. Next, moves it to `INDEX`. Finally, updates `sequencer.activeThreadIndex` if the active thread was moved.
 </details>
+
+### `(new thread in (TARGET v) inserted (INDEX v) {SUBSTACK})` -> Thread
+_Menus: `TARGET` uses [Target](#target), `INDEX` uses [Insert Index](#insert-index)_
+
+<img src="../assets/blocks/new_thread_in_this_target_inserted_after_end_2.png">
+
+Same as [`new thread in (TARGET v) inserted (INDEX v) {SUBSTACK}`](#new-thread-in-target-v-inserted-index-v-substack---undefined), except returns the thread that was created (or null).
+
+Will return the null thread if there are no blocks in `SUBSTACK` or if `TARGET` is invalid.
 
 
 
