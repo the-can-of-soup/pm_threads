@@ -156,7 +156,7 @@ Creates a new thread that will execute in `TARGET`; then, inserts it into the [t
 
 > [!NOTE]
 >
-> Local ("For this sprite only") variables have noteworthy behavior when used inside `SUBSTACK`:
+> Local ("For this sprite only") variables have noteworthy behavior when used inside `SUBSTACK` where `TARGET` is not the current target:
 > - If it exists, the variable with the same name in `TARGET` is used.
 > - If no variable with the same name exists in `TARGET`, **a new local variable will be created** in `TARGET` with the name, but this variable will have the same ID as the variable in the original sprite. This can cause odd behavior and/or bugs with variable monitors due to ID conflict.
 
