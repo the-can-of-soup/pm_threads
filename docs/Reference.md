@@ -11,9 +11,9 @@
     - [`(active index)` -> Number](#active-index---number)
     - [`(null thread)` -> Thread](#null-thread---thread)
     - [`(thread at (INDEX v))` -> Thread](#thread-at-index-v---thread)
-  - Thread Builders
-    - **TODO:** `new thread in (TARGET v) moved to (INDEX v)` -> Undefined
-    - **TODO:** `(new thread in (TARGET v) moved to (INDEX v))` -> Thread
+  - [Thread Builders](#thread-builders)
+    - [`new thread in (TARGET v) inserted (INDEX v) {SUBSTACK}` -> Undefined](#new-thread-in-target-v-inserted-index-v-substack---undefined)
+    - **TODO:** `(new thread in (TARGET v) inserted (INDEX v))` -> Thread
   - [Thread Properties](#thread-properties)
     - [`(target of [THREAD])` -> Target](#target-of-thread---target)
     - [`(id of [THREAD])` -> String](#id-of-thread---string)
@@ -141,6 +141,23 @@ Returns the thread that is at `INDEX` in the [threads array](#threads---arraythr
   <summary>Internal behavior</summary>
   
   Reads from the `runtime.threads` array.
+</details>
+
+
+
+## Thread Builders
+
+### `new thread in (TARGET v) inserted (INDEX v) {SUBSTACK}` -> Undefined
+_Menus: `TARGET` uses [Target](#target), `INDEX` uses [Insert Index](#insert-index)_
+
+<img src="../assets/blocks/new_thread_in_this_target_inserted_after_end.png">
+
+Creates a new thread that will execute in `TARGET`; then, inserts it into the [threads array](#threads---arraythread) at `INDEX`.
+
+<details>
+  <summary>Internal behavior</summary>
+  
+  Uses `runtime._pushThread` to create a new thread at the end of the [threads array](#threads---arraythread) containing the contents of `SUBSTACK`. Next, moves it to `INDEX`. Finally, updates `sequencer.activeThreadIndex` if the active thread was moved.
 </details>
 
 
