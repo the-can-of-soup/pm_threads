@@ -86,7 +86,8 @@
     - [`(work timer)` -> Number](#work-timer---number)
     - [`set work timer to [TIME]` -> Undefined](#set-work-timer-to-time---undefined)
 - [Menus](#menus)
-    - [Index](#index)
+    - [Get Index](#get-index)
+    - [Insert Index](#insert-index)
     - [Status Format](#status-format)
     - [Set Boolean](#set-boolean)
 
@@ -130,7 +131,7 @@ Returns the null thread.
 This represents a thread that failed to load or doesn't exist. It has an ID of `undefined`. This thread is also used when the wrong type is inserted into a thread input.
 
 ### `(thread at (INDEX v))` -> Thread
-_Menus: `INDEX` uses [Index](#index) (get mode)_
+_Menus: `INDEX` uses [Get Index](#get-index)_
 
 <img src="../assets/blocks/thread_at_start.png">
 
@@ -394,7 +395,7 @@ If `ACTIVETHREAD` is null or not in the [threads array](#threads---arraythread),
 </details>
 
 ### `yield to thread at (INDEX v)` -> Undefined
-_Menus: `INDEX` uses [Index](#index) (get mode)_
+_Menus: `INDEX` uses [Get Index](#get-index)_
 
 <img src="../assets/blocks/yield_to_thread_at_start.png">
 
@@ -424,7 +425,7 @@ Yields and immediately ends the tick, skipping all threads that would normally s
 ## Broadcasts
 
 ### `broadcast [MESSAGE v] to (INDEX v)` -> Undefined
-_Menus: `INDEX` uses [Index](#index) (insert mode)_
+_Menus: `INDEX` uses [Insert Index](#insert-index)_
 
 <img src="../assets/blocks/broadcast_message1_to_after_end.png">
 
@@ -433,7 +434,7 @@ Broadcasts `MESSAGE` and then moves all new threads that were created to `INDEX`
 Any preexisting threads with a `when I receive [MESSAGE v]` hat block will be restarted and moved to `INDEX` as well.
 
 ### `broadcast [MESSAGE v] to (INDEX v) and wait` -> Undefined
-_Menus: `INDEX` uses [Index](#index) (insert mode)_
+_Menus: `INDEX` uses [Insert Index](#insert-index)_
 
 <img src="../assets/blocks/broadcast_message1_to_after_end_and_wait.png">
 
@@ -516,7 +517,7 @@ If `ACTIVETHREAD` is null or not in the [threads array](#threads---arraythread) 
 </details>
 
 ### `set threads to [THREADS] and yield to thread at (ACTIVEINDEX v)` -> Undefined
-_Menus: `ACTIVEINDEX` uses [Index](#index) (get mode & absolute mode)_
+_Menus: `ACTIVEINDEX` uses [Absolute Insert Index](#insert-index)_
 
 <img src="../assets/blocks/set_threads_to_and_yield_to_thread_at_start.png">
 
@@ -535,7 +536,7 @@ If `ACTIVEINDEX` is larger than the normally accepted range, will immediately en
 </details>
 
 ### `move [THREAD] to (INDEX v)` -> Undefined
-_Menus: `INDEX` uses [Index](#index) (insert mode)_
+_Menus: `INDEX` uses [Insert Index](#insert-index)_
 
 <img src="../assets/blocks/move_to_after_end.png">
 
@@ -828,49 +829,63 @@ The behavior and effects of this flag are described under [`<graphics updated>`]
 
 # Menus
 
-### Index
+### Get Index
+_Accepts reporters: **Yes**_
 
-Depending on whether the argument is going to be used as a _get_ index or an _insert_ index and whether _absolute mode_ is used, the menu items will be:
+| Item                        | Description                                                                  |
+|-----------------------------|------------------------------------------------------------------------------|
+| start                       | Gets the thread at the start of the [threads array](#threads---arraythread). |
+| end                         | Gets the thread at the end of the threads array.                             |
+| previous index*             | Gets the thread before the active thread in the threads array.               |
+| active index*               | Gets the active thread.                                                      |
+| next index*                 | Gets the thread after the active thread in the threads array.                |
+| (you can put an index here) | _N/A_                                                                        |
 
-| Get                         | Insert                      |
-|-----------------------------|-----------------------------|
-| start                       | before start                |
-| end                         | after end                   |
-| previous index*             | before previous*            |
-| active index*               | before active*              |
-| next index*                 | before next*                |
-| (you can put an index here) | (you can put an index here) |
+*This item will not appear for _absolute get index_ menus.
 
-*This item will not appear if _absolute mode_ is used.
+The value can be overridden by an integer from `0` to the length of the [threads array](#threads---arraythread) (inclusive). For the value `0`, the behavior of `end` is used. Otherwise, the value is interpreted as a 1-based index.
 
-For *get* indexes, the value can be overridden by an integer from `0` to the length of the [threads array](#threads---arraythread) (inclusive).\
-For *insert* indexes, the value can be overridden by an integer from `0` to the length of the threads array + 1 (inclusive).
+### Insert Index
+_Accepts reporters: **Yes**_
 
-For the value `0`, the behavior of `end` or `after end` is used. Otherwise, the value is interpreted as a 1-based index.
+| Item                        | Description                                                                              |
+|-----------------------------|------------------------------------------------------------------------------------------|
+| before start                | Inserts the thread(s) at the start of the [threads array](#threads---arraythread).       |
+| after end                   | Inserts the thread(s) at the end of the threads array.                                   |
+| before previous*            | Inserts the thread(s) before the _thread before the active thread_ in the threads array. |
+| before active*              | Inserts the thread(s) before the active thread in the threads array.                     |
+| after active*               | Inserts the thread(s) after the active thread in the threads array.                      |
+| (you can put an index here) | _N/A_                                                                                    |
 
-In the case of *insert*, the operation will insert the thread(s) **before the specified index**.
+*This item will not appear for _absolute insert index_ menus.
+
+The value can be overridden by an integer from `0` to the length of the [threads array](#threads---arraythread) + 1 (inclusive). For the value `0`, the behavior of `after end` is used. Otherwise, the value is interpreted as a 1-based index; the operation will insert the thread(s) **before the specified index**.
 
 ### Status Format
+_Accepts reporters: **No**_
 
-| Menu Items    |
-|---------------|
-| #             |
-| text          |
-| internal name |
+| Item          | Description                                                 |
+|---------------|-------------------------------------------------------------|
+| #             | Gives the status as an integer.                             |
+| text          | Gives the status as a user-friendly string.                 |
+| internal name | Gives the status as the name of its variable in the engine. |
 
 ### Set Boolean
+_Accepts reporters: **No**_
 
-| Menu Items |
-|------------|
-| enable     |
-| disable    |
+| Item    | Description           |
+|---------|-----------------------|
+| enable  | Enables the setting.  |
+| disable | Disables the setting. |
 
 ### Target
+_Accepts reporters: **Yes**_
 
-| Menu Items       |
-|------------------|
-| this target      |
-| \<sprite names\> |
+| Item                        | Description                                             |
+|-----------------------------|---------------------------------------------------------|
+| this target                 | Uses the current target.                                |
+| _sprite name_               | Uses the non-clone target of the sprite with this name. |
+| (you can put a target here) | _N/A_                                                   |
 
 The value can be overridden by a target or target ID.
 
