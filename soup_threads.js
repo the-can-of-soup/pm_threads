@@ -1992,7 +1992,7 @@
             compiler.source += `if (${branch}) {`;
 
             let rawThread = compiler.localVariables.next();
-            compiler.source += `${rawThread} = runtime._pushThread(${branch}, ${rawTarget}, {targetBlockLocation: runtime.sequencer.activeThread.blockContainer});`;
+            compiler.source += `${rawThread} = runtime._pushThread(${branch}, ${rawTarget}, {targetBlockLocation: thread.blockContainer});`;
             /*
             compiler.source += `${rawThread}.spoofing = true;`;
             compiler.source += `${rawThread}.spoofTarget = ${rawTarget};`;
