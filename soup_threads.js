@@ -1988,7 +1988,7 @@
             compiler.source += `let ${rawTarget} = runtime.getTargetById(${targetId});`;
 
             let branch = compiler.localVariables.next();
-            compiler.source += `let ${branch} = target.blocks.getBranch(${JSON.stringify(node.blockId)}, 0);`;
+            compiler.source += `let ${branch} = thread.blockContainer.getBranch(${JSON.stringify(node.blockId)}, 0);`;
             compiler.source += `if (${branch}) {`;
 
             let rawThread = compiler.localVariables.next();
