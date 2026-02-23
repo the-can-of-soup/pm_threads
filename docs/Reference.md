@@ -13,7 +13,7 @@
     - [`(thread at (INDEX v))` -> Thread](#thread-at-index-v---thread)
   - [Thread Builders](#thread-builders)
     - [`new thread in (TARGET v) inserted (INDEX v) {SUBSTACK}` -> Undefined](#new-thread-in-target-v-inserted-index-v-substack---undefined)
-    - **TODO:** `(new thread in (TARGET v) inserted (INDEX v))` -> Thread
+    - **TODO:** `(new thread in (TARGET v) inserted (INDEX v)) {SUBSTACK}` -> Thread
   - [Thread Properties](#thread-properties)
     - [`(target of [THREAD])` -> Target](#target-of-thread---target)
     - [`(id of [THREAD])` -> String](#id-of-thread---string)
