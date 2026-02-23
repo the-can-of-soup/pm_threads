@@ -376,7 +376,7 @@
           }
 
         case 'next index':
-        case 'before next':
+        case 'after active':
           if (!absoluteMode) {
             INDEX = runtime.sequencer.activeThreadIndex + 2;
             break;
@@ -1606,8 +1606,8 @@
                 value: 'before active',
               },
               {
-                text: 'before next',
-                value: 'before next',
+                text: 'after active',
+                value: 'after active',
               },
               {
                 text: '(you can put an index here)',
