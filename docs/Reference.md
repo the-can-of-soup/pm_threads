@@ -337,7 +337,7 @@ In many cases when a thread is stopped, it will enter limbo. Limbo is when a dea
 <details>
   <summary>Internal behavior</summary>
   
-  Returns `true` if:
+  Returns `true` if all of:
   - The raw thread is not in the `runtime.threads` array (therefore it is dead).
   - The thread's status is not [4 (completed)](#status-statusformat-v-of-thread---number--string).
 </details>
