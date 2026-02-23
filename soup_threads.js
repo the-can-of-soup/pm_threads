@@ -10,7 +10,11 @@
 
 // TO-DO
 //
-// - Make broadcast message dropdown accept reporters
+// - Fix message arguments (change default "i" to "message1")
+// - Make sure passing nonexistent message names to broadcast blocks doesn't break anything
+// - Add "info of [THREAD]" block that returns header as displayed in reporter bubble
+// - Make "__name__" thread var display a label in reporter bubble header
+// - Make thread vars stored in a map instead of an object
 // - Figure out *exactly* what happens when a hat block is restarted
 // - Figure out *exactly* what happens when an async block is run
 // - Make all blocks compiled
@@ -123,6 +127,9 @@
       if (this.thread.status !== RawThreadType.STATUS_DONE && !runtime.threads.includes(this.thread)) {
         result += ` (limbo)`;
       }
+      if (this.thread.updateMonitor) {
+        result += ` monitor`;
+      }
       result += ` thread`;
       try {
         result += ` in ${this.thread.target.sprite.name}`;
@@ -147,7 +154,18 @@
     }
 
     toJSON() {
-      return this.toString();
+      if (this.thread === null) {
+        return null;
+      }
+
+      return {
+        id: this.getId(),
+        status: this.thread.status,
+        targetId: this.thread.target.id,
+        isMonitor: this.thread.updateMonitor,
+        isStackClick: this.thread.stackClick,
+        variables: this.thread.soupThreadVariables,
+      };
     }
 
     toShortString() {
@@ -238,9 +256,10 @@
   };
 
   const MessageArgument = {
-    type: Scratch.ArgumentType.BROADCAST,
+    type: Scratch.ArgumentType.STRING,
+    menu: 'message',
     exemptFromNormalization: true,
-    defaultValue: 'message1',
+    // defaultValue: 'message1',
   };
 
   const EmptyArgument = {
@@ -759,7 +778,7 @@
 
           {
             opcode: 'builderNoReturn',
-            text: ['(not implemented) new thread in [TARGET] moved to [INDEX]', '[ICON]'],
+            text: ['(partially implemented) new thread in [TARGET] moved to [INDEX]', '[ICON]'],
             alignments: [
               null, // text
               null, // branch
@@ -1660,6 +1679,12 @@
               },
             ]
           },
+          message: {
+            acceptReporters: true,
+            // bro why the heck isn't this documented anywhere
+            // this took me so long to find
+            variableType: vm.exports.Variable.BROADCAST_MESSAGE_TYPE,
+          },
         },
       };
     }
@@ -1687,6 +1712,19 @@
     static getCompileInfo() {
       return {
         ir: {
+
+          builderNoReturn(generator, block) {
+            return {
+              kind: 'stack',
+              blockId: block.id,
+              args: {
+                TARGET: generator.descendInputOfBlock(block, 'TARGET'),
+                INDEX: generator.descendInputOfBlock(block, 'INDEX'),
+              }
+            }
+          },
+
+
 
           killThread(generator, block) {
             generator.script.yields = true;
@@ -1926,6 +1964,47 @@
 
         },
         js: {
+
+          builderNoReturn(node, compiler, imports) {
+            // Stolen from Controls Expansion
+            /*
+            if (util.thread.target.blocks.getBranch(util.thread.peekStack(), 0)) {
+              util.sequencer.runtime._pushThread(
+                util.thread.target.blocks.getBranch(util.thread.peekStack(), 0),
+                util.target,
+                {}
+              );
+            }
+            */
+
+            // absolutely no chance this works
+
+            let targetId = compiler.localVariables.next();
+            compiler.source += `let ${targetId} = vm.SoupThreadsUtil.handleTargetInput(${compiler.descendInput(node.args.TARGET).asUnknown()}, target);`
+
+            compiler.source += `if (${targetId} !== null) {`;
+
+            let rawTarget = compiler.localVariables.next();
+            compiler.source += `let ${rawTarget} = runtime.getTargetById(${targetId});`;
+
+            let branch = compiler.localVariables.next();
+            compiler.source += `let ${branch} = target.blocks.getBranch(${JSON.stringify(node.blockId)}, 0);`;
+            compiler.source += `if (${branch}) {`;
+
+            let rawThread = compiler.localVariables.next();
+            compiler.source += `${rawThread} = runtime._pushThread(${branch}, ${rawTarget}, {targetBlockLocation: target.blocks});`;
+            compiler.source += `${rawThread}.spoofing = true;`;
+            compiler.source += `${rawThread}.spoofTarget = ${rawTarget};`;
+
+            // TODO: move thread
+            // TODO: rename this block and also `builder` to "new thread in [TARGET] inserted [INDEX]"
+
+            compiler.source += `}`;
+
+            compiler.source += `}`;
+          },
+
+
 
           killThread(node, compiler, imports) {
             let THREAD = compiler.localVariables.next();
@@ -2349,7 +2428,7 @@
             
             let oldWarp = compiler.isWarp;
             compiler.isWarp = (dropdown === 'enable');
-            compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads.setWarpModeFor')); // false means this is not a loop
+            compiler.descendStack(node.args.SUBSTACK, new imports.Frame(false, 'soupThreads.setWarpModeFor')); // false means this is not a loop
             compiler.isWarp = oldWarp;
           },
 
