@@ -915,8 +915,8 @@ The value can be overridden by a target or target ID.
     - When `stop (SPRITE v)` is run, all threads running as `SPRITE` are considered killed, even if they caused it.
     - When a clone is deleted, all threads running as that clone are considered killed, even if they caused the deletion.
 
-[^3]: The contents of the loop will **NOT** be run with warp mode (all at once); only the loop itself has this behavior.
+[^3]: The _contents_ of the loop will **NOT** be run with warp mode (all at once); only the loop itself has this behavior.
 
-[^4]: This block will yield after a loop if the editor is frozen and warp timer is enabled to prevent crashes.
+[^4]: This block _will_ yield after a loop if the editor is frozen and warp timer is enabled to prevent crashes.
 
 [^5]: Threads that entered limbo[^1] this tick are not present in the [threads array](#threads---arraythread).
