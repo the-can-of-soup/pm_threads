@@ -102,6 +102,8 @@
     static toThread(thread) {
       if (thread instanceof ThreadType) {
         return thread;
+      } else if (thread instanceof RawThreadType) {
+        return new ThreadType(thread);
       }
       return new ThreadType();
     }
@@ -807,7 +809,7 @@
           },
           {
             opcode: 'builder',
-            text: ['(not implemented) new thread in [TARGET] inserted [INDEX]', '[ICON]'],
+            text: ['new thread in [TARGET] inserted [INDEX]', '[ICON]'],
             alignments: [
               null, // text
               null, // branch
@@ -1729,6 +1731,17 @@
             }
           },
 
+          builder(generator, block) {
+            return {
+              kind: 'input',
+              blockId: block.id,
+              args: {
+                TARGET: generator.descendInputOfBlock(block, 'TARGET'),
+                INDEX: generator.descendInputOfBlock(block, 'INDEX'),
+              }
+            }
+          },
+
 
 
           killThread(generator, block) {
@@ -1970,7 +1983,9 @@
         },
         js: {
 
-          builderNoReturn(node, compiler, imports) {
+          _builderCore(node, compiler, imports) {
+            let source = '';
+
             // Stolen from Controls Expansion
             /*
             if (util.thread.target.blocks.getBranch(util.thread.peekStack(), 0)) {
@@ -1982,29 +1997,32 @@
             }
             */
 
-            // absolutely no chance this works
+            // absolutely no chance this works :D
+
+
+            let rawThread = compiler.localVariables.next();
+            source += `let ${rawThread} = null;`;
 
             let TARGET = compiler.localVariables.next();
-            compiler.source += `let ${TARGET} = vm.SoupThreadsUtil.handleTargetInput(${compiler.descendInput(node.args.TARGET).asUnknown()}, target);`
+            source += `let ${TARGET} = vm.SoupThreadsUtil.handleTargetInput(${compiler.descendInput(node.args.TARGET).asUnknown()}, target);`
 
             // insertMode = true, absoluteMode = false, constrain = true
             let INDEX = compiler.localVariables.next();
-            compiler.source += `let ${INDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.INDEX).asUnknown()}, true, false, true);`;
+            source += `let ${INDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.INDEX).asUnknown()}, true, false, true);`;
 
-            compiler.source += `if (${TARGET} !== null) {`;
+            source += `if (${TARGET} !== null) {`;
 
             let rawTarget = compiler.localVariables.next();
-            compiler.source += `let ${rawTarget} = runtime.getTargetById(${TARGET});`;
+            source += `let ${rawTarget} = runtime.getTargetById(${TARGET});`;
 
             let branch = compiler.localVariables.next();
-            compiler.source += `let ${branch} = thread.blockContainer.getBranch(${JSON.stringify(node.blockId)}, 0);`;
-            compiler.source += `if (${branch}) {`;
+            source += `let ${branch} = thread.blockContainer.getBranch(${JSON.stringify(node.blockId)}, 0);`;
+            source += `if (${branch}) {`;
 
 
             // Create the thread.
 
-            let rawThread = compiler.localVariables.next();
-            compiler.source += `${rawThread} = runtime._pushThread(${branch}, ${rawTarget}, {targetBlockLocation: thread.blockContainer});`;
+            source += `${rawThread} = runtime._pushThread(${branch}, ${rawTarget}, {targetBlockLocation: thread.blockContainer});`;
 
             // Move the thread.
             // Because the new thread was pushed to the end of the array, we will
@@ -2012,21 +2030,46 @@
 
             // Remove the old reference to the thread.
             // The new thread will always be at the end of the array, so we remove the last element.
-            compiler.source += `runtime.threads.splice(-1, 1);`;
+            source += `runtime.threads.splice(-1, 1);`;
             // Insert the thread.
-            compiler.source += `runtime.threads.splice(${INDEX}, 0, ${rawThread});`;
+            source += `runtime.threads.splice(${INDEX}, 0, ${rawThread});`;
 
             // Update activeThreadIndex if the active thread moved.
 
-            compiler.source += `if (${INDEX} <= runtime.sequencer.activeThreadIndex) {`;
+            source += `if (${INDEX} <= runtime.sequencer.activeThreadIndex) {`;
             // The active thread was indirectly moved.
-            compiler.source += `runtime.sequencer.activeThreadIndex += 1;`;
-            compiler.source += `}`;
+            source += `runtime.sequencer.activeThreadIndex += 1;`;
+            source += `}`;
 
 
-            compiler.source += `}`;
+            source += `}`;
 
-            compiler.source += `}`;
+            source += `}`;
+
+
+            return {
+              source,
+              rawThread,
+            };
+          },
+
+          builderNoReturn(node, compiler, imports) {
+            let compiledBuilderCore = SoupThreadsExtension.getCompileInfo().js._builderCore(node, compiler, imports);
+            compiler.source += compiledBuilderCore.source;
+          },
+
+          builder(node, compiler, imports) {
+            let source = '';
+
+            source += `(function(){`;
+
+            let compiledBuilderCore = SoupThreadsExtension.getCompileInfo().js._builderCore(node, compiler, imports);
+            source += compiledBuilderCore.source;
+            source += `return new vm.SoupThreads.Type(${compiledBuilderCore.rawThread});`;
+
+            source += `})()`; // no semicolon
+
+            return new imports.TypedInput(source, imports.TYPE_UNKNOWN);
           },
 
 
