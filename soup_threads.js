@@ -778,7 +778,7 @@
 
           {
             opcode: 'builderNoReturn',
-            text: ['(partially implemented) new thread in [TARGET] moved to [INDEX]', '[ICON]'],
+            text: ['new thread in [TARGET] inserted [INDEX]', '[ICON]'],
             alignments: [
               null, // text
               null, // branch
@@ -807,7 +807,7 @@
           },
           {
             opcode: 'builder',
-            text: ['(not implemented) new thread in [TARGET] moved to [INDEX]', '[ICON]'],
+            text: ['(not implemented) new thread in [TARGET] inserted [INDEX]', '[ICON]'],
             alignments: [
               null, // text
               null, // branch
@@ -1979,27 +1979,45 @@
 
             // absolutely no chance this works
 
-            let targetId = compiler.localVariables.next();
-            compiler.source += `let ${targetId} = vm.SoupThreadsUtil.handleTargetInput(${compiler.descendInput(node.args.TARGET).asUnknown()}, target);`
+            let TARGET = compiler.localVariables.next();
+            compiler.source += `let ${TARGET} = vm.SoupThreadsUtil.handleTargetInput(${compiler.descendInput(node.args.TARGET).asUnknown()}, target);`
 
-            compiler.source += `if (${targetId} !== null) {`;
+            // insertMode = true, absoluteMode = false, constrain = true
+            let INDEX = compiler.localVariables.next();
+            compiler.source += `let ${INDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.INDEX).asUnknown()}, true, false, true);`;
+
+            compiler.source += `if (${TARGET} !== null) {`;
 
             let rawTarget = compiler.localVariables.next();
-            compiler.source += `let ${rawTarget} = runtime.getTargetById(${targetId});`;
+            compiler.source += `let ${rawTarget} = runtime.getTargetById(${TARGET});`;
 
             let branch = compiler.localVariables.next();
             compiler.source += `let ${branch} = thread.blockContainer.getBranch(${JSON.stringify(node.blockId)}, 0);`;
             compiler.source += `if (${branch}) {`;
 
+
+            // Create the thread.
+
             let rawThread = compiler.localVariables.next();
             compiler.source += `${rawThread} = runtime._pushThread(${branch}, ${rawTarget}, {targetBlockLocation: thread.blockContainer});`;
-            /*
-            compiler.source += `${rawThread}.spoofing = true;`;
-            compiler.source += `${rawThread}.spoofTarget = ${rawTarget};`;
-            */
 
-            // TODO: move thread
-            // TODO: rename this block and also `builder` to "new thread in [TARGET] inserted [INDEX]"
+            // Move the thread.
+            // Because the new thread was pushed to the end of the array, we will
+            // always be moving it backwards (or to the same position) here.
+
+            // Remove the old reference to the thread.
+            // The new thread will always be at the end of the array, so we remove the last element.
+            compiler.source += `runtime.threads.splice(-1, 1);`;
+            // Insert the thread.
+            compiler.source += `runtime.threads.splice(${INDEX}, 0, ${rawThread});`;
+
+            // Update activeThreadIndex if the active thread moved.
+
+            compiler.source += `if (${INDEX} <= runtime.sequencer.activeThreadIndex) {`;
+            // The active thread was indirectly moved.
+            compiler.source += `runtime.sequencer.activeThreadIndex += 1;`;
+            compiler.source += `}`;
+
 
             compiler.source += `}`;
 
@@ -2303,7 +2321,7 @@
             compiler.source += `if (${INDEX} <= ${threadIndex}) {`;
 
             // Moving backwards (or to the same position)
-            // Remove the thread.
+            // Remove the old reference to the thread.
             compiler.source += `runtime.threads.splice(${threadIndex}, 1);`;
             // Insert the thread.
             compiler.source += `runtime.threads.splice(${INDEX}, 0, ${THREAD}.thread);`;
