@@ -1992,9 +1992,11 @@
             compiler.source += `if (${branch}) {`;
 
             let rawThread = compiler.localVariables.next();
-            compiler.source += `${rawThread} = runtime._pushThread(${branch}, ${rawTarget}, {targetBlockLocation: target.blocks});`;
+            compiler.source += `${rawThread} = runtime._pushThread(${branch}, ${rawTarget}, {targetBlockLocation: runtime.sequencer.activeThread.blockContainer});`;
+            /*
             compiler.source += `${rawThread}.spoofing = true;`;
             compiler.source += `${rawThread}.spoofTarget = ${rawTarget};`;
+            */
 
             // TODO: move thread
             // TODO: rename this block and also `builder` to "new thread in [TARGET] inserted [INDEX]"
