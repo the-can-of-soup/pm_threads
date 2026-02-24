@@ -10,7 +10,6 @@
 
 // TO-DO
 //
-// - Add "info of [THREAD]" block that returns header as displayed in reporter bubble
 // - Make "__name__" thread var display a label in reporter bubble header
 // - Make thread vars stored in a map instead of an object
 // - Add "super mutator shenanagins" so that atomic forever loses its end cap if an "escape loop" block is present inside it
@@ -896,6 +895,14 @@
                 menu: 'statusFormat',
                 defaultValue: '#',
               }
+            }
+          },
+          {
+            opcode: 'getHeader',
+            text: 'info text of [THREAD]',
+            ...ReporterBlock,
+            arguments: {
+              THREAD: Thread.Argument,
             }
           },
 
@@ -2551,7 +2558,7 @@
 
       return THREAD.getId();
     }
-    
+
     getIndex({THREAD}, util) {
       THREAD = ThreadType.toThread(THREAD);
 
@@ -2580,6 +2587,12 @@
         return ThreadStatusInternalNames[THREAD.thread.status];
       }
       return THREAD.thread.status;
+    }
+
+    getHeader({THREAD}, util) {
+      THREAD = ThreadType.toThread(THREAD);
+
+      return THREAD.getHeader();
     }
 
 
