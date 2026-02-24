@@ -20,6 +20,7 @@
 >   - Redraw Conditions (work timer, graphics updated, turbo mode, etc.)
 >   - Monitor Threads
 > - Threads Extension
->   - Common Patterns (thread manager, "data" thread variable when creating a new thread, etc.)
+>   - Thread Variables
 >   - Atomic Loop Blocks
 >   - Broadcast Blocks
+>   - Common Patterns (thread manager, "data" thread variable when creating a new thread, etc.)
