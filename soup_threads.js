@@ -10,10 +10,10 @@
 
 // TO-DO
 //
-// - Make sure passing nonexistent message names to broadcast blocks doesn't break anything
 // - Add "info of [THREAD]" block that returns header as displayed in reporter bubble
 // - Make "__name__" thread var display a label in reporter bubble header
 // - Make thread vars stored in a map instead of an object
+// - Add "super mutator shenanagins" so that atomic forever loses its end cap if an "escape loop" block is present inside it
 // - Figure out *exactly* what happens when a hat block is restarted
 // - Figure out *exactly* what happens when an async block is run
 // - Make compat atomic loops (atomic "for" loops for looping through arrays, objects, sets, etc.)
@@ -1544,6 +1544,8 @@
         menus: {
           index: {
             acceptReporters: true,
+            isTypeable: true,
+            isNumeric: true,
             items: [
               {
                 text: 'start',
@@ -1567,12 +1569,14 @@
               },
               {
                 text: '(you can put an index here)',
-                value: '(you can put an index here)',
+                value: '1',
               },
             ],
           },
           indexAbsolute: {
             acceptReporters: true,
+            isTypeable: true,
+            isNumeric: true,
             items: [
               {
                 text: 'start',
@@ -1584,12 +1588,14 @@
               },
               {
                 text: '(you can put an index here)',
-                value: '(you can put an index here)',
+                value: '1',
               },
             ],
           },
           indexInsert: {
             acceptReporters: true,
+            isTypeable: true,
+            isNumeric: true,
             items: [
               {
                 text: 'before start',
@@ -1613,12 +1619,14 @@
               },
               {
                 text: '(you can put an index here)',
-                value: '(you can put an index here)',
+                value: '1',
               },
             ],
           },
           indexInsertAbsolute: {
             acceptReporters: true,
+            isTypeable: true,
+            isNumeric: true,
             items: [
               {
                 text: 'before start',
@@ -1630,7 +1638,7 @@
               },
               {
                 text: '(you can put an index here)',
-                value: '(you can put an index here)',
+                value: '1',
               },
             ],
           },
@@ -1712,10 +1720,10 @@
         }
       }
 
-      menuItems.push({
-        text: '(you can put a target here)',
-        value: '(you can put a target here)',
-      });
+      // menuItems.push({
+      //   text: '(you can put a target here)',
+      //   value: '(you can put a target here)',
+      // });
 
       return menuItems;
     }
