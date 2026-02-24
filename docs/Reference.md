@@ -165,6 +165,8 @@ Creates a new thread that will execute in `TARGET`; then, inserts it into the [t
   <summary>Internal behavior</summary>
   
   Uses `runtime._pushThread` to create a new thread at the end of the [threads array](#threads---arraythread) containing the contents of `SUBSTACK`. Next, moves it to `INDEX`. Finally, updates `sequencer.activeThreadIndex` if the active thread was moved.
+
+  The new thread is created by passing the ID of the first block in `SUBSTACK` to `runtime._pushThread`, rather than by starting some precompiled chunk. This means that **`SUBSTACK` is not compiled until the "new thread" block is run**.
 </details>
 
 ### `(new thread in (TARGET v) inserted (INDEX v) {SUBSTACK})` -> Thread
