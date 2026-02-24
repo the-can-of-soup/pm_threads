@@ -165,8 +165,10 @@
 
       return {
         id: this.getId(),
-        status: this.thread.status,
         targetId: this.thread.target.id,
+        status: this.thread.status,
+        originalStatus: this.getOriginalStatus(),
+        isLimbo: this.isLimbo(),
         isMonitor: this.thread.updateMonitor,
         isStackClick: this.thread.stackClick,
         variables: this.thread.soupThreadVariables,
@@ -234,7 +236,7 @@
       // Returns true if the thread is in limbo.
       // This is if it is dead, but its unpaused status is not STATUS_DONE.
 
-      return this.getUnpausedStatus() !== RawThreadType.STATUS_DONE && !runtime.threads.includes(this.thread);
+      return this.thread !== null && this.getUnpausedStatus() !== RawThreadType.STATUS_DONE && !runtime.threads.includes(this.thread);
     }
   }
 
