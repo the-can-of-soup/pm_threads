@@ -1843,10 +1843,8 @@
           return {
             kind: 'stack',
             args: {
+              MESSAGE: generator.descendInputOfBlock(block, 'MESSAGE'),
               INDEX: generator.descendInputOfBlock(block, 'INDEX'),
-            },
-            constants: {
-              MESSAGE: block.fields.MESSAGE.value,
             }
           };
         },
@@ -1857,10 +1855,8 @@
           return {
             kind: 'stack',
             args: {
+              MESSAGE: generator.descendInputOfBlock(block, 'MESSAGE'),
               INDEX: generator.descendInputOfBlock(block, 'INDEX'),
-            },
-            constants: {
-              MESSAGE: block.fields.MESSAGE.value,
             }
           };
         },
@@ -1870,8 +1866,8 @@
 
           return {
             kind: 'stack',
-            constants: {
-              MESSAGE: block.fields.MESSAGE.value,
+            args: {
+              MESSAGE: generator.descendInputOfBlock(block, 'MESSAGE'),
             }
           };
         },
@@ -2192,8 +2188,6 @@
 
 
         broadcastAt(node, compiler, imports, wait = false, atomic = false) {
-          let MESSAGE = node.constants.MESSAGE;
-
           let INDEX = compiler.localVariables.next();
           if (atomic) {
             // Insert new threads immediately before the active thread if atomic mode is enabled
@@ -2205,7 +2199,7 @@
 
           // Threads can be added to the end of the threads array, or overwrite threads in the middle of the array (when restarting a thread).
           let newThreads = compiler.localVariables.next();
-          compiler.source += `let ${newThreads} = runtime.startHats('event_whenbroadcastreceived', {BROADCAST_OPTION: ${JSON.stringify(MESSAGE)}});`;
+          compiler.source += `let ${newThreads} = runtime.startHats('event_whenbroadcastreceived', {BROADCAST_OPTION: ${compiler.descendInput(node.args.MESSAGE).asString()}});`;
 
           // Temporarily remove all new threads from the threads array.
 
