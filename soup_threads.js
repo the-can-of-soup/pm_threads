@@ -17,7 +17,7 @@
 // - Figure out *exactly* what happens when a hat block is restarted
 // - Figure out *exactly* what happens when an async block is run
 // - Make compat atomic loops (atomic "for" loops for looping through arrays, objects, sets, etc.)
-// - Yell at @jwklong until they fix the lip that is happening in the `builder` block
+// - Yell at @jwklong until they fix the lip that is happening in the `builder` block and the wrongly positioned arrows in dropdown textboxes with custom block shape addon enabled
 // - Make all blocks compiled
 
 // NOTES
@@ -877,6 +877,14 @@
             }
           },
           {
+            opcode: 'getIndex',
+            text: 'index of [THREAD]',
+            ...ReporterBlock,
+            arguments: {
+              THREAD: Thread.Argument,
+            }
+          },
+          {
             opcode: 'getStatus',
             text: 'status [STATUSFORMAT] of [THREAD]',
             ...ReporterBlock,
@@ -888,14 +896,6 @@
                 menu: 'statusFormat',
                 defaultValue: '#',
               }
-            }
-          },
-          {
-            opcode: 'getIndex',
-            text: 'index of [THREAD]',
-            ...ReporterBlock,
-            arguments: {
-              THREAD: Thread.Argument,
             }
           },
 
@@ -2551,6 +2551,21 @@
 
       return THREAD.getId();
     }
+    
+    getIndex({THREAD}, util) {
+      THREAD = ThreadType.toThread(THREAD);
+
+      if (THREAD.thread === null) {
+        return '';
+      }
+
+      let threadIndex;
+      if ((threadIndex = runtime.threads.indexOf(THREAD.thread)) !== -1) {
+        return threadIndex + 1;
+      }
+
+      return '';
+    }
 
     getStatus({THREAD, STATUSFORMAT}, util) {
       THREAD = ThreadType.toThread(THREAD);
@@ -2565,21 +2580,6 @@
         return ThreadStatusInternalNames[THREAD.thread.status];
       }
       return THREAD.thread.status;
-    }
-
-    getIndex({THREAD}, util) {
-      THREAD = ThreadType.toThread(THREAD);
-
-      if (THREAD.thread === null) {
-        return '';
-      }
-
-      let threadIndex;
-      if ((threadIndex = runtime.threads.indexOf(THREAD.thread)) !== -1) {
-        return threadIndex + 1;
-      }
-
-      return '';
     }
 
 
