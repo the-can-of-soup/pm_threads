@@ -167,7 +167,7 @@
         id: this.getId(),
         targetId: this.thread.target.id,
         status: this.thread.status,
-        originalStatus: this.getOriginalStatus(),
+        originalStatus: this.getUnpausedStatus(),
         isLimbo: this.isLimbo(),
         isMonitor: this.thread.updateMonitor,
         isStackClick: this.thread.stackClick,
