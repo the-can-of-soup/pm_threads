@@ -124,8 +124,12 @@
       if (this.thread === null) {
         return `Null thread`;
       }
-      let result = ThreadStatus[this.thread.status];
-      if (this.thread.status !== RawThreadType.STATUS_DONE && !runtime.threads.includes(this.thread)) {
+      let result = '';
+      result += ThreadStatus[this.thread.status];
+      if (this.thread.status === RawThreadType.STATUS_PAUSED) {
+        result += `<${ThreadStatus[this.thread.originalStatus]}>`;
+      }
+      if (this.isLimbo()) {
         result += ` (limbo)`;
       }
       if (this.thread.updateMonitor) {
@@ -220,6 +224,17 @@
       // because dead threads are only not "completed" if they are
       // in limbo.
       return this.thread.isKilled || this.thread.status !== RawThreadType.STATUS_DONE;
+    }
+
+    getUnpausedStatus() {
+      return this.thread.status === RawThreadType.STATUS_PAUSED ? this.thread.originalStatus : this.thread.status;
+    }
+
+    isLimbo() {
+      // Returns true if the thread is in limbo.
+      // This is if it is dead, but its unpaused status is not STATUS_DONE.
+
+      return this.getUnpausedStatus() !== RawThreadType.STATUS_DONE && !runtime.threads.includes(this.thread);
     }
   }
 
@@ -898,6 +913,20 @@
             }
           },
           {
+            opcode: 'getOriginalStatus',
+            text: 'unpaused status [STATUSFORMAT] of [THREAD]',
+            ...ReporterBlock,
+            arguments: {
+              THREAD: Thread.Argument,
+              STATUSFORMAT: {
+                type: Scratch.ArgumentType.STRING,
+                exemptFromNormalization: true,
+                menu: 'statusFormat',
+                defaultValue: '#',
+              }
+            }
+          },
+          {
             opcode: 'getHeader',
             text: 'info text of [THREAD]',
             ...ReporterBlock,
@@ -1010,7 +1039,7 @@
           },
           {
             opcode: 'unpauseThread',
-            text: 'resume [THREAD]',
+            text: 'unpause [THREAD]',
             ...CommandBlock,
             arguments: {
               THREAD: Thread.Argument,
@@ -2580,6 +2609,7 @@
       if (THREAD.thread === null) {
         return '';
       }
+
       if (STATUSFORMAT === 'text') {
         return ThreadStatus[THREAD.thread.status];
       }
@@ -2587,6 +2617,24 @@
         return ThreadStatusInternalNames[THREAD.thread.status];
       }
       return THREAD.thread.status;
+    }
+
+    getOriginalStatus({THREAD, STATUSFORMAT}, util) {
+      THREAD = ThreadType.toThread(THREAD);
+
+      if (THREAD.thread === null) {
+        return '';
+      }
+
+      let status = THREAD.getUnpausedStatus();
+
+      if (STATUSFORMAT === 'text') {
+        return ThreadStatus[status];
+      }
+      if (STATUSFORMAT === 'internal name') {
+        return ThreadStatusInternalNames[status];
+      }
+      return status;
     }
 
     getHeader({THREAD}, util) {
@@ -2692,12 +2740,12 @@
       // Returns true if:
       //
       // - The thread is not in the threads list (it is dead).
-      // - The thread's status is not STATUS_DONE.
+      // - The thread's unpaused status is not STATUS_DONE.
       //
       // Note: the case where dead threads are in the threads list are not considered,
       // as those threads always have status STATUS_DONE.
 
-      return THREAD.thread.status !== RawThreadType.STATUS_DONE && !runtime.threads.includes(THREAD.thread);
+      return THREAD.isLimbo();
     }
 
     isStackClick({THREAD}, util) {
