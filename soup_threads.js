@@ -10,7 +10,6 @@
 
 // TO-DO
 //
-// - Fix message arguments (change default "i" to "message1")
 // - Make sure passing nonexistent message names to broadcast blocks doesn't break anything
 // - Add "info of [THREAD]" block that returns header as displayed in reporter bubble
 // - Make "__name__" thread var display a label in reporter bubble header
@@ -259,10 +258,10 @@
   };
 
   const MessageArgument = {
+    // if you are copying this for your own project, make sure to also look at the "message" menu
     type: Scratch.ArgumentType.STRING,
     menu: 'message',
     exemptFromNormalization: true,
-    // defaultValue: 'message1',
   };
 
   const EmptyArgument = {
@@ -1683,10 +1682,14 @@
             ]
           },
           message: {
+            // if you are copying this for your own project, make sure to also look at MessageArgument
             acceptReporters: true,
             // bro why the heck isn't this documented anywhere
             // this took me so long to find
             variableType: vm.exports.Variable.BROADCAST_MESSAGE_TYPE,
+            // props to @godslayerakp for adding this feature; before, the default message name was "i" for some reason,
+            // so it would've been necessary for me to use XML or some other workaround
+            defaultName: 'message1',
           },
         },
       };
