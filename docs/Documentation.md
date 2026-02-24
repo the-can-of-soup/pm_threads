@@ -20,6 +20,7 @@
 >   - Redraw Conditions (work timer, graphics updated, turbo mode, etc.)
 >   - Monitor Threads
 > - Threads Extension
+>   - Thread Type (reporter bubble formatting, toString and toJSON behavior, serialization, etc.)
 >   - Thread Variables
 >   - Atomic Loop Blocks
 >   - Broadcast Blocks
