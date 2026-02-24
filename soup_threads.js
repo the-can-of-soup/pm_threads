@@ -115,7 +115,7 @@
           this.thread.soupThreadId = uid();
         }
         if (!('soupThreadVariables' in this.thread)) {
-          this.thread.soupThreadVariables = {};
+          this.thread.soupThreadVariables = new Map();
         }
       }
     }
@@ -174,7 +174,7 @@
         isKilled: this.isKilled(),
         isMonitor: this.thread.updateMonitor,
         isStackClick: this.thread.stackClick,
-        variables: this.thread.soupThreadVariables,
+        variables: Object.fromEntries(this.thread.soupThreadVariables), // appears to be fine if method names in Object.prototype are keys in the map here?
       };
     }
 
@@ -2832,7 +2832,7 @@
       }
 
       let variables = THREAD.thread.soupThreadVariables;
-      return variables.hasOwnProperty(VARIABLE) ? variables[VARIABLE] : '';
+      return variables.has(VARIABLE) ? variables.get(VARIABLE) : '';
     }
 
     setThreadVar({THREAD, VARIABLE, VALUE}, util) {
@@ -2844,7 +2844,7 @@
       }
 
       let variables = THREAD.thread.soupThreadVariables;
-      variables[VARIABLE] = VALUE;
+      variables.set(VARIABLE, VALUE);
     }
 
     getThreadVarNames({THREAD}, util) {
@@ -2855,7 +2855,7 @@
       }
 
       let variables = THREAD.thread.soupThreadVariables;
-      return new jwArray.Type(Object.keys(variables));
+      return new jwArray.Type(Array.from(variables.keys()));
     }
 
     deleteThreadVar({THREAD, VARIABLE}, util) {
@@ -2867,7 +2867,7 @@
       }
 
       let variables = THREAD.thread.soupThreadVariables;
-      delete variables[VARIABLE];
+      variables.delete(VARIABLE);
     }
 
 
