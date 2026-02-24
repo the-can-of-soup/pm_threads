@@ -12,6 +12,7 @@ URL: [`https://raw.githubusercontent.com/the-can-of-soup/pm_threads/refs/heads/m
 > - Thumbnail (?)
 > - Icon (?)
 > - Documentation
+> - Block shape (?)
 
 ## Documentation
 
