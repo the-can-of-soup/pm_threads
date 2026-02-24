@@ -10,8 +10,8 @@
 
 // TO-DO
 //
-// - Make "__name__" thread var display a label in reporter bubble header
 // - Make thread vars stored in a map instead of an object
+// - Make "__name__" thread var display a label in reporter bubble header
 // - Add "super mutator shenanagins" so that atomic forever loses its end cap if an "escape loop" block is present inside it
 // - Figure out *exactly* what happens when a hat block is restarted
 // - Figure out *exactly* what happens when an async block is run
