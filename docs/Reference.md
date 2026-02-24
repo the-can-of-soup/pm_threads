@@ -869,7 +869,7 @@ _Used in:_
 - [`(thread at (INDEX v))`](#thread-at-index-v---thread)
 - [`yield to thread at (INDEX v)`](#yield-to-thread-at-index-v---undefined)
 
-_Accepts reporters: **Yes**_
+_Type: **Number Textbox**_
 
 | Item                        | Description                                                                  |
 |-----------------------------|------------------------------------------------------------------------------|
@@ -878,7 +878,7 @@ _Accepts reporters: **Yes**_
 | previous index*             | Gets the thread before the active thread in the threads array.               |
 | active index*               | Gets the active thread.                                                      |
 | next index*                 | Gets the thread after the active thread in the threads array.                |
-| (you can put an index here) | _N/A_                                                                        |
+| (you can put an index here) | _Sets the textbox to `1` when selected._                                     |
 
 *This item will not appear for _absolute get index_ menus.
 
@@ -893,7 +893,7 @@ _Used in:_
 - [`set threads to [THREADS] and yield to thread at (ACTIVEINDEX v)`](#set-threads-to-threads-and-yield-to-thread-at-activeindex-v---undefined) _(absolute insert index)_
 - [`move [THREAD] to (INDEX v)`](#move-thread-to-index-v---undefined)
 
-_Accepts reporters: **Yes**_
+_Type: **Number Textbox**_
 
 | Item                        | Description                                                                              |
 |-----------------------------|------------------------------------------------------------------------------------------|
@@ -902,7 +902,7 @@ _Accepts reporters: **Yes**_
 | before previous*            | Inserts the thread(s) before the _thread before the active thread_ in the threads array. |
 | before active*              | Inserts the thread(s) before the active thread in the threads array.                     |
 | after active*               | Inserts the thread(s) after the active thread in the threads array.                      |
-| (you can put an index here) | _N/A_                                                                                    |
+| (you can put an index here) | _Sets the textbox to `1` when selected._                                                 |
 
 *This item will not appear for _absolute insert index_ menus.
 
@@ -914,13 +914,12 @@ _Used in:_
 - [`(new thread in (TARGET v) inserted (INDEX v) {SUBSTACK})`](#new-thread-in-target-v-inserted-index-v-substack---thread)
 - [`(threads in (TARGET v))`](#threads-in-target-v---arraythread)
 
-_Accepts reporters: **Yes**_
+_Type: **Accepts Reporters**_
 
 | Item                        | Description                                             |
 |-----------------------------|---------------------------------------------------------|
 | this target                 | Uses the current target.                                |
 | _sprite name_               | Uses the non-clone target of the sprite with this name. |
-| (you can put a target here) | _N/A_                                                   |
 
 The value can be overridden by a target or target ID.
 
@@ -928,7 +927,7 @@ The value can be overridden by a target or target ID.
 _Used in:_
 - [`(status [STATUSFORMAT v] of [THREAD])`](#status-statusformat-v-of-thread---number--string)
 
-_Accepts reporters: **No**_
+_Type: **Static**_
 
 | Item          | Description                                                 |
 |---------------|-------------------------------------------------------------|
@@ -940,7 +939,7 @@ _Accepts reporters: **No**_
 _Used in:_
 - [`[SETBOOLEAN v] warp mode for {SUBSTACK}`](#setboolean-v-warp-mode-for-substack---undefined)
 
-_Accepts reporters: **No**_
+_Type: **Static**_
 
 | Item    | Description           |
 |---------|-----------------------|
