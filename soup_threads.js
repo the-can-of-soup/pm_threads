@@ -563,7 +563,7 @@
       RawThreadType.prototype.play = SoupThreadsUtil.unpauseThreadOverride;
 
       // Register compiled blocks
-      runtime.registerCompiledExtensionBlocks('soupThreads', SoupThreadsExtension.getCompileInfo());
+      runtime.registerCompiledExtensionBlocks('soupThreads', SoupThreadsExtension.compileInfo);
 
       // Register custom shapes
       Scratch.gui.getBlockly().then(function(ScratchBlocks) {
@@ -1717,793 +1717,791 @@
       return menuItems;
     }
 
-    static getCompileInfo() {
-      return {
-        ir: {
+    static compileInfo = {
+      ir: {
 
-          builderNoReturn(generator, block) {
-            return {
-              kind: 'stack',
-              blockId: block.id,
-              args: {
-                TARGET: generator.descendInputOfBlock(block, 'TARGET'),
-                INDEX: generator.descendInputOfBlock(block, 'INDEX'),
-              }
+        builderNoReturn(generator, block) {
+          return {
+            kind: 'stack',
+            blockId: block.id,
+            args: {
+              TARGET: generator.descendInputOfBlock(block, 'TARGET'),
+              INDEX: generator.descendInputOfBlock(block, 'INDEX'),
             }
-          },
-
-          builder(generator, block) {
-            return {
-              kind: 'input',
-              blockId: block.id,
-              args: {
-                TARGET: generator.descendInputOfBlock(block, 'TARGET'),
-                INDEX: generator.descendInputOfBlock(block, 'INDEX'),
-              }
-            }
-          },
-
-
-
-          killThread(generator, block) {
-            generator.script.yields = true;
-
-            return {
-              kind: 'stack',
-              args: {
-                THREAD: generator.descendInputOfBlock(block, 'THREAD'),
-              }
-            };
-          },
-
-          pauseThread(generator, block) {
-            generator.script.yields = true;
-
-            return {
-              kind: 'stack',
-              args: {
-                THREAD: generator.descendInputOfBlock(block, 'THREAD'),
-              }
-            };
-          },
-
-          unpauseThread(generator, block) {
-            return {
-              kind: 'stack',
-              args: {
-                THREAD: generator.descendInputOfBlock(block, 'THREAD'),
-              }
-            };
-          },
-
-
-
-          yield(generator, block) {
-            generator.script.yields = true;
-
-            return {
-              kind: 'stack',
-            };
-          },
-
-          multiYield(generator, block) {
-            generator.script.yields = true;
-
-            return {
-              kind: 'stack',
-              args: {
-                TIMES: generator.descendInputOfBlock(block, 'TIMES'),
-              }
-            };
-          },
-
-          yieldBack(generator, block) {
-            generator.script.yields = true;
-
-            return {
-              kind: 'stack',
-            };
-          },
-
-          yieldToThread(generator, block) {
-            generator.script.yields = true;
-
-            return {
-              kind: 'stack',
-              args: {
-                ACTIVETHREAD: generator.descendInputOfBlock(block, 'ACTIVETHREAD'),
-              }
-            };
-          },
-
-          yieldToIndex(generator, block) {
-            generator.script.yields = true;
-
-            return {
-              kind: 'stack',
-              args: {
-                ACTIVEINDEX: generator.descendInputOfBlock(block, 'ACTIVEINDEX'),
-              }
-            };
-          },
-
-          yieldToEnd(generator, block) {
-            generator.script.yields = true;
-
-            return {
-              kind: 'stack',
-            };
-          },
-
-
-
-          broadcastAt(generator, block) {
-            return {
-              kind: 'stack',
-              args: {
-                INDEX: generator.descendInputOfBlock(block, 'INDEX'),
-              },
-              constants: {
-                MESSAGE: block.fields.MESSAGE.value,
-              }
-            };
-          },
-
-          broadcastAtAndWait(generator, block) {
-            generator.script.yields = true;
-
-            return {
-              kind: 'stack',
-              args: {
-                INDEX: generator.descendInputOfBlock(block, 'INDEX'),
-              },
-              constants: {
-                MESSAGE: block.fields.MESSAGE.value,
-              }
-            };
-          },
-
-          broadcastAtomic(generator, block) {
-            generator.script.yields = true;
-
-            return {
-              kind: 'stack',
-              constants: {
-                MESSAGE: block.fields.MESSAGE.value,
-              }
-            };
-          },
-
-
-
-          setRunningThreadsActiveThread(generator, block) {
-            generator.script.yields = true;
-
-            return {
-              kind: 'stack',
-              args: {
-                THREADS: generator.descendInputOfBlock(block, 'THREADS'),
-                ACTIVETHREAD: generator.descendInputOfBlock(block, 'ACTIVETHREAD'),
-              }
-            };
-          },
-
-          setRunningThreadsActiveIndex(generator, block) {
-            generator.script.yields = true;
-
-            return {
-              kind: 'stack',
-              args: {
-                THREADS: generator.descendInputOfBlock(block, 'THREADS'),
-                ACTIVEINDEX: generator.descendInputOfBlock(block, 'ACTIVEINDEX'),
-              }
-            };
-          },
-
-          moveThread(generator, block) {
-            return {
-              kind: 'stack',
-              args: {
-                THREAD: generator.descendInputOfBlock(block, 'THREAD'),
-                INDEX: generator.descendInputOfBlock(block, 'INDEX'),
-              }
-            };
-          },
-
-          swapThreads(generator, block) {
-            return {
-              kind: 'stack',
-              args: {
-                THREADONE: generator.descendInputOfBlock(block, 'THREADONE'),
-                THREADTWO: generator.descendInputOfBlock(block, 'THREADTWO'),
-              }
-            };
-          },
-
-
-
-          repeatAtomic(generator, block) {
-            return {
-              kind: 'stack',
-              args: {
-                TIMES: generator.descendInputOfBlock(block, 'TIMES'),
-                SUBSTACK: generator.descendSubstack(block, 'SUBSTACK'),
-              }
-            };
-          },
-
-          repeatUntilAtomic(generator, block) {
-            return {
-              kind: 'stack',
-              args: {
-                CONDITION: generator.descendInputOfBlock(block, 'CONDITION'),
-                SUBSTACK: generator.descendSubstack(block, 'SUBSTACK'),
-              }
-            };
-          },
-
-          repeatWhileAtomic(generator, block) {
-            return {
-              kind: 'stack',
-              args: {
-                CONDITION: generator.descendInputOfBlock(block, 'CONDITION'),
-                SUBSTACK: generator.descendSubstack(block, 'SUBSTACK'),
-              }
-            };
-          },
-
-          repeatForeverAtomic(generator, block) {
-            return {
-              kind: 'stack',
-              args: {
-                SUBSTACK: generator.descendSubstack(block, 'SUBSTACK'),
-              }
-            };
-          },
-
-
-
-          getWarpMode(generator, block) {
-            return {
-              kind: 'input',
-            };
-          },
-
-          setWarpModeFor(generator, block) {
-            return {
-              kind: 'stack',
-              args: {
-                SUBSTACK: generator.descendSubstack(block, 'SUBSTACK'),
-              },
-              constants: {
-                SETBOOLEAN: block.fields.SETBOOLEAN.value,
-              },
-            };
-          },
-
+          }
         },
-        js: {
 
-          _builderCore(node, compiler, imports) {
-            let source = '';
-
-            // Stolen from Controls Expansion
-            /*
-            if (util.thread.target.blocks.getBranch(util.thread.peekStack(), 0)) {
-              util.sequencer.runtime._pushThread(
-                util.thread.target.blocks.getBranch(util.thread.peekStack(), 0),
-                util.target,
-                {}
-              );
+        builder(generator, block) {
+          return {
+            kind: 'input',
+            blockId: block.id,
+            args: {
+              TARGET: generator.descendInputOfBlock(block, 'TARGET'),
+              INDEX: generator.descendInputOfBlock(block, 'INDEX'),
             }
-            */
+          }
+        },
 
-            // absolutely no chance this works :D
 
 
-            let rawThread = compiler.localVariables.next();
-            source += `let ${rawThread} = null;`;
+        killThread(generator, block) {
+          generator.script.yields = true;
 
-            let TARGET = compiler.localVariables.next();
-            source += `let ${TARGET} = vm.SoupThreadsUtil.handleTargetInput(${compiler.descendInput(node.args.TARGET).asUnknown()}, target);`
+          return {
+            kind: 'stack',
+            args: {
+              THREAD: generator.descendInputOfBlock(block, 'THREAD'),
+            }
+          };
+        },
 
+        pauseThread(generator, block) {
+          generator.script.yields = true;
+
+          return {
+            kind: 'stack',
+            args: {
+              THREAD: generator.descendInputOfBlock(block, 'THREAD'),
+            }
+          };
+        },
+
+        unpauseThread(generator, block) {
+          return {
+            kind: 'stack',
+            args: {
+              THREAD: generator.descendInputOfBlock(block, 'THREAD'),
+            }
+          };
+        },
+
+
+
+        yield(generator, block) {
+          generator.script.yields = true;
+
+          return {
+            kind: 'stack',
+          };
+        },
+
+        multiYield(generator, block) {
+          generator.script.yields = true;
+
+          return {
+            kind: 'stack',
+            args: {
+              TIMES: generator.descendInputOfBlock(block, 'TIMES'),
+            }
+          };
+        },
+
+        yieldBack(generator, block) {
+          generator.script.yields = true;
+
+          return {
+            kind: 'stack',
+          };
+        },
+
+        yieldToThread(generator, block) {
+          generator.script.yields = true;
+
+          return {
+            kind: 'stack',
+            args: {
+              ACTIVETHREAD: generator.descendInputOfBlock(block, 'ACTIVETHREAD'),
+            }
+          };
+        },
+
+        yieldToIndex(generator, block) {
+          generator.script.yields = true;
+
+          return {
+            kind: 'stack',
+            args: {
+              ACTIVEINDEX: generator.descendInputOfBlock(block, 'ACTIVEINDEX'),
+            }
+          };
+        },
+
+        yieldToEnd(generator, block) {
+          generator.script.yields = true;
+
+          return {
+            kind: 'stack',
+          };
+        },
+
+
+
+        broadcastAt(generator, block) {
+          return {
+            kind: 'stack',
+            args: {
+              INDEX: generator.descendInputOfBlock(block, 'INDEX'),
+            },
+            constants: {
+              MESSAGE: block.fields.MESSAGE.value,
+            }
+          };
+        },
+
+        broadcastAtAndWait(generator, block) {
+          generator.script.yields = true;
+
+          return {
+            kind: 'stack',
+            args: {
+              INDEX: generator.descendInputOfBlock(block, 'INDEX'),
+            },
+            constants: {
+              MESSAGE: block.fields.MESSAGE.value,
+            }
+          };
+        },
+
+        broadcastAtomic(generator, block) {
+          generator.script.yields = true;
+
+          return {
+            kind: 'stack',
+            constants: {
+              MESSAGE: block.fields.MESSAGE.value,
+            }
+          };
+        },
+
+
+
+        setRunningThreadsActiveThread(generator, block) {
+          generator.script.yields = true;
+
+          return {
+            kind: 'stack',
+            args: {
+              THREADS: generator.descendInputOfBlock(block, 'THREADS'),
+              ACTIVETHREAD: generator.descendInputOfBlock(block, 'ACTIVETHREAD'),
+            }
+          };
+        },
+
+        setRunningThreadsActiveIndex(generator, block) {
+          generator.script.yields = true;
+
+          return {
+            kind: 'stack',
+            args: {
+              THREADS: generator.descendInputOfBlock(block, 'THREADS'),
+              ACTIVEINDEX: generator.descendInputOfBlock(block, 'ACTIVEINDEX'),
+            }
+          };
+        },
+
+        moveThread(generator, block) {
+          return {
+            kind: 'stack',
+            args: {
+              THREAD: generator.descendInputOfBlock(block, 'THREAD'),
+              INDEX: generator.descendInputOfBlock(block, 'INDEX'),
+            }
+          };
+        },
+
+        swapThreads(generator, block) {
+          return {
+            kind: 'stack',
+            args: {
+              THREADONE: generator.descendInputOfBlock(block, 'THREADONE'),
+              THREADTWO: generator.descendInputOfBlock(block, 'THREADTWO'),
+            }
+          };
+        },
+
+
+
+        repeatAtomic(generator, block) {
+          return {
+            kind: 'stack',
+            args: {
+              TIMES: generator.descendInputOfBlock(block, 'TIMES'),
+              SUBSTACK: generator.descendSubstack(block, 'SUBSTACK'),
+            }
+          };
+        },
+
+        repeatUntilAtomic(generator, block) {
+          return {
+            kind: 'stack',
+            args: {
+              CONDITION: generator.descendInputOfBlock(block, 'CONDITION'),
+              SUBSTACK: generator.descendSubstack(block, 'SUBSTACK'),
+            }
+          };
+        },
+
+        repeatWhileAtomic(generator, block) {
+          return {
+            kind: 'stack',
+            args: {
+              CONDITION: generator.descendInputOfBlock(block, 'CONDITION'),
+              SUBSTACK: generator.descendSubstack(block, 'SUBSTACK'),
+            }
+          };
+        },
+
+        repeatForeverAtomic(generator, block) {
+          return {
+            kind: 'stack',
+            args: {
+              SUBSTACK: generator.descendSubstack(block, 'SUBSTACK'),
+            }
+          };
+        },
+
+
+
+        getWarpMode(generator, block) {
+          return {
+            kind: 'input',
+          };
+        },
+
+        setWarpModeFor(generator, block) {
+          return {
+            kind: 'stack',
+            args: {
+              SUBSTACK: generator.descendSubstack(block, 'SUBSTACK'),
+            },
+            constants: {
+              SETBOOLEAN: block.fields.SETBOOLEAN.value,
+            },
+          };
+        },
+
+      },
+      js: {
+
+        _builderCore(node, compiler, imports) {
+          let source = '';
+
+          // Stolen from Controls Expansion
+          /*
+          if (util.thread.target.blocks.getBranch(util.thread.peekStack(), 0)) {
+            util.sequencer.runtime._pushThread(
+              util.thread.target.blocks.getBranch(util.thread.peekStack(), 0),
+              util.target,
+              {}
+            );
+          }
+          */
+
+          // absolutely no chance this works :D
+
+
+          let rawThread = compiler.localVariables.next();
+          source += `let ${rawThread} = null;`;
+
+          let TARGET = compiler.localVariables.next();
+          source += `let ${TARGET} = vm.SoupThreadsUtil.handleTargetInput(${compiler.descendInput(node.args.TARGET).asUnknown()}, target);`
+
+          // insertMode = true, absoluteMode = false, constrain = true
+          let INDEX = compiler.localVariables.next();
+          source += `let ${INDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.INDEX).asUnknown()}, true, false, true);`;
+
+          source += `if (${TARGET} !== null) {`;
+
+          let rawTarget = compiler.localVariables.next();
+          source += `let ${rawTarget} = runtime.getTargetById(${TARGET});`;
+
+          let branch = compiler.localVariables.next();
+          source += `let ${branch} = thread.blockContainer.getBranch(${JSON.stringify(node.blockId)}, 0);`;
+          source += `if (${branch}) {`;
+
+
+          // Create the thread.
+
+          source += `${rawThread} = runtime._pushThread(${branch}, ${rawTarget}, {targetBlockLocation: thread.blockContainer});`;
+
+          // Move the thread.
+          // Because the new thread was pushed to the end of the array, we will
+          // always be moving it backwards (or to the same position) here.
+
+          // Remove the old reference to the thread.
+          // The new thread will always be at the end of the array, so we remove the last element.
+          source += `runtime.threads.splice(-1, 1);`;
+          // Insert the thread.
+          source += `runtime.threads.splice(${INDEX}, 0, ${rawThread});`;
+
+          // Update activeThreadIndex if the active thread moved.
+
+          source += `if (${INDEX} <= runtime.sequencer.activeThreadIndex) {`;
+          // The active thread was indirectly moved.
+          source += `runtime.sequencer.activeThreadIndex += 1;`;
+          source += `}`;
+
+
+          source += `}`;
+
+          source += `}`;
+
+
+          return {
+            source,
+            rawThread,
+          };
+        },
+
+        builderNoReturn(node, compiler, imports) {
+          let compiledBuilderCore = SoupThreadsExtension.compileInfo.js._builderCore(node, compiler, imports);
+          compiler.source += compiledBuilderCore.source;
+        },
+
+        builder(node, compiler, imports) {
+          let source = '';
+
+          source += `(function(){`;
+
+          let compiledBuilderCore = SoupThreadsExtension.compileInfo.js._builderCore(node, compiler, imports);
+          source += compiledBuilderCore.source;
+          source += `return new vm.SoupThreads.Type(${compiledBuilderCore.rawThread});`;
+
+          source += `})()`; // no semicolon
+
+          return new imports.TypedInput(source, imports.TYPE_UNKNOWN);
+        },
+
+
+
+        killThread(node, compiler, imports) {
+          let THREAD = compiler.localVariables.next();
+          compiler.source += `let ${THREAD} = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREAD).asUnknown()});`;
+
+          compiler.source += `if (${THREAD}.thread !== null && ${THREAD}.thread.status !== vm.exports.Thread.STATUS_DONE && runtime.threads.includes(${THREAD}.thread)) {`;
+
+          // Sets isKilled to true, sets status to STATUS_DONE, clears some other properties
+          compiler.source += `runtime._stopThread(${THREAD}.thread);`;
+
+          // Yield if active thread was killed.
+          compiler.source += `if (${THREAD}.thread === runtime.sequencer.activeThread) {`;
+          compiler.source += `yield;`;
+          compiler.source += `}`;
+
+          compiler.source += `}`;
+        },
+
+        pauseThread(node, compiler, imports) {
+          let THREAD = compiler.localVariables.next();
+          compiler.source += `let ${THREAD} = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREAD).asUnknown()});`;
+
+          compiler.source += `if (${THREAD}.thread !== null && !${THREAD}.thread.soupThreadsPaused) {`;
+
+          compiler.source += `vm.SoupThreadsUtil.pauseThreadAsSoupThreads.call(${THREAD}.thread);`;
+
+          // Yield if active thread was paused.
+          compiler.source += `if (${THREAD}.thread === runtime.sequencer.activeThread) {`;
+          compiler.source += `yield;`;
+          compiler.source += `}`;
+
+          compiler.source += `}`;
+        },
+
+        unpauseThread(node, compiler, imports) {
+          let THREAD = compiler.localVariables.next();
+          compiler.source += `let ${THREAD} = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREAD).asUnknown()});`;
+
+          compiler.source += `if (${THREAD}.thread !== null && ${THREAD}.thread.soupThreadsPaused) {`;
+          compiler.source += `vm.SoupThreadsUtil.unpauseThreadAsSoupThreads.call(${THREAD}.thread);`;
+          compiler.source += `}`;
+        },
+
+
+
+        yield(node, compiler, imports) {
+          compiler.source += `yield;`;
+        },
+
+        multiYield(node, compiler, imports) {
+          let i = compiler.localVariables.next();
+          compiler.source += `for (let ${i} = 0; ${i} < (${compiler.descendInput(node.args.TIMES).asNumber()}); ${i}++) {`;
+          compiler.source += `yield;`
+          compiler.source += `}`;
+        },
+
+        yieldBack(node, compiler, imports) {
+          // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
+          // Will yield to current thread if the current thread is at the start.
+          compiler.source += `if (runtime.sequencer.activeThreadIndex <= 0) {`;
+          compiler.source += `runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;`;
+          compiler.source += `} else {`;
+          // Yield to current thread
+          compiler.source += `runtime.sequencer.activeThreadIndex--;`;
+          compiler.source += `}`;
+
+          compiler.source += `yield;`;
+        },
+
+        yieldToThread(node, compiler, imports) {
+          let ACTIVETHREAD = compiler.localVariables.next();
+          compiler.source += `let ${ACTIVETHREAD} = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.ACTIVETHREAD).asUnknown()});`;
+
+          // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
+
+          let threadIndex = compiler.localVariables.next();
+          compiler.source += `let ${threadIndex};`;
+          compiler.source += `if (${ACTIVETHREAD}.thread !== null && (${threadIndex} = runtime.threads.indexOf(${ACTIVETHREAD}.thread)) !== -1) {`;
+          compiler.source += `runtime.sequencer.activeThreadIndex = ${threadIndex} - 1;`;
+          compiler.source += `} else {`;
+          // Fall back to yielding to end of tick.
+          compiler.source += `runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;`;
+          compiler.source += `}`;
+
+          compiler.source += `yield;`;
+        },
+
+        yieldToIndex(node, compiler, imports) {
+          let ACTIVEINDEX = compiler.localVariables.next();
+          compiler.source += `let ${ACTIVEINDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.ACTIVEINDEX).asUnknown()});`;
+
+          // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
+
+          compiler.source += `if (${ACTIVEINDEX} < 0) {`;
+          // yield to first thread
+          compiler.source += `runtime.sequencer.activeThreadIndex = -1;`;
+          compiler.source += `} else if (${ACTIVEINDEX} >= runtime.threads.length) {`;
+          // yield to end of tick
+          compiler.source += `runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;`;
+          compiler.source += `} else {`;
+          compiler.source += `runtime.sequencer.activeThreadIndex = ${ACTIVEINDEX} - 1;`;
+          compiler.source += `}`;
+
+          compiler.source += `yield;`;
+        },
+
+        yieldToEnd(node, compiler, imports) {
+          // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
+          compiler.source += `runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;`;
+
+          compiler.source += `yield;`;
+        },
+
+
+
+        broadcastAt(node, compiler, imports, wait = false, atomic = false) {
+          let MESSAGE = node.constants.MESSAGE;
+
+          let INDEX = compiler.localVariables.next();
+          if (atomic) {
+            // Insert new threads immediately before the active thread if atomic mode is enabled
+            compiler.source += `let ${INDEX} = runtime.sequencer.activeThreadIndex;`;
+          } else {
             // insertMode = true, absoluteMode = false, constrain = true
-            let INDEX = compiler.localVariables.next();
-            source += `let ${INDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.INDEX).asUnknown()}, true, false, true);`;
-
-            source += `if (${TARGET} !== null) {`;
-
-            let rawTarget = compiler.localVariables.next();
-            source += `let ${rawTarget} = runtime.getTargetById(${TARGET});`;
-
-            let branch = compiler.localVariables.next();
-            source += `let ${branch} = thread.blockContainer.getBranch(${JSON.stringify(node.blockId)}, 0);`;
-            source += `if (${branch}) {`;
-
-
-            // Create the thread.
-
-            source += `${rawThread} = runtime._pushThread(${branch}, ${rawTarget}, {targetBlockLocation: thread.blockContainer});`;
-
-            // Move the thread.
-            // Because the new thread was pushed to the end of the array, we will
-            // always be moving it backwards (or to the same position) here.
-
-            // Remove the old reference to the thread.
-            // The new thread will always be at the end of the array, so we remove the last element.
-            source += `runtime.threads.splice(-1, 1);`;
-            // Insert the thread.
-            source += `runtime.threads.splice(${INDEX}, 0, ${rawThread});`;
-
-            // Update activeThreadIndex if the active thread moved.
-
-            source += `if (${INDEX} <= runtime.sequencer.activeThreadIndex) {`;
-            // The active thread was indirectly moved.
-            source += `runtime.sequencer.activeThreadIndex += 1;`;
-            source += `}`;
-
-
-            source += `}`;
-
-            source += `}`;
-
-
-            return {
-              source,
-              rawThread,
-            };
-          },
-
-          builderNoReturn(node, compiler, imports) {
-            let compiledBuilderCore = SoupThreadsExtension.getCompileInfo().js._builderCore(node, compiler, imports);
-            compiler.source += compiledBuilderCore.source;
-          },
-
-          builder(node, compiler, imports) {
-            let source = '';
-
-            source += `(function(){`;
-
-            let compiledBuilderCore = SoupThreadsExtension.getCompileInfo().js._builderCore(node, compiler, imports);
-            source += compiledBuilderCore.source;
-            source += `return new vm.SoupThreads.Type(${compiledBuilderCore.rawThread});`;
-
-            source += `})()`; // no semicolon
-
-            return new imports.TypedInput(source, imports.TYPE_UNKNOWN);
-          },
-
-
-
-          killThread(node, compiler, imports) {
-            let THREAD = compiler.localVariables.next();
-            compiler.source += `let ${THREAD} = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREAD).asUnknown()});`;
-
-            compiler.source += `if (${THREAD}.thread !== null && ${THREAD}.thread.status !== vm.exports.Thread.STATUS_DONE && runtime.threads.includes(${THREAD}.thread)) {`;
-
-            // Sets isKilled to true, sets status to STATUS_DONE, clears some other properties
-            compiler.source += `runtime._stopThread(${THREAD}.thread);`;
-
-            // Yield if active thread was killed.
-            compiler.source += `if (${THREAD}.thread === runtime.sequencer.activeThread) {`;
-            compiler.source += `yield;`;
-            compiler.source += `}`;
-
-            compiler.source += `}`;
-          },
-
-          pauseThread(node, compiler, imports) {
-            let THREAD = compiler.localVariables.next();
-            compiler.source += `let ${THREAD} = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREAD).asUnknown()});`;
-
-            compiler.source += `if (${THREAD}.thread !== null && !${THREAD}.thread.soupThreadsPaused) {`;
-
-            compiler.source += `vm.SoupThreadsUtil.pauseThreadAsSoupThreads.call(${THREAD}.thread);`;
-
-            // Yield if active thread was paused.
-            compiler.source += `if (${THREAD}.thread === runtime.sequencer.activeThread) {`;
-            compiler.source += `yield;`;
-            compiler.source += `}`;
-
-            compiler.source += `}`;
-          },
-
-          unpauseThread(node, compiler, imports) {
-            let THREAD = compiler.localVariables.next();
-            compiler.source += `let ${THREAD} = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREAD).asUnknown()});`;
-
-            compiler.source += `if (${THREAD}.thread !== null && ${THREAD}.thread.soupThreadsPaused) {`;
-            compiler.source += `vm.SoupThreadsUtil.unpauseThreadAsSoupThreads.call(${THREAD}.thread);`;
-            compiler.source += `}`;
-          },
-
-
-
-          yield(node, compiler, imports) {
-            compiler.source += `yield;`;
-          },
-
-          multiYield(node, compiler, imports) {
-            let i = compiler.localVariables.next();
-            compiler.source += `for (let ${i} = 0; ${i} < (${compiler.descendInput(node.args.TIMES).asNumber()}); ${i}++) {`;
-            compiler.source += `yield;`
-            compiler.source += `}`;
-          },
-
-          yieldBack(node, compiler, imports) {
-            // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
-            // Will yield to current thread if the current thread is at the start.
-            compiler.source += `if (runtime.sequencer.activeThreadIndex <= 0) {`;
-            compiler.source += `runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;`;
-            compiler.source += `} else {`;
-            // Yield to current thread
-            compiler.source += `runtime.sequencer.activeThreadIndex--;`;
-            compiler.source += `}`;
-
-            compiler.source += `yield;`;
-          },
-
-          yieldToThread(node, compiler, imports) {
-            let ACTIVETHREAD = compiler.localVariables.next();
-            compiler.source += `let ${ACTIVETHREAD} = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.ACTIVETHREAD).asUnknown()});`;
-
-            // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
-
-            let threadIndex = compiler.localVariables.next();
-            compiler.source += `let ${threadIndex};`;
-            compiler.source += `if (${ACTIVETHREAD}.thread !== null && (${threadIndex} = runtime.threads.indexOf(${ACTIVETHREAD}.thread)) !== -1) {`;
-            compiler.source += `runtime.sequencer.activeThreadIndex = ${threadIndex} - 1;`;
-            compiler.source += `} else {`;
-            // Fall back to yielding to end of tick.
-            compiler.source += `runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;`;
-            compiler.source += `}`;
-
-            compiler.source += `yield;`;
-          },
-
-          yieldToIndex(node, compiler, imports) {
-            let ACTIVEINDEX = compiler.localVariables.next();
-            compiler.source += `let ${ACTIVEINDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.ACTIVEINDEX).asUnknown()});`;
-
-            // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
-
-            compiler.source += `if (${ACTIVEINDEX} < 0) {`;
-            // yield to first thread
-            compiler.source += `runtime.sequencer.activeThreadIndex = -1;`;
-            compiler.source += `} else if (${ACTIVEINDEX} >= runtime.threads.length) {`;
-            // yield to end of tick
-            compiler.source += `runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;`;
-            compiler.source += `} else {`;
-            compiler.source += `runtime.sequencer.activeThreadIndex = ${ACTIVEINDEX} - 1;`;
-            compiler.source += `}`;
-
-            compiler.source += `yield;`;
-          },
-
-          yieldToEnd(node, compiler, imports) {
-            // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
-            compiler.source += `runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;`;
-
-            compiler.source += `yield;`;
-          },
-
-
-
-          broadcastAt(node, compiler, imports, wait = false, atomic = false) {
-            let MESSAGE = node.constants.MESSAGE;
-
-            let INDEX = compiler.localVariables.next();
-            if (atomic) {
-              // Insert new threads immediately before the active thread if atomic mode is enabled
-              compiler.source += `let ${INDEX} = runtime.sequencer.activeThreadIndex;`;
-            } else {
-              // insertMode = true, absoluteMode = false, constrain = true
-              compiler.source += `let ${INDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.INDEX).asUnknown()}, true, false, true);`;
-            }
-
-            // Threads can be added to the end of the threads array, or overwrite threads in the middle of the array (when restarting a thread).
-            let newThreads = compiler.localVariables.next();
-            compiler.source += `let ${newThreads} = runtime.startHats('event_whenbroadcastreceived', {BROADCAST_OPTION: ${JSON.stringify(MESSAGE)}});`;
-
-            // Temporarily remove all new threads from the threads array.
-
-            let rawThread = compiler.localVariables.next();
-            compiler.source += `for (let ${rawThread} of ${newThreads}) {`;
-
-            let threadIndex = compiler.localVariables.next();
-            compiler.source += `let ${threadIndex} = runtime.threads.indexOf(${rawThread});`;
-            compiler.source += `if (${threadIndex} !== -1) {`;
-
-            // Remove the thread.
-            compiler.source += `runtime.threads.splice(${threadIndex}, 1);`;
-
-            // Update activeThreadIndex if necessary.
-            compiler.source += `if (${threadIndex} < runtime.sequencer.activeThreadIndex) {`;
-            compiler.source += `runtime.sequencer.activeThreadIndex--;`;
-            compiler.source += `}`;
-
-            // Update INDEX if necessary.
-            compiler.source += `if (${threadIndex} < ${INDEX}) {`;
-            compiler.source += `${INDEX}--;`;
-            compiler.source += `}`;
-
-            compiler.source += `}`;
-
-            compiler.source += `}`;
-
-            // Insert threads at the specified index.
-
-            let i = compiler.localVariables.next();
-            compiler.source += `for (let ${i} = 0; ${i} < ${newThreads}.length; ${i}++) {`;
-
-            // Insert the thread.
-            compiler.source += `runtime.threads.splice(${INDEX} + ${i}, 0, ${newThreads}[${i}]);`
-
-            // Update activeThreadIndex if necessary.
-            compiler.source += `if (${INDEX} + ${i} <= runtime.sequencer.activeThreadIndex) {`;
-            compiler.source += `runtime.sequencer.activeThreadIndex++;`;
-            compiler.source += `}`;
-
-            compiler.source += `}`;
-
-            // Yield to first new thread (if atomic mode).
-            if (atomic) {
-              // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
-              compiler.source += `runtime.sequencer.activeThreadIndex = ${INDEX} - 1;`;
-              compiler.source += `yield;`;
-            }
-
-            // Wait for threads to finish (if wait mode).
-            if (wait) {
-              compiler.source += `while (true) {`;
-
-              // Check if all threads are dead.
-
-              let allDone = compiler.localVariables.next();
-              compiler.source += `let ${allDone} = true;`;
-              compiler.source += `for (let ${rawThread} of ${newThreads}) {`;
-
-              compiler.source += `if (${rawThread}.status !== vm.exports.Thread.STATUS_DONE && runtime.threads.includes(${rawThread})) {`;
-              compiler.source += `${allDone} = false;`;
-              compiler.source += `break;`;
-              compiler.source += `}`;
-
-              compiler.source += `}`;
-
-              // Finish if all threads are dead.
-              compiler.source += `if (${allDone}) {`;
-              compiler.source += `break;`;
-              compiler.source += `}`;
-
-              // Yield otherwise.
-              compiler.source += `yield;`;
-
-              compiler.source += `}`;
-            }
-          },
-
-          broadcastAtAndWait(node, compiler, imports) {
-            // wait = true
-            SoupThreadsExtension.getCompileInfo().js.broadcastAt(node, compiler, imports, true);
-          },
-
-          broadcastAtomic(node, compiler, imports) {
-            // wait = false, atomic = true
-            SoupThreadsExtension.getCompileInfo().js.broadcastAt(node, compiler, imports, false, true);
-          },
-
-
-
-          setRunningThreadsActiveIndex(node, compiler, imports) {
-            let THREADS = compiler.localVariables.next();
-            compiler.source += `let ${THREADS} = vm.jwArray.Type.toArray(${compiler.descendInput(node.args.THREADS).asUnknown()}).array;`;
-            let thread = compiler.localVariables.next();
-            compiler.source += `${THREADS} = ${THREADS}.map((${thread}) => (vm.SoupThreads.Type.toThread(${thread})).${thread});`;
-            compiler.source += `${THREADS} = Array.from(new Set(${THREADS}));`;
-            let rawThread = compiler.localVariables.next();
-            compiler.source += `${THREADS} = ${THREADS}.filter((${rawThread}) => (${rawThread} !== null && runtime.threads.includes(${rawThread})));`;
-
-            // Completely replace threads array via mutating only.
-            compiler.source += `runtime.threads.splice(0, runtime.threads.length, ...${THREADS});`;
-
-            // Only handle index input after replacing threads array so that length calculations are correct.
-            // insertMode = false, absoluteMode = true
-            let ACTIVEINDEX = compiler.localVariables.next();
-            compiler.source += `let ${ACTIVEINDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.ACTIVEINDEX).asUnknown()}, false, true);`;
-
-            // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
-
-            compiler.source += `if (${ACTIVEINDEX} < 0) {`;
-            // yield to first thread
-            compiler.source += `runtime.sequencer.activeThreadIndex = -1;`;
-            compiler.source += `} else if (${ACTIVEINDEX} >= runtime.threads.length) {`;
-            // yield to end of tick
-            compiler.source += `runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;`;
-            compiler.source += `} else {`;
-            compiler.source += `runtime.sequencer.activeThreadIndex = ${ACTIVEINDEX} - 1;`;
-            compiler.source += `}`;
-
-            compiler.source += `yield;`;
-          },
-
-          setRunningThreadsActiveThread(node, compiler, imports) {
-            let THREADS = compiler.localVariables.next();
-            compiler.source += `let ${THREADS} = vm.jwArray.Type.toArray(${compiler.descendInput(node.args.THREADS).asUnknown()}).array;`;
-            let thread = compiler.localVariables.next();
-            compiler.source += `${THREADS} = ${THREADS}.map((${thread}) => (vm.SoupThreads.Type.toThread(${thread})).${thread});`;
-            compiler.source += `${THREADS} = Array.from(new Set(${THREADS}));`;
-            let rawThread = compiler.localVariables.next();
-            compiler.source += `${THREADS} = ${THREADS}.filter((${rawThread}) => (${rawThread} !== null && runtime.threads.includes(${rawThread})));`;
-
-            // Completely replace threads array via mutating only.
-            compiler.source += `runtime.threads.splice(0, runtime.threads.length, ...${THREADS});`;
-
-            let ACTIVETHREAD = compiler.localVariables.next();
-            compiler.source += `let ${ACTIVETHREAD} = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.ACTIVETHREAD).asUnknown()});`;
-
-            // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
-
-            compiler.source += `let threadIndex;`;
-            compiler.source += `if (${ACTIVETHREAD}.thread !== null && (threadIndex = runtime.threads.indexOf(${ACTIVETHREAD}.thread)) !== -1) {`;
-            compiler.source += `runtime.sequencer.activeThreadIndex = threadIndex - 1;`;
-            compiler.source += `} else {`;
-            // Fall back to yielding to end of tick.
-            compiler.source += `runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;`;
-            compiler.source += `}`;
-
-            compiler.source += `yield;`;
-          },
-
-          moveThread(node, compiler, imports) {
-            let THREAD = compiler.localVariables.next();
-            compiler.source += `let ${THREAD} = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREAD).asUnknown()});`;
-
-            let threadIndex = compiler.localVariables.next();
-            compiler.source += `let ${threadIndex};`;
-            compiler.source += `if (${THREAD}.thread !== null && (${threadIndex} = runtime.threads.indexOf(${THREAD}.thread)) !== -1) {`;
-            // insertMode = true, absoluteMode = false, constrain = true
-            let INDEX = compiler.localVariables.next();
             compiler.source += `let ${INDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.INDEX).asUnknown()}, true, false, true);`;
+          }
 
-            // Move the thread
+          // Threads can be added to the end of the threads array, or overwrite threads in the middle of the array (when restarting a thread).
+          let newThreads = compiler.localVariables.next();
+          compiler.source += `let ${newThreads} = runtime.startHats('event_whenbroadcastreceived', {BROADCAST_OPTION: ${JSON.stringify(MESSAGE)}});`;
 
-            compiler.source += `if (${INDEX} <= ${threadIndex}) {`;
+          // Temporarily remove all new threads from the threads array.
 
-            // Moving backwards (or to the same position)
-            // Remove the old reference to the thread.
-            compiler.source += `runtime.threads.splice(${threadIndex}, 1);`;
-            // Insert the thread.
-            compiler.source += `runtime.threads.splice(${INDEX}, 0, ${THREAD}.thread);`;
+          let rawThread = compiler.localVariables.next();
+          compiler.source += `for (let ${rawThread} of ${newThreads}) {`;
 
-            compiler.source += `} else {`;
+          let threadIndex = compiler.localVariables.next();
+          compiler.source += `let ${threadIndex} = runtime.threads.indexOf(${rawThread});`;
+          compiler.source += `if (${threadIndex} !== -1) {`;
 
-            // Moving forwards
-            // Insert the thread.
-            compiler.source += `runtime.threads.splice(${INDEX}, 0, ${THREAD}.thread);`;
-            // Remove the old reference to the thread.
-            compiler.source += `runtime.threads.splice(${threadIndex}, 1);`;
+          // Remove the thread.
+          compiler.source += `runtime.threads.splice(${threadIndex}, 1);`;
 
-            compiler.source += `}`;
+          // Update activeThreadIndex if necessary.
+          compiler.source += `if (${threadIndex} < runtime.sequencer.activeThreadIndex) {`;
+          compiler.source += `runtime.sequencer.activeThreadIndex--;`;
+          compiler.source += `}`;
 
-            // Update activeThreadIndex if the active thread moved
+          // Update INDEX if necessary.
+          compiler.source += `if (${threadIndex} < ${INDEX}) {`;
+          compiler.source += `${INDEX}--;`;
+          compiler.source += `}`;
 
-            compiler.source += `if (${threadIndex} === runtime.sequencer.activeThreadIndex) {`;
-            // The active thread was directly moved.
-            compiler.source += `runtime.sequencer.activeThreadIndex = ${INDEX};`;
-            compiler.source += `} else if (${INDEX} <= runtime.sequencer.activeThreadIndex) {`;
-            // The active thread was indirectly moved.
-            compiler.source += `runtime.sequencer.activeThreadIndex += 1;`;
-            compiler.source += `}`;
+          compiler.source += `}`;
 
-            compiler.source += `}`;
-          },
+          compiler.source += `}`;
 
-          swapThreads(node, compiler, imports) {
-            let THREADONE = compiler.localVariables.next();
-            compiler.source += `let ${THREADONE} = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREADONE).asUnknown()});`;
-            let THREADTWO = compiler.localVariables.next();
-            compiler.source += `let ${THREADTWO} = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREADTWO).asUnknown()});`;
+          // Insert threads at the specified index.
 
-            compiler.source += `if (${THREADONE}.thread !== null && ${THREADTWO}.thread !== null) {`;
-            let threadIndex1 = compiler.localVariables.next();
-            compiler.source += `let ${threadIndex1} = runtime.threads.indexOf(${THREADONE}.thread);`;
-            let threadIndex2 = compiler.localVariables.next();
-            compiler.source += `let ${threadIndex2} = runtime.threads.indexOf(${THREADTWO}.thread);`;
+          let i = compiler.localVariables.next();
+          compiler.source += `for (let ${i} = 0; ${i} < ${newThreads}.length; ${i}++) {`;
 
-            compiler.source += `if (${threadIndex1} !== -1 && ${threadIndex2} !== -1 && ${threadIndex1} !== ${threadIndex2}) {`;
+          // Insert the thread.
+          compiler.source += `runtime.threads.splice(${INDEX} + ${i}, 0, ${newThreads}[${i}]);`
 
-            // Swap threads
-            compiler.source += `runtime.threads[${threadIndex1}] = ${THREADTWO}.thread;`;
-            compiler.source += `runtime.threads[${threadIndex2}] = ${THREADONE}.thread;`;
+          // Update activeThreadIndex if necessary.
+          compiler.source += `if (${INDEX} + ${i} <= runtime.sequencer.activeThreadIndex) {`;
+          compiler.source += `runtime.sequencer.activeThreadIndex++;`;
+          compiler.source += `}`;
 
-            // Update activeThreadIndex if the active thread moved
-            compiler.source += `if (runtime.sequencer.activeThreadIndex === ${threadIndex1}) {`;
-            compiler.source += `runtime.sequencer.activeThreadIndex = ${threadIndex2};`;
-            compiler.source += `} else if (runtime.sequencer.activeThreadIndex === ${threadIndex2}) {`;
-            compiler.source += `runtime.sequencer.activeThreadIndex = ${threadIndex1};`;
-            compiler.source += `}`;
+          compiler.source += `}`;
 
-            compiler.source += `}`;
-            compiler.source += `}`;
-          },
+          // Yield to first new thread (if atomic mode).
+          if (atomic) {
+            // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
+            compiler.source += `runtime.sequencer.activeThreadIndex = ${INDEX} - 1;`;
+            compiler.source += `yield;`;
+          }
 
-
-
-          repeatAtomic(node, compiler, imports) {
-            let i = compiler.localVariables.next();
-            compiler.source += `for (let ${i} = 0; ${i} < (${compiler.descendInput(node.args.TIMES).asNumber()}); ${i}++) {`;
-
-            compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads.repeatAtomic')); // true means this is a loop
-
-            if (runtime.compilerOptions.warpTimer) {
-              compiler.source += `if (isStuck()) {`;
-              compiler.source += `yield;`;
-              compiler.source += `}`;
-            }
-
-            compiler.source += `}`;
-          },
-
-          repeatUntilAtomic(node, compiler, imports) {
-            compiler.source += `while (!(${compiler.descendInput(node.args.CONDITION).asBoolean()})) {`;
-
-            compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads.repeatUntilAtomic')); // true means this is a loop
-
-            if (runtime.compilerOptions.warpTimer) {
-              compiler.source += `if (isStuck()) {`;
-              compiler.source += `yield;`;
-              compiler.source += `}`;
-            }
-
-            compiler.source += `}`;
-          },
-
-          repeatWhileAtomic(node, compiler, imports) {
-            compiler.source += `while (${compiler.descendInput(node.args.CONDITION).asBoolean()}) {`;
-
-            compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads.repeatWhileAtomic')); // true means this is a loop
-
-            if (runtime.compilerOptions.warpTimer) {
-              compiler.source += `if (isStuck()) {`;
-              compiler.source += `yield;`;
-              compiler.source += `}`;
-            }
-
-            compiler.source += `}`;
-          },
-
-          repeatForeverAtomic(node, compiler, imports) {
+          // Wait for threads to finish (if wait mode).
+          if (wait) {
             compiler.source += `while (true) {`;
 
-            compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads.repeatForeverAtomic')); // true means this is a loop
+            // Check if all threads are dead.
 
-            if (runtime.compilerOptions.warpTimer) {
-              compiler.source += `if (isStuck()) {`;
-              compiler.source += `yield;`;
-              compiler.source += `}`;
-            }
+            let allDone = compiler.localVariables.next();
+            compiler.source += `let ${allDone} = true;`;
+            compiler.source += `for (let ${rawThread} of ${newThreads}) {`;
+
+            compiler.source += `if (${rawThread}.status !== vm.exports.Thread.STATUS_DONE && runtime.threads.includes(${rawThread})) {`;
+            compiler.source += `${allDone} = false;`;
+            compiler.source += `break;`;
+            compiler.source += `}`;
 
             compiler.source += `}`;
-          },
 
+            // Finish if all threads are dead.
+            compiler.source += `if (${allDone}) {`;
+            compiler.source += `break;`;
+            compiler.source += `}`;
 
+            // Yield otherwise.
+            compiler.source += `yield;`;
 
-          getWarpMode(node, compiler, imports) {
-            return new imports.TypedInput(`${compiler.isWarp}`, imports.TYPE_BOOLEAN);
-          },
-
-          setWarpModeFor(node, compiler, imports) {
-            let dropdown = node.constants.SETBOOLEAN;
-            
-            let oldWarp = compiler.isWarp;
-            compiler.isWarp = (dropdown === 'enable');
-            compiler.descendStack(node.args.SUBSTACK, new imports.Frame(false, 'soupThreads.setWarpModeFor')); // false means this is not a loop
-            compiler.isWarp = oldWarp;
-          },
-
+            compiler.source += `}`;
+          }
         },
-      };
-    }
+
+        broadcastAtAndWait(node, compiler, imports) {
+          // wait = true
+          SoupThreadsExtension.compileInfo.js.broadcastAt(node, compiler, imports, true);
+        },
+
+        broadcastAtomic(node, compiler, imports) {
+          // wait = false, atomic = true
+          SoupThreadsExtension.compileInfo.js.broadcastAt(node, compiler, imports, false, true);
+        },
+
+
+
+        setRunningThreadsActiveIndex(node, compiler, imports) {
+          let THREADS = compiler.localVariables.next();
+          compiler.source += `let ${THREADS} = vm.jwArray.Type.toArray(${compiler.descendInput(node.args.THREADS).asUnknown()}).array;`;
+          let thread = compiler.localVariables.next();
+          compiler.source += `${THREADS} = ${THREADS}.map((${thread}) => (vm.SoupThreads.Type.toThread(${thread})).${thread});`;
+          compiler.source += `${THREADS} = Array.from(new Set(${THREADS}));`;
+          let rawThread = compiler.localVariables.next();
+          compiler.source += `${THREADS} = ${THREADS}.filter((${rawThread}) => (${rawThread} !== null && runtime.threads.includes(${rawThread})));`;
+
+          // Completely replace threads array via mutating only.
+          compiler.source += `runtime.threads.splice(0, runtime.threads.length, ...${THREADS});`;
+
+          // Only handle index input after replacing threads array so that length calculations are correct.
+          // insertMode = false, absoluteMode = true
+          let ACTIVEINDEX = compiler.localVariables.next();
+          compiler.source += `let ${ACTIVEINDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.ACTIVEINDEX).asUnknown()}, false, true);`;
+
+          // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
+
+          compiler.source += `if (${ACTIVEINDEX} < 0) {`;
+          // yield to first thread
+          compiler.source += `runtime.sequencer.activeThreadIndex = -1;`;
+          compiler.source += `} else if (${ACTIVEINDEX} >= runtime.threads.length) {`;
+          // yield to end of tick
+          compiler.source += `runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;`;
+          compiler.source += `} else {`;
+          compiler.source += `runtime.sequencer.activeThreadIndex = ${ACTIVEINDEX} - 1;`;
+          compiler.source += `}`;
+
+          compiler.source += `yield;`;
+        },
+
+        setRunningThreadsActiveThread(node, compiler, imports) {
+          let THREADS = compiler.localVariables.next();
+          compiler.source += `let ${THREADS} = vm.jwArray.Type.toArray(${compiler.descendInput(node.args.THREADS).asUnknown()}).array;`;
+          let thread = compiler.localVariables.next();
+          compiler.source += `${THREADS} = ${THREADS}.map((${thread}) => (vm.SoupThreads.Type.toThread(${thread})).${thread});`;
+          compiler.source += `${THREADS} = Array.from(new Set(${THREADS}));`;
+          let rawThread = compiler.localVariables.next();
+          compiler.source += `${THREADS} = ${THREADS}.filter((${rawThread}) => (${rawThread} !== null && runtime.threads.includes(${rawThread})));`;
+
+          // Completely replace threads array via mutating only.
+          compiler.source += `runtime.threads.splice(0, runtime.threads.length, ...${THREADS});`;
+
+          let ACTIVETHREAD = compiler.localVariables.next();
+          compiler.source += `let ${ACTIVETHREAD} = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.ACTIVETHREAD).asUnknown()});`;
+
+          // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
+
+          compiler.source += `let threadIndex;`;
+          compiler.source += `if (${ACTIVETHREAD}.thread !== null && (threadIndex = runtime.threads.indexOf(${ACTIVETHREAD}.thread)) !== -1) {`;
+          compiler.source += `runtime.sequencer.activeThreadIndex = threadIndex - 1;`;
+          compiler.source += `} else {`;
+          // Fall back to yielding to end of tick.
+          compiler.source += `runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;`;
+          compiler.source += `}`;
+
+          compiler.source += `yield;`;
+        },
+
+        moveThread(node, compiler, imports) {
+          let THREAD = compiler.localVariables.next();
+          compiler.source += `let ${THREAD} = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREAD).asUnknown()});`;
+
+          let threadIndex = compiler.localVariables.next();
+          compiler.source += `let ${threadIndex};`;
+          compiler.source += `if (${THREAD}.thread !== null && (${threadIndex} = runtime.threads.indexOf(${THREAD}.thread)) !== -1) {`;
+          // insertMode = true, absoluteMode = false, constrain = true
+          let INDEX = compiler.localVariables.next();
+          compiler.source += `let ${INDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.INDEX).asUnknown()}, true, false, true);`;
+
+          // Move the thread
+
+          compiler.source += `if (${INDEX} <= ${threadIndex}) {`;
+
+          // Moving backwards (or to the same position)
+          // Remove the old reference to the thread.
+          compiler.source += `runtime.threads.splice(${threadIndex}, 1);`;
+          // Insert the thread.
+          compiler.source += `runtime.threads.splice(${INDEX}, 0, ${THREAD}.thread);`;
+
+          compiler.source += `} else {`;
+
+          // Moving forwards
+          // Insert the thread.
+          compiler.source += `runtime.threads.splice(${INDEX}, 0, ${THREAD}.thread);`;
+          // Remove the old reference to the thread.
+          compiler.source += `runtime.threads.splice(${threadIndex}, 1);`;
+
+          compiler.source += `}`;
+
+          // Update activeThreadIndex if the active thread moved
+
+          compiler.source += `if (${threadIndex} === runtime.sequencer.activeThreadIndex) {`;
+          // The active thread was directly moved.
+          compiler.source += `runtime.sequencer.activeThreadIndex = ${INDEX};`;
+          compiler.source += `} else if (${INDEX} <= runtime.sequencer.activeThreadIndex) {`;
+          // The active thread was indirectly moved.
+          compiler.source += `runtime.sequencer.activeThreadIndex += 1;`;
+          compiler.source += `}`;
+
+          compiler.source += `}`;
+        },
+
+        swapThreads(node, compiler, imports) {
+          let THREADONE = compiler.localVariables.next();
+          compiler.source += `let ${THREADONE} = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREADONE).asUnknown()});`;
+          let THREADTWO = compiler.localVariables.next();
+          compiler.source += `let ${THREADTWO} = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREADTWO).asUnknown()});`;
+
+          compiler.source += `if (${THREADONE}.thread !== null && ${THREADTWO}.thread !== null) {`;
+          let threadIndex1 = compiler.localVariables.next();
+          compiler.source += `let ${threadIndex1} = runtime.threads.indexOf(${THREADONE}.thread);`;
+          let threadIndex2 = compiler.localVariables.next();
+          compiler.source += `let ${threadIndex2} = runtime.threads.indexOf(${THREADTWO}.thread);`;
+
+          compiler.source += `if (${threadIndex1} !== -1 && ${threadIndex2} !== -1 && ${threadIndex1} !== ${threadIndex2}) {`;
+
+          // Swap threads
+          compiler.source += `runtime.threads[${threadIndex1}] = ${THREADTWO}.thread;`;
+          compiler.source += `runtime.threads[${threadIndex2}] = ${THREADONE}.thread;`;
+
+          // Update activeThreadIndex if the active thread moved
+          compiler.source += `if (runtime.sequencer.activeThreadIndex === ${threadIndex1}) {`;
+          compiler.source += `runtime.sequencer.activeThreadIndex = ${threadIndex2};`;
+          compiler.source += `} else if (runtime.sequencer.activeThreadIndex === ${threadIndex2}) {`;
+          compiler.source += `runtime.sequencer.activeThreadIndex = ${threadIndex1};`;
+          compiler.source += `}`;
+
+          compiler.source += `}`;
+          compiler.source += `}`;
+        },
+
+
+
+        repeatAtomic(node, compiler, imports) {
+          let i = compiler.localVariables.next();
+          compiler.source += `for (let ${i} = 0; ${i} < (${compiler.descendInput(node.args.TIMES).asNumber()}); ${i}++) {`;
+
+          compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads.repeatAtomic')); // true means this is a loop
+
+          if (runtime.compilerOptions.warpTimer) {
+            compiler.source += `if (isStuck()) {`;
+            compiler.source += `yield;`;
+            compiler.source += `}`;
+          }
+
+          compiler.source += `}`;
+        },
+
+        repeatUntilAtomic(node, compiler, imports) {
+          compiler.source += `while (!(${compiler.descendInput(node.args.CONDITION).asBoolean()})) {`;
+
+          compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads.repeatUntilAtomic')); // true means this is a loop
+
+          if (runtime.compilerOptions.warpTimer) {
+            compiler.source += `if (isStuck()) {`;
+            compiler.source += `yield;`;
+            compiler.source += `}`;
+          }
+
+          compiler.source += `}`;
+        },
+
+        repeatWhileAtomic(node, compiler, imports) {
+          compiler.source += `while (${compiler.descendInput(node.args.CONDITION).asBoolean()}) {`;
+
+          compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads.repeatWhileAtomic')); // true means this is a loop
+
+          if (runtime.compilerOptions.warpTimer) {
+            compiler.source += `if (isStuck()) {`;
+            compiler.source += `yield;`;
+            compiler.source += `}`;
+          }
+
+          compiler.source += `}`;
+        },
+
+        repeatForeverAtomic(node, compiler, imports) {
+          compiler.source += `while (true) {`;
+
+          compiler.descendStack(node.args.SUBSTACK, new imports.Frame(true, 'soupThreads.repeatForeverAtomic')); // true means this is a loop
+
+          if (runtime.compilerOptions.warpTimer) {
+            compiler.source += `if (isStuck()) {`;
+            compiler.source += `yield;`;
+            compiler.source += `}`;
+          }
+
+          compiler.source += `}`;
+        },
+
+
+
+        getWarpMode(node, compiler, imports) {
+          return new imports.TypedInput(`${compiler.isWarp}`, imports.TYPE_BOOLEAN);
+        },
+
+        setWarpModeFor(node, compiler, imports) {
+          let dropdown = node.constants.SETBOOLEAN;
+          
+          let oldWarp = compiler.isWarp;
+          compiler.isWarp = (dropdown === 'enable');
+          compiler.descendStack(node.args.SUBSTACK, new imports.Frame(false, 'soupThreads.setWarpModeFor')); // false means this is not a loop
+          compiler.isWarp = oldWarp;
+        },
+
+      },
+    };
 
 
 
