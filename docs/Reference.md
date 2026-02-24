@@ -19,6 +19,7 @@
     - [`(id of [THREAD])` -> String](#id-of-thread---string)
     - [`(index of [THREAD])` -> Number](#index-of-thread---number)
     - [`(status [STATUSFORMAT v] of [THREAD])` -> Number | String](#status-statusformat-v-of-thread---number--string)
+    - [`(info text of [THREAD])` -> String](#info-text-of-thread---string)
   - [Boolean Thread Operators](#boolean-thread-operators)
     - [`<[VALUE] is a thread?>` -> Boolean](#value-is-a-thread---boolean)
     - [`<[THREADONE] is [THREADTWO]>` -> Boolean](#threadone-is-threadtwo---boolean)
@@ -236,6 +237,11 @@ Returns the current status code of `THREAD`, the status code in text format if `
   
   Reads the `status` key from the raw thread object.
 </details>
+
+### `(info text of [THREAD])` -> String
+<img src="../assets/blocks/info_text_of.png">
+
+Returns user-friendly info text for the thread as shown in the reporter bubble.
 
 
 
