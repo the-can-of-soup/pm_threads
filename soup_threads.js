@@ -169,6 +169,9 @@
         status: this.thread.status,
         originalStatus: this.getUnpausedStatus(),
         isLimbo: this.isLimbo(),
+        isAlive: this.isAlive(),
+        isExitedNaturally: this.isExitedNaturally(),
+        isKilled: this.isKilled(),
         isMonitor: this.thread.updateMonitor,
         isStackClick: this.thread.stackClick,
         variables: this.thread.soupThreadVariables,
@@ -233,10 +236,74 @@
     }
 
     isLimbo() {
-      // Returns true if the thread is in limbo.
-      // This is if it is dead, but its unpaused status is not STATUS_DONE.
+      // Limbo is when a dead thread's status is not STATUS_DONE.
 
-      return this.thread !== null && this.getUnpausedStatus() !== RawThreadType.STATUS_DONE && !runtime.threads.includes(this.thread);
+      if (this.thread === null) {
+        return false;
+      }
+
+      // Returns true if:
+      //
+      // - The thread is not in the threads list (it is dead).
+      // - The thread's unpaused status is not STATUS_DONE.
+      //
+      // Note: the case where dead threads are in the threads list are not considered,
+      // as those threads always have status STATUS_DONE.
+
+      return this.getUnpausedStatus() !== RawThreadType.STATUS_DONE && !runtime.threads.includes(this.thread);
+    }
+
+    isAlive() {
+      if (this.thread === null) {
+        return false;
+      }
+
+      // Returns true if:
+      //
+      // - The thread is in the threads list (it died this tick if its status is STATUS_DONE).
+      // - The thread's status is not STATUS_DONE.
+
+      return runtime.threads.includes(this.thread) && this.thread.status !== RawThreadType.STATUS_DONE;
+    }
+
+    isExitedNaturally() {
+      if (this.thread === null) {
+        return false;
+      }
+
+      // Returns true if:
+      //
+      // - The thread is not in the threads list (it is dead).
+      // - The thread was not killed (as defined in `deadThreadWasKilled()`).
+      // OR
+      // - The thread *is* in the threads list (it died this tick if its status is STATUS_DONE).
+      // - The thread's status is STATUS_DONE.
+      // - The thread's `isKilled` property is `false`.
+
+      if (runtime.threads.includes(this.thread)) {
+        return this.thread.status === RawThreadType.STATUS_DONE && !this.thread.isKilled;
+      }
+      return !this.deadThreadWasKilled();
+    }
+
+    isKilled() {
+      if (this.thread === null) {
+        return false;
+      }
+
+      // Returns true if:
+      //
+      // - The thread is not in the threads list (it is dead).
+      // - The thread was killed (as defined in `deadThreadWasKilled()`).
+      // OR
+      // - The thread *is* in the threads list (it died this tick if its status is STATUS_DONE).
+      // - The thread's status is STATUS_DONE.
+      // - The thread's `isKilled` property is `true`.
+
+      if (runtime.threads.includes(this.thread)) {
+        return this.thread.status === RawThreadType.STATUS_DONE && this.thread.isKilled;
+      }
+      return this.deadThreadWasKilled();
     }
   }
 
@@ -2667,60 +2734,19 @@
     isRunning({THREAD}, util) {
       THREAD = ThreadType.toThread(THREAD);
 
-      if (THREAD.thread === null) {
-        return false;
-      }
-
-      // Returns true if:
-      //
-      // - The thread is in the threads list (it died this tick if its status is STATUS_DONE).
-      // - The thread's status is not STATUS_DONE.
-
-      return runtime.threads.includes(THREAD.thread) && THREAD.thread.status !== RawThreadType.STATUS_DONE;
+      return THREAD.isAlive();
     }
 
     isFinished({THREAD}, util) {
       THREAD = ThreadType.toThread(THREAD);
 
-      if(THREAD.thread === null) {
-        return false;
-      }
-      
-      // Returns true if:
-      //
-      // - The thread is not in the threads list (it is dead).
-      // - The thread was not killed (as defined in `deadThreadWasKilled()`).
-      // OR
-      // - The thread *is* in the threads list (it died this tick if its status is STATUS_DONE).
-      // - The thread's status is STATUS_DONE.
-      // - The thread's `isKilled` property is `false`.
-
-      if (runtime.threads.includes(THREAD.thread)) {
-        return THREAD.thread.status === RawThreadType.STATUS_DONE && !THREAD.thread.isKilled;
-      }
-      return !THREAD.deadThreadWasKilled();
+      return THREAD.isExitedNaturally();
     }
 
     isKilled({THREAD}, util) {
       THREAD = ThreadType.toThread(THREAD);
 
-      if (THREAD.thread === null) {
-        return false;
-      }
-
-      // Returns true if:
-      //
-      // - The thread is not in the threads list (it is dead).
-      // - The thread was killed (as defined in `deadThreadWasKilled()`).
-      // OR
-      // - The thread *is* in the threads list (it died this tick if its status is STATUS_DONE).
-      // - The thread's status is STATUS_DONE.
-      // - The thread's `isKilled` property is `true`.
-
-      if (runtime.threads.includes(THREAD.thread)) {
-        return THREAD.thread.status === RawThreadType.STATUS_DONE && THREAD.thread.isKilled;
-      }
-      return THREAD.deadThreadWasKilled();
+      return THREAD.isKilled();
     }
 
     isPaused({THREAD}, util) {
@@ -2734,18 +2760,6 @@
 
     isLimbo({THREAD}, util) {
       THREAD = ThreadType.toThread(THREAD);
-
-      if (THREAD.thread === null) {
-        return false;
-      }
-
-      // Returns true if:
-      //
-      // - The thread is not in the threads list (it is dead).
-      // - The thread's unpaused status is not STATUS_DONE.
-      //
-      // Note: the case where dead threads are in the threads list are not considered,
-      // as those threads always have status STATUS_DONE.
 
       return THREAD.isLimbo();
     }
