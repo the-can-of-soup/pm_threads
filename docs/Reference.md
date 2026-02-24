@@ -19,6 +19,7 @@
     - [`(id of [THREAD])` -> String](#id-of-thread---string)
     - [`(index of [THREAD])` -> Number](#index-of-thread---number)
     - [`(status [STATUSFORMAT v] of [THREAD])` -> Number | String](#status-statusformat-v-of-thread---number--string)
+    - [`(unpaused status [STATUSFORMAT v] of [THREAD])` -> Number | String](#unpaused-status-statusformat-v-of-thread---number--string)
     - [`(info text of [THREAD])` -> String](#info-text-of-thread---string)
   - [Boolean Thread Operators](#boolean-thread-operators)
     - [`<[VALUE] is a thread?>` -> Boolean](#value-is-a-thread---boolean)
@@ -34,7 +35,7 @@
   - [Thread Actions](#thread-actions)
     - [`kill [THREAD]` -> Undefined](#kill-thread---undefined)
     - [`pause [THREAD]` -> Undefined](#pause-thread---undefined)
-    - [`resume [THREAD]` -> Undefined](#resume-thread---undefined)
+    - [`unpause [THREAD]` -> Undefined](#unpause-thread---undefined)
   - [Yielding](#yielding)
     - [`yield` -> Undefined](#yield---undefined)
     - [`yield [TIMES] times` -> Undefined](#yield-times-times---undefined)
@@ -238,6 +239,19 @@ Returns the current status code of `THREAD`, the status code in text format if `
   Reads the `status` key from the raw thread object.
 </details>
 
+### `(unpaused status [STATUSFORMAT v] of [THREAD])` -> Number | String
+_Menus: `STATUSFORMAT` uses [Status Format](#status-format)_
+
+<img src="../assets/blocks/unpaused_status_%23_of.png">
+
+Same as [`(status [STATUSFORMAT v] of [THREAD])`](#status-statusformat-v-of-thread---number--string), except if `THREAD` is paused, returns the status that the thread had _before_ it was paused.
+
+<details>
+  <summary>Internal behavior</summary>
+  
+  Reads the `status` key from the raw thread object, or if it is [5 (paused)](#status-statusformat-v-of-thread---number--string), instead reads the `originalStatus` key.
+</details>
+
 ### `(info text of [THREAD])` -> String
 <img src="../assets/blocks/info_text_of.png">
 
@@ -325,6 +339,8 @@ Returns `true` if `THREAD` exited due to an external cause.[^2]
 
 Returns `true` if `THREAD` was paused by the [`pause [THREAD]`](#pause-thread---undefined) block.
 
+To check if a thread is paused in general, use the [`(status [STATUSFORMAT v] of [THREAD])`](#status-statusformat-v-of-thread---number--string) block and check for status 5 (paused).
+
 <details>
   <summary>Internal behavior</summary>
   
@@ -392,8 +408,8 @@ Kills `THREAD`, and then yields if `THREAD` was the active thread.
 
 Pauses `THREAD`, and then yields if `THREAD` was the active thread.
 
-### `resume [THREAD]` -> Undefined
-<img src="../assets/blocks/resume.png">
+### `unpause [THREAD]` -> Undefined
+<img src="../assets/blocks/unpause.png">
 
 Unpauses `THREAD`.
 
