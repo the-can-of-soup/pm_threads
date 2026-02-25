@@ -146,13 +146,6 @@
       return result;
     }
 
-    getId() {
-      if (this.thread === null) {
-        return 'undefined';
-      }
-      return this.thread.soupThreadId;
-    }
-
     toString() {
       return `Thread ${this.getId()}`;
     }
@@ -189,7 +182,20 @@
     }
 
     toReporterContent() {
-      return span(`${escapeHTML(this.getHeader())}<br><small style="font-family: Consolas, 'Courier New', monospace;">${escapeHTML(this.getId())}</small>`);
+      let content = '';
+
+      content += `<span style="white-space: normal;">`;
+
+      content += escapeHTML(this.getHeader());
+      let label = this.getLabel();
+      if (label !== undefined) {
+        content += `<br><i>${escapeHTML(label)}</i>`;
+      }
+      content += `<br><small style="font-family: Consolas, 'Courier New', monospace;">${escapeHTML(this.getId())}</small>`;
+
+      content += `</span>`;
+
+      return span(content);
     }
 
     toMonitorContent() {
@@ -197,7 +203,20 @@
     }
 
     toListItem() {
-      return span(`${escapeHTML(this.getHeader())} <small style="font-family: Consolas, 'Courier New', monospace;">${escapeHTML(this.getId())}</small>`);
+      let content = '';
+
+      content += `<span style="white-space: normal;">`;
+
+      content += escapeHTML(this.getHeader());
+      let label = this.getLabel();
+      if (label !== undefined) {
+        content += ` <i>${escapeHTML(label)}</i>`;
+      }
+      content += ` <small style="font-family: Consolas, 'Courier New', monospace;">${escapeHTML(this.getId())}</small>`;
+
+      content += `</span>`;
+
+      return span(content);
     }
 
     jwArrayHandler() {
@@ -205,7 +224,28 @@
     }
 
     dogeiscutObjectHandler() {
-      return `<span style="white-space: nowrap;">${escapeHTML(this.getHeader())} <small style="font-family: Consolas, 'Courier New', monospace;">${escapeHTML(this.getId())}</small></span>`;
+      let content = '';
+
+      let label = this.getLabel();
+
+      if (label === undefined) {
+        content += `<span style="white-space: nowrap;">`;
+
+        content += `<small style="font-family: Consolas, 'Courier New', monospace;">${escapeHTML(this.getId())}</small>`;
+        content += ` ${escapeHTML(this.getHeader())}`;
+
+        content += `</span>`;
+      } else {
+        content += `<span style="white-space: nowrap;">`;
+
+        content += `<i>${escapeHTML(label)}</i>`;
+        content += ` <small style="font-family: Consolas, 'Courier New', monospace;">${escapeHTML(this.getId())}</small>`;
+        content += ` ${escapeHTML(this.getHeader())}`;
+
+        content += `</span>`;
+      }
+
+      return content;
     }
 
     toListEditor() {
@@ -230,8 +270,24 @@
       return this.thread.isKilled || this.thread.status !== RawThreadType.STATUS_DONE;
     }
 
+    getId() {
+      if (this.thread === null) {
+        return 'undefined';
+      }
+      return this.thread.soupThreadId;
+    }
+
     getUnpausedStatus() {
       return this.thread.status === RawThreadType.STATUS_PAUSED ? this.thread.originalStatus : this.thread.status;
+    }
+
+    getLabel() {
+      if (this.thread === null) {
+        return undefined;
+      }
+
+      let variables = this.thread.soupThreadVariables;
+      return variables.has('__label__') ? Scratch.Cast.toString(variables.get('__label__')) : undefined;
     }
 
     isLimbo() {
