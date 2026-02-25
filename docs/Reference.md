@@ -644,6 +644,12 @@ Repeatedly executes `SUBSTACK` forever. The difference between this block and th
 
 ## Thread Variables
 
+> [!NOTE]
+>
+> The variable name `__label__` is special. If this variable exists in a thread, that thread's reporter bubble will show the stringified contents of it italicised next to other info. This is meant to be used to add human-readable identifiers or notes to a thread, which will then be seen in the editor or when debugging.
+>
+> Other than visuals in the editor, this variable can be used entirely as a normal variable, and even hold non-string types; this is just not recommended.
+
 ### `(get [VARIABLE] in [THREAD])` -> Any
 <img src="../assets/blocks/get_foo_in.png">
 
