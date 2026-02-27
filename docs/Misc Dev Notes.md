@@ -25,8 +25,10 @@
 ## Monitor updater threads
 
 - These are threads with the `updateMonitor` flag.
-- Monitor updater threads are added to the end of `runtime.threads` before the start of every _frame_.
+- Monitor updater threads are added to the end of `runtime.threads` before the start of every _frame_ (immediately after executable hat threads).[^4]
 - Monitor updater threads exit immediately after being stepped once. If they were the only thread in `runtime.threads`, this means there are now 0 threads, immediately ending the frame and having the same effect as if graphics updated was `true`.
+
+[^4]: https://github.com/PenguinMod/PenguinMod-Vm/blob/5510cff79cd043256dcb6dac0375f2261e56be09/src/engine/runtime.js#L3118
 
 ## Executable hat threads
 
@@ -35,6 +37,7 @@
 - Immediately after these threads are created, they are stepped once (call this step their "predicate step"). `sequencer.activeThread` is `null` during this time, because the execution phase has not yet begun, however the `thread` global in the compiled context _is_ set and is the currently stepping executable hat thread.[^3]
 - In a predicate step, the first thing that happens is its hat block evaluates its inputs and then its predicate. If its predicate is `true`, the step then continues, and the body of the script steps _(even though the execution phase has not yet begun!)_. If the predicate is `false`, the thread completes with status 4 (completed) and ends the step.
 - When the predicate step evaluates the hat's inputs, this will execute whatever blocks are in the inputs (again _even though the execution phase hasn't begun yet_). I have yet to determine what happens if an input block yields while being executed.
+- Interestingly, executable hat threads are created and therefore initially stepped _before `runtime.redrawRequested` (graphics updated) is set to `false`_; this means that the graphics updated value from the end of the previous frame should actually bleed into predicate steps of the current frame (although this has yet to be tested).
 - Keep in mind that both during and after the predicate step, the thread is still an executable hat thread, so `executableHat` will be `true` even while the thread is being stepped normally by the sequencer during the execution phase.
 
 [^2]: https://github.com/PenguinMod/PenguinMod-Vm/blob/5510cff79cd043256dcb6dac0375f2261e56be09/src/engine/runtime.js#L3109
