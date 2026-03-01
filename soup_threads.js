@@ -10,7 +10,9 @@
 
 // TO-DO
 //
+// - Make order of thread data display in objects table display: ID, label (if present), header
 // - Add "super mutator shenanagins" so that atomic forever loses its end cap if an "escape loop" block is present inside it
+// - Figure out *exactly* when and how Scratch.BlockType.HAT blocks have their condition checked
 // - Figure out *exactly* what happens when a hat block is restarted
 // - Figure out *exactly* what happens when an async block is run
 // - Make compat atomic loops (atomic "for" loops for looping through arrays, objects, sets, etc.)
@@ -83,6 +85,8 @@
     return id.join('');
   };
 
+  let nullThreadWrapperPointer = {};
+
   class ThreadType {
     customId = 'soupThread';
 
@@ -108,13 +112,29 @@
     constructor(thread = null) {
       this.thread = thread;
 
-      if (this.thread !== null) {
+      if (this.thread === null) {
+
+        // Use existing wrapper if possible
+        if ('soupThreadWrapper' in nullThreadWrapperPointer) {
+          return nullThreadWrapperPointer.soupThreadWrapper;
+        }
+        nullThreadWrapperPointer.soupThreadWrapper = this;
+
+      } else {
+
+        // Use existing wrapper if possible
+        if ('soupThreadWrapper' in this.thread) {
+          return this.thread.soupThreadWrapper;
+        }
+        this.thread.soupThreadWrapper = this;
+
         if (!('soupThreadId' in this.thread)) {
           this.thread.soupThreadId = uid();
         }
         if (!('soupThreadVariables' in this.thread)) {
           this.thread.soupThreadVariables = new Map();
         }
+
       }
     }
 
@@ -423,14 +443,23 @@
     [RawThreadType.STATUS_PAUSED]: 'STATUS_PAUSED',
   }
 
+  const RuntimePhase = {
+    NOT_STEPPING: 'not stepping', // between RUNTIME_STEP_END and RUNTIME_STEP_START events (between frames)
+    BEFORE_EXECUTE: 'before execution phase', // between RUNTIME_STEP_START and BEFORE_EXECUTE events (before execution phase)
+    EXECUTION: 'execution phase', // between BEFORE_EXECUTE and AFTER_EXECUTE events
+    AFTER_EXECUTE: 'after execution phase', // between AFTER_EXECUTE and RUNTIME_STEP_END (after execution phase)
+  }
+
   class SoupThreadsUtil {
 
     static ThreadType = ThreadType;
     static ThreadStatus = ThreadStatus;
+    static RuntimePhase = RuntimePhase;
 
     static uid = uid;
     static originalPauseThread = RawThreadType.prototype.pause;
     static originalUnpauseThread = RawThreadType.prototype.play;
+    static nullThreadWrapperPointer = nullThreadWrapperPointer;
 
     /**
      * Should be called as a raw thread to pause it in the name of the extension.
@@ -477,17 +506,29 @@
     }
 
     /**
+     * Gets the index of the current thread in the threads array.
+     * 
+     * @static
+     * @param {RawThreadType} threadGlobal - The "thread" global in the compiled context.
+     * @returns {number} - A 0-based index within the threads array.
+     */
+    static getCurrentThreadIndex(threadGlobal) {
+      return runtime.soupThreadsRuntimePhase === RuntimePhase.EXECUTION ? runtime.sequencer.activeThreadIndex : runtime.threads.indexOf(threadGlobal);
+    }
+
+    /**
      * Converts an arbitrary block input value from an "index" menu to a 0-based index for the threads array.
      * 
      * @static
      * @param {*} INDEX - An arbitrary block input value from an "index" menu.
+     * @param {RawThreadType} threadGlobal - The "thread" global in the compiled context.
      * @param {boolean} insertMode - If true, the "end" index will select the index after the last index.
      *     This is to allow inserting to the end of the array.
      * @param {boolean} absoluteMode - If true, relative indexes such as "active index" and "previous index"
      *     will be ignored and instead treated as a generic invalid string.
      * @returns {number} - A 0-based index to be used on the threads array.
      */
-    static handleIndexInput(INDEX, insertMode = false, absoluteMode = false, constrain = false) {
+    static handleIndexInput(INDEX, threadGlobal, insertMode = false, absoluteMode = false, constrain = false) {
       // Convert index to a 1-based integer
       switch (Scratch.Cast.toString(INDEX)) {
         case 'start':
@@ -503,21 +544,21 @@
         case 'previous index':
         case 'before previous':
           if (!absoluteMode) {
-            INDEX = runtime.sequencer.activeThreadIndex;
+            INDEX = SoupThreadsUtil.getCurrentThreadIndex(threadGlobal);
             break;
           }
 
         case 'active index':
         case 'before active':
           if (!absoluteMode) {
-            INDEX = runtime.sequencer.activeThreadIndex + 1;
+            INDEX = SoupThreadsUtil.getCurrentThreadIndex(threadGlobal) + 1;
             break;
           }
 
         case 'next index':
         case 'after active':
           if (!absoluteMode) {
-            INDEX = runtime.sequencer.activeThreadIndex + 2;
+            INDEX = SoupThreadsUtil.getCurrentThreadIndex(threadGlobal) + 2;
             break;
           }
 
@@ -724,6 +765,7 @@
       jwTargets = vm.jwTargets;
 
       // Set up state
+      runtime.sequencer.soupThreadsWorkTime = null;
       runtime.soupThreadsTickFromInit = 0;
       runtime.soupThreadsFrameFromInit = 0;
       runtime.soupThreadsTickFromStart = 0;
@@ -733,33 +775,50 @@
       runtime.soupThreadsLastFrameStartTime = null;
       runtime.soupThreadsLastFrameWorkEndTime = null;
       runtime.soupThreadsLastBroadcastRawThreads = [];
+      runtime.soupThreadsRuntimePhase = RuntimePhase.NOT_STEPPING;
 
       // Register event listeners
 
-      runtime.on('BEFORE_EXECUTE', function() {
-        // Runs before every frame
+      runtime.on('RUNTIME_STEP_START', function() {
+        // Runs before every frame.
+
+        runtime.soupThreadsRuntimePhase = RuntimePhase.BEFORE_EXECUTE;
 
         runtime.soupThreadsFrameFromInit += 1;
         runtime.soupThreadsFrameFromStart += 1;
 
         runtime.soupThreadsTickWithinFrame = 0;
 
-        // Calculate work time
-        // Mimics this line from sequencer.js: https://github.com/PenguinMod/PenguinMod-Vm/blob/b88731f3f93ed36d2b57024f8e8d758b6b60b54e/src/engine/sequencer.js#L74
-        runtime.sequencer.soupThreadsWorkTime = 0.75 * runtime.currentStepTime;
-
         runtime.soupThreadsLastFrameStartTime = runtime.soupThreadsFrameStartTime;
         runtime.soupThreadsFrameStartTime = Date.now();
       });
 
+      runtime.on('BEFORE_EXECUTE', function() {
+        // Runs before the execution phase every frame.
+
+        runtime.soupThreadsRuntimePhase = RuntimePhase.EXECUTION;
+
+        // Calculate work time
+        // Mimics this line from sequencer.js: https://github.com/PenguinMod/PenguinMod-Vm/blob/b88731f3f93ed36d2b57024f8e8d758b6b60b54e/src/engine/sequencer.js#L74
+        runtime.sequencer.soupThreadsWorkTime = 0.75 * runtime.currentStepTime;
+      });
+
       runtime.on('AFTER_EXECUTE', function() {
-        // Runs after every frame but before redraw and sleep until end of frame time
+        // Runs after execution phase every frame but before redraw.
+
+        runtime.soupThreadsRuntimePhase = RuntimePhase.AFTER_EXECUTE;
 
         runtime.soupThreadsLastFrameWorkEndTime = Date.now();
+      });
+
+      runtime.on('RUNTIME_STEP_END', function() {
+        // Runs after every frame.
+
+        runtime.soupThreadsRuntimePhase = RuntimePhase.NOT_STEPPING;
       })
 
       runtime.on('BEFORE_TICK', function() {
-        // Runs before every tick
+        // Runs before every tick.
 
         runtime.soupThreadsTickFromInit += 1;
         runtime.soupThreadsTickFromStart += 1;
@@ -767,14 +826,14 @@
       });
 
       runtime.on('PROJECT_START', function() {
-        // Runs when blue flag clicked, after state has been reset
+        // Runs when blue flag clicked, after the state has been reset.
 
         runtime.soupThreadsTickFromStart = 0;
         runtime.soupThreadsFrameFromStart = 0;
       });
 
       runtime.on('HATS_STARTED', function(requestedHatOpcode, optMatchFields, optTarget, newThreads) {
-        // Runs when runtime.startHats or util.startHats is called
+        // Runs when runtime.startHats or util.startHats is called.
 
         if (requestedHatOpcode === 'event_whenbroadcastreceived') {
           runtime.soupThreadsLastBroadcastRawThreads = newThreads;
@@ -1890,6 +1949,29 @@
     static compileInfo = {
       ir: {
 
+        currentThread(generator, block) {
+          return {
+            kind: 'input',
+          };
+        },
+
+        currentThreadIdx(generator, block) {
+          return {
+            kind: 'input',
+          };
+        },
+
+        threadAt(generator, block) {
+          return {
+            kind: 'input',
+            args: {
+              INDEX: generator.descendInputOfBlock(block, 'INDEX'),
+            }
+          };
+        }
+
+
+
         builderNoReturn(generator, block) {
           return {
             kind: 'stack',
@@ -2149,6 +2231,51 @@
       },
       js: {
 
+        currentThread(node, compiler, imports) {
+          let source = '';
+
+          source += `(`;
+
+          source += `new vm.SoupThreads.Type(thread)`;
+
+          source += `)`;
+
+          return new imports.TypedInput(source, imports.TYPE_UNKNOWN);
+        },
+
+        currentThreadIdx(node, compiler, imports) {
+          let source = '';
+
+          source += `(`;
+
+          source += `(`;
+
+          // Use "thread" global instead of active thread if not currently in the execution phase;
+          // this catches the edge step edge case.
+          source += `runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION`;
+          source += ` ? runtime.sequencer.activeThreadIndex`;
+          source += ` : runtime.threads.indexOf(thread)`;
+
+          source += `) + 1`;
+
+          source += `)`;
+
+          return new imports.TypedInput(source, imports.TYPE_NUMBER);
+        },
+
+        threadAt(node, compiler, imports) {
+          let INDEX = compiler.localVariables.next();
+          compiler.source += `let ${INDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.INDEX).asUnknown()}, thread);`;
+
+          compiler.source += `if (${INDEX} < 0 || ${INDEX} >= runtime.threads.length) {`;
+          compiler.source += `return new vm.SoupThreads.Type();`;
+          compiler.source += `}`;
+
+          compiler.source += `return new vm.SoupThreads.Type(runtime.threads[${INDEX}]);`;
+        },
+
+
+
         _builderCore(node, compiler, imports) {
           let source = '';
 
@@ -2170,11 +2297,11 @@
           source += `let ${rawThread} = null;`;
 
           let TARGET = compiler.localVariables.next();
-          source += `let ${TARGET} = vm.SoupThreadsUtil.handleTargetInput(${compiler.descendInput(node.args.TARGET).asUnknown()}, target);`
+          source += `let ${TARGET} = vm.SoupThreadsUtil.handleTargetInput(${compiler.descendInput(node.args.TARGET).asUnknown()}, target);`;
 
           // insertMode = true, absoluteMode = false, constrain = true
           let INDEX = compiler.localVariables.next();
-          source += `let ${INDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.INDEX).asUnknown()}, true, false, true);`;
+          source += `let ${INDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.INDEX).asUnknown()}, thread, true, false, true);`;
 
           source += `if (${TARGET} !== null) {`;
 
@@ -2250,7 +2377,7 @@
           compiler.source += `runtime._stopThread(${THREAD}.thread);`;
 
           // Yield if active thread was killed.
-          compiler.source += `if (${THREAD}.thread === runtime.sequencer.activeThread) {`;
+          compiler.source += `if (${THREAD}.thread === thread) {`;
           compiler.source += `yield;`;
           compiler.source += `}`;
 
@@ -2266,7 +2393,7 @@
           compiler.source += `vm.SoupThreadsUtil.pauseThreadAsSoupThreads.call(${THREAD}.thread);`;
 
           // Yield if active thread was paused.
-          compiler.source += `if (${THREAD}.thread === runtime.sequencer.activeThread) {`;
+          compiler.source += `if (${THREAD}.thread === thread) {`;
           compiler.source += `yield;`;
           compiler.source += `}`;
 
@@ -2296,19 +2423,27 @@
         },
 
         yieldBack(node, compiler, imports) {
+          // Will do nothing if not in the execution phase.
+          compiler.source += `if (runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION) {`;
+
           // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
           // Will yield to current thread if the current thread is at the start.
-          compiler.source += `if (runtime.sequencer.activeThreadIndex <= 0) {`;
-          compiler.source += `runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;`;
+          compiler.source += `if (runtime.sequencer.activeThreadIndex > 0) {`;
+          compiler.source += `runtime.sequencer.activeThreadIndex -= 2;`;
           compiler.source += `} else {`;
           // Yield to current thread
           compiler.source += `runtime.sequencer.activeThreadIndex--;`;
           compiler.source += `}`;
 
           compiler.source += `yield;`;
+
+          compiler.source += `}`;
         },
 
         yieldToThread(node, compiler, imports) {
+          // Will skip special behavior and yield normally if not in execution phase.
+          compiler.source += `if (runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION) {`;
+
           let ACTIVETHREAD = compiler.localVariables.next();
           compiler.source += `let ${ACTIVETHREAD} = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.ACTIVETHREAD).asUnknown()});`;
 
@@ -2323,12 +2458,17 @@
           compiler.source += `runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;`;
           compiler.source += `}`;
 
+          compiler.source += `}`;
+
           compiler.source += `yield;`;
         },
 
         yieldToIndex(node, compiler, imports) {
+          // Will skip special behavior and yield normally if not in execution phase.
+          compiler.source += `if (runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION) {`;
+
           let ACTIVEINDEX = compiler.localVariables.next();
-          compiler.source += `let ${ACTIVEINDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.ACTIVEINDEX).asUnknown()});`;
+          compiler.source += `let ${ACTIVEINDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.ACTIVEINDEX).asUnknown()}, thread);`;
 
           // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
 
@@ -2342,12 +2482,19 @@
           compiler.source += `runtime.sequencer.activeThreadIndex = ${ACTIVEINDEX} - 1;`;
           compiler.source += `}`;
 
+          compiler.source += `}`;
+
           compiler.source += `yield;`;
         },
 
         yieldToEnd(node, compiler, imports) {
+          // Will skip special behavior and yield normally if not in execution phase.
+          compiler.source += `if (runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION) {`;
+
           // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
           compiler.source += `runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;`;
+
+          compiler.source += `}`;
 
           compiler.source += `yield;`;
         },
@@ -2355,13 +2502,16 @@
 
 
         broadcastAt(node, compiler, imports, wait = false, atomic = false) {
+          // Will do nothing if not in the execution phase.
+          compiler.source += `if (runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION) {`;
+
           let INDEX = compiler.localVariables.next();
           if (atomic) {
             // Insert new threads immediately before the active thread if atomic mode is enabled
             compiler.source += `let ${INDEX} = runtime.sequencer.activeThreadIndex;`;
           } else {
             // insertMode = true, absoluteMode = false, constrain = true
-            compiler.source += `let ${INDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.INDEX).asUnknown()}, true, false, true);`;
+            compiler.source += `let ${INDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.INDEX).asUnknown()}, thread, true, false, true);`;
           }
 
           // Threads can be added to the end of the threads array, or overwrite threads in the middle of the array (when restarting a thread).
@@ -2443,6 +2593,8 @@
 
             compiler.source += `}`;
           }
+
+          compiler.source += `}`;
         },
 
         broadcastAtAndWait(node, compiler, imports) {
@@ -2472,9 +2624,13 @@
           // Only handle index input after replacing threads array so that length calculations are correct.
           // insertMode = false, absoluteMode = true
           let ACTIVEINDEX = compiler.localVariables.next();
-          compiler.source += `let ${ACTIVEINDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.ACTIVEINDEX).asUnknown()}, false, true);`;
+          compiler.source += `let ${ACTIVEINDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.ACTIVEINDEX).asUnknown()}, thread, false, true);`;
 
           // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
+
+          // Will yield normally if not in execution phase; it is assumed that this is a edge step, so this will
+          // move to the first thread after all edge steps for the frame are finished.
+          compiler.source += `if (runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION) {`;
 
           compiler.source += `if (${ACTIVEINDEX} < 0) {`;
           // yield to first thread
@@ -2484,6 +2640,8 @@
           compiler.source += `runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;`;
           compiler.source += `} else {`;
           compiler.source += `runtime.sequencer.activeThreadIndex = ${ACTIVEINDEX} - 1;`;
+          compiler.source += `}`;
+
           compiler.source += `}`;
 
           compiler.source += `yield;`;
@@ -2506,12 +2664,18 @@
 
           // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
 
+          // Will yield normally if not in execution phase; it is assumed that this is a edge step, so this will
+          // move to the first thread after all edge steps for the frame are finished.
+          compiler.source += `if (runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION) {`;
+
           compiler.source += `let threadIndex;`;
           compiler.source += `if (${ACTIVETHREAD}.thread !== null && (threadIndex = runtime.threads.indexOf(${ACTIVETHREAD}.thread)) !== -1) {`;
           compiler.source += `runtime.sequencer.activeThreadIndex = threadIndex - 1;`;
           compiler.source += `} else {`;
           // Fall back to yielding to end of tick.
           compiler.source += `runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;`;
+          compiler.source += `}`;
+
           compiler.source += `}`;
 
           compiler.source += `yield;`;
@@ -2526,7 +2690,7 @@
           compiler.source += `if (${THREAD}.thread !== null && (${threadIndex} = runtime.threads.indexOf(${THREAD}.thread)) !== -1) {`;
           // insertMode = true, absoluteMode = false, constrain = true
           let INDEX = compiler.localVariables.next();
-          compiler.source += `let ${INDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.INDEX).asUnknown()}, true, false, true);`;
+          compiler.source += `let ${INDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.INDEX).asUnknown()}, thread, true, false, true);`;
 
           // Move the thread
 
@@ -2549,6 +2713,9 @@
           compiler.source += `}`;
 
           // Update activeThreadIndex if the active thread moved
+          // This only done if we are in the execution phase, as otherwise it would do nothing.
+
+          compiler.source += `if (runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION) {`;
 
           compiler.source += `if (${threadIndex} === runtime.sequencer.activeThreadIndex) {`;
           // The active thread was directly moved.
@@ -2556,6 +2723,8 @@
           compiler.source += `} else if (${INDEX} <= runtime.sequencer.activeThreadIndex) {`;
           // The active thread was indirectly moved.
           compiler.source += `runtime.sequencer.activeThreadIndex += 1;`;
+          compiler.source += `}`;
+
           compiler.source += `}`;
 
           compiler.source += `}`;
@@ -2579,11 +2748,16 @@
           compiler.source += `runtime.threads[${threadIndex1}] = ${THREADTWO}.thread;`;
           compiler.source += `runtime.threads[${threadIndex2}] = ${THREADONE}.thread;`;
 
+          compiler.source += `if (runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION) {`;
+
           // Update activeThreadIndex if the active thread moved
+          // This only done if we are in the execution phase, as otherwise it would do nothing.
           compiler.source += `if (runtime.sequencer.activeThreadIndex === ${threadIndex1}) {`;
           compiler.source += `runtime.sequencer.activeThreadIndex = ${threadIndex2};`;
           compiler.source += `} else if (runtime.sequencer.activeThreadIndex === ${threadIndex2}) {`;
           compiler.source += `runtime.sequencer.activeThreadIndex = ${threadIndex1};`;
+          compiler.source += `}`;
+
           compiler.source += `}`;
 
           compiler.source += `}`;
@@ -2652,7 +2826,11 @@
 
 
         getWarpMode(node, compiler, imports) {
-          return new imports.TypedInput(`${compiler.isWarp}`, imports.TYPE_BOOLEAN);
+          let source = '';
+
+          source += `${compiler.isWarp}`;
+
+          return new imports.TypedInput(source, imports.TYPE_BOOLEAN);
         },
 
         setWarpModeFor(node, compiler, imports) {
@@ -2669,6 +2847,7 @@
 
 
 
+    /*
     currentThread({}, util) {
       return new ThreadType(util.sequencer.activeThread);
     }
@@ -2679,11 +2858,13 @@
       }
       return util.sequencer.activeThreadIndex + 1;
     }
+    */
 
     nullThread({}, util) {
       return new ThreadType();
     }
 
+    /*
     threadAt({INDEX}, util) {
       INDEX = SoupThreadsUtil.handleIndexInput(INDEX);
 
@@ -2693,6 +2874,7 @@
 
       return new ThreadType(runtime.threads[INDEX]);
     }
+    */
 
 
 
