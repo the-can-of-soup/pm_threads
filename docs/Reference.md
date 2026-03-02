@@ -512,7 +512,7 @@ Executes the behavior of [`broadcast [MESSAGE v] to (INDEX v)`](#broadcast-messa
 ### `step [MESSAGE v] immediately and return` -> Undefined
 <img src="../assets/blocks/step_message1_immediately_and_return.png">
 
-Broadcasts `MESSAGE`, moves all new threads to immediately before the active thread, yields, and makes the first new thread active.
+Broadcasts `MESSAGE`, moves all new threads to immediately before the active thread in the [threads array](#threads---arraythread), yields, and makes the first new thread active.
 
 Any preexisting threads with a `when I receive [MESSAGE v]` hat block will be restarted and moved to before the active thread as well.
 
