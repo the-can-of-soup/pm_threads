@@ -77,7 +77,7 @@
     - [`(tick # this frame)` -> Number](#tick--this-frame---number)
   - [Runtime Phase](#runtime-phase)
     - [`<this is a predicate step?>` -> Boolean](#this-is-a-predicate-step---boolean)
-    - [`(runtime phase [STATUSFORMAT v])` -> Number | String](#runtime-phase-statusformat-v---numberstring)
+    - [`(runtime phase [STATUSFORMAT v])` -> Number | String](#runtime-phase-statusformat-v---number--string)
   - [Warp Mode](#warp-mode)
     - [`<warp mode>` -> Boolean](#warp-mode---boolean)
     - [`[SETBOOLEAN v] warp mode for {SUBSTACK}` -> Undefined](#setboolean-v-warp-mode-for-substack---undefined)
