@@ -36,8 +36,8 @@
 
 ## Executable hat threads & predicate steps
 
-- Executable hat threads are threads with the `executableHat` flag.
-- Every _frame_, before the normal execution phase begins (more precisely, before the `BEFORE_EXECUTE` event is fired but after `RUNTIME_STEP_START`), all blocks of the `Scratch.BlockType.HAT` type with the `isEdgeActivated` flag will have their threads created and appended to the end of `runtime.threads`.[^2] These threads are executable hat threads.
+- Executable hat threads are defined here as threads with the `executableHat` flag.
+- Every _frame_, before the execution phase (more precisely, before the `BEFORE_EXECUTE` event is fired but after `RUNTIME_STEP_START`), all blocks of the `Scratch.BlockType.HAT` type with the `isEdgeActivated` flag will have their threads created and appended to the end of `runtime.threads`.[^2] These threads are executable hat threads.
 - Also, `Scratch.BlockType.HAT` blocks _without_ the `isEdgeActivated` flag will very likely (but controlled by the extension that added them) have their threads be created and appended every frame on the `BEFORE_EXECUTE` event. These threads are also executable hat threads.
 - Immediately after these threads are created, they are stepped once (call this step their "predicate step"). `sequencer.activeThread` is `null` during this time, because the execution phase has not yet begun, however the `thread` global in the compiled context _is_ set and is the currently stepping executable hat thread.[^3]
 - In a predicate step, the hat block evaluates its inputs and then its predicate. If its predicate is `true` (and it wasn't `true` on the last check if edge-activated), the thread yields, and on its next step, it will step the body (blocks below the hat). If the predicate is `false`, the thread completes with status 4 (completed) and ends the step.
