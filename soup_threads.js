@@ -311,6 +311,7 @@
 
     isLimbo() {
       // Limbo is when a dead thread's status is not STATUS_DONE.
+      // NOTE: This may be reimplemented in other places where raw threads are used.
 
       if (this.thread === null) {
         return false;
@@ -328,6 +329,8 @@
     }
 
     isAlive() {
+      // NOTE: This may be reimplemented in other places where raw threads are used.
+
       if (this.thread === null) {
         return false;
       }
@@ -341,6 +344,8 @@
     }
 
     isExitedNaturally() {
+      // NOTE: This may be reimplemented in other places where raw threads are used.
+
       if (this.thread === null) {
         return false;
       }
@@ -361,6 +366,8 @@
     }
 
     isKilled() {
+      // NOTE: This may be reimplemented in other places where raw threads are used.
+
       if (this.thread === null) {
         return false;
       }
@@ -2640,6 +2647,40 @@
 
 
 
+        setRunningThreadsActiveThread(node, compiler, imports) {
+          let THREADS = compiler.localVariables.next();
+          compiler.source += `let ${THREADS} = vm.jwArray.Type.toArray(${compiler.descendInput(node.args.THREADS).asUnknown()}).array;`;
+          let thread = compiler.localVariables.next();
+          compiler.source += `${THREADS} = ${THREADS}.map((${thread}) => (vm.SoupThreads.Type.toThread(${thread})).${thread});`;
+          compiler.source += `${THREADS} = Array.from(new Set(${THREADS}));`;
+          let rawThread = compiler.localVariables.next();
+          compiler.source += `${THREADS} = ${THREADS}.filter((${rawThread}) => (${rawThread} !== null && runtime.threads.includes(${rawThread})));`;
+
+          // Completely replace threads array via mutating only.
+          compiler.source += `runtime.threads.splice(0, runtime.threads.length, ...${THREADS});`;
+
+          let ACTIVETHREAD = compiler.localVariables.next();
+          compiler.source += `let ${ACTIVETHREAD} = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.ACTIVETHREAD).asUnknown()});`;
+
+          // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
+
+          // Will yield normally if not in execution phase; it is assumed that this is a predicate step, so this will
+          // move to the first thread after all predicate steps for the frame are finished.
+          compiler.source += `if (runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION) {`;
+
+          compiler.source += `let threadIndex;`;
+          compiler.source += `if (${ACTIVETHREAD}.thread !== null && (threadIndex = runtime.threads.indexOf(${ACTIVETHREAD}.thread)) !== -1) {`;
+          compiler.source += `runtime.sequencer.activeThreadIndex = threadIndex - 1;`;
+          compiler.source += `} else {`;
+          // Fall back to yielding to end of tick.
+          compiler.source += `runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;`;
+          compiler.source += `}`;
+
+          compiler.source += `}`;
+
+          compiler.source += `yield;`;
+        },
+
         setRunningThreadsActiveIndex(node, compiler, imports) {
           let THREADS = compiler.localVariables.next();
           compiler.source += `let ${THREADS} = vm.jwArray.Type.toArray(${compiler.descendInput(node.args.THREADS).asUnknown()}).array;`;
@@ -2671,40 +2712,6 @@
           compiler.source += `runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;`;
           compiler.source += `} else {`;
           compiler.source += `runtime.sequencer.activeThreadIndex = ${ACTIVEINDEX} - 1;`;
-          compiler.source += `}`;
-
-          compiler.source += `}`;
-
-          compiler.source += `yield;`;
-        },
-
-        setRunningThreadsActiveThread(node, compiler, imports) {
-          let THREADS = compiler.localVariables.next();
-          compiler.source += `let ${THREADS} = vm.jwArray.Type.toArray(${compiler.descendInput(node.args.THREADS).asUnknown()}).array;`;
-          let thread = compiler.localVariables.next();
-          compiler.source += `${THREADS} = ${THREADS}.map((${thread}) => (vm.SoupThreads.Type.toThread(${thread})).${thread});`;
-          compiler.source += `${THREADS} = Array.from(new Set(${THREADS}));`;
-          let rawThread = compiler.localVariables.next();
-          compiler.source += `${THREADS} = ${THREADS}.filter((${rawThread}) => (${rawThread} !== null && runtime.threads.includes(${rawThread})));`;
-
-          // Completely replace threads array via mutating only.
-          compiler.source += `runtime.threads.splice(0, runtime.threads.length, ...${THREADS});`;
-
-          let ACTIVETHREAD = compiler.localVariables.next();
-          compiler.source += `let ${ACTIVETHREAD} = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.ACTIVETHREAD).asUnknown()});`;
-
-          // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
-
-          // Will yield normally if not in execution phase; it is assumed that this is a predicate step, so this will
-          // move to the first thread after all predicate steps for the frame are finished.
-          compiler.source += `if (runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION) {`;
-
-          compiler.source += `let threadIndex;`;
-          compiler.source += `if (${ACTIVETHREAD}.thread !== null && (threadIndex = runtime.threads.indexOf(${ACTIVETHREAD}.thread)) !== -1) {`;
-          compiler.source += `runtime.sequencer.activeThreadIndex = threadIndex - 1;`;
-          compiler.source += `} else {`;
-          // Fall back to yielding to end of tick.
-          compiler.source += `runtime.sequencer.activeThreadIndex = runtime.threads.length - 1;`;
           compiler.source += `}`;
 
           compiler.source += `}`;
