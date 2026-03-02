@@ -1026,6 +1026,7 @@ The value can be overridden by a target or target ID.
 ### Status Format
 _Used in:_
 - [`(status [STATUSFORMAT v] of [THREAD])`](#status-statusformat-v-of-thread---number--string)
+- [`(unpaused status [STATUSFORMAT v] of [THREAD])`](#unpaused-status-statusformat-v-of-thread---number--string)
 
 _Type: **Static**_
 
