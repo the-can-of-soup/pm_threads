@@ -837,8 +837,8 @@ Returns the current "runtime phase" formatted as specified by `STATUSFORMAT`. He
 | Phase # | Phase text       | Internal name    | Description                                                                               |
 |---------|------------------|------------------|-------------------------------------------------------------------------------------------|
 | 0       | Not stepping     | `NOT_STEPPING`   | `runtime._step` (function that executes a frame) is not currently running.*               |
-| 1       | Frame start      | `FRAME_START`    | No ticks have occurred yet this frame.                                                    |
-| 2       | Before execution | `BEFORE_EXECUTE` | Fully prepared to start the first tick.                                                   |
+| 1       | Frame start      | `FRAME_START`    | No ticks have occurred yet this frame.[^6]                                                |
+| 2       | Before execution | `BEFORE_EXECUTE` | Fully prepared to start the first tick.[^7]                                               |
 | 3       | Execution        | `EXECUTION`      | The first step of the first tick of the frame is about to happen or has already happened. |
 | 4       | Frame end        | `FRAME_END`      | All ticks this frame have executed.*                                                      |
 
@@ -1093,3 +1093,7 @@ _Type: **Static**_
 [^4]: This block _will_ yield after a loop if the editor is frozen and warp timer is enabled to prevent crashes.
 
 [^5]: Threads that entered limbo[^1] this tick are not present in the [threads array](#threads---arraythread).
+
+[^6]: In practice, this should only be returned during a [predicate step](#this-is-a-predicate-step---boolean) of an edge-activated hat block.
+
+[^7]: In practice, this should only be returned during a [predicate step](#this-is-a-predicate-step---boolean) of a non-edge-activated hat block.
