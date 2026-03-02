@@ -32,6 +32,7 @@
     - [`<[THREAD] is in limbo?>` -> Boolean](#thread-is-in-limbo---boolean)
     - [`<[THREAD] was started by clicking in the editor?>` -> Boolean](#thread-was-started-by-clicking-in-the-editor---boolean)
     - [`<[THREAD] is a monitor updater?>` -> Boolean](#thread-is-a-monitor-updater---boolean)
+    - **TODO:** `<[THREAD] is an executable hat thread?>` -> Boolean
   - [Thread Actions](#thread-actions)
     - [`kill [THREAD]` -> Undefined](#kill-thread---undefined)
     - [`pause [THREAD]` -> Undefined](#pause-thread---undefined)
@@ -74,6 +75,9 @@
     - [`(tick # from @blueFlag)` -> Number](#tick--from-blueflag---number)
     - [`(frame # from @blueFlag)` -> Number](#frame--from-blueflag---number)
     - [`(tick # this frame)` -> Number](#tick--this-frame---number)
+  - [Runtime Phase](#runtime-phase)
+    - [`<this is a predicate step?>` -> Boolean](#this-is-a-predicate-step---boolean)
+    - **TODO:** `(runtime phase [STATUSFORMAT v])` -> Number | String
   - [Warp Mode](#warp-mode)
     - [`<warp mode>` -> Boolean](#warp-mode---boolean)
     - [`[SETBOOLEAN v] warp mode for {SUBSTACK}` -> Undefined](#setboolean-v-warp-mode-for-substack---undefined)
@@ -112,7 +116,7 @@ Returns the current thread.
   
   Reads the `thread` global in the compiled context.
 
-  **Note:** This used to read `sequencer.activeThread`, but this is `null` during predicate steps, so it was changed.
+  **Note:** This used to read `sequencer.activeThread`, but this is `null` during [predicate steps](#this-is-a-predicate-step---boolean), so it was changed.
 </details>
 
 ### `(active index)` -> Number
@@ -123,7 +127,7 @@ Returns the index of the current thread in the [threads array](#threads---arrayt
 <details>
   <summary>Internal behavior</summary>
   
-  Reads `sequencer.activeThreadIndex` _([I added that!](https://github.com/PenguinMod/PenguinMod-Vm/pull/173) :D)_, or if this is a predicate step, finds the index of the `thread` compiled global in `runtime.threads`.
+  Reads `sequencer.activeThreadIndex` _([I added that!](https://github.com/PenguinMod/PenguinMod-Vm/pull/173) :D)_, or if this is a [predicate step](#this-is-a-predicate-step---boolean), finds the index of the `thread` compiled global in `runtime.threads`.
 </details>
 
 ### `(null thread)` -> Thread
@@ -168,7 +172,7 @@ Creates a new thread that will execute in `TARGET`; then, inserts it into the [t
   
   Uses `runtime._pushThread` to create a new thread at the end of the [threads array](#threads---arraythread) containing the contents of `SUBSTACK`. Next, moves it to `INDEX`. Finally, updates `sequencer.activeThreadIndex` if the active thread was moved.
 
-  If this is a predicate step, `sequencer.activeThreadIndex` is actually left unchanged, as we are not currently in the execution phase, so it is `null`.
+  If this is a [predicate step](#this-is-a-predicate-step---boolean), `sequencer.activeThreadIndex` is actually left unchanged, as we are not currently in the execution phase, so it is `null`.
 
   The new thread is created by passing the ID of the first block in `SUBSTACK` to `runtime._pushThread`, rather than by starting some precompiled chunk. This means that **`SUBSTACK` is not compiled until the "new thread" block is run**.
 </details>
@@ -434,7 +438,7 @@ Yields `TIMES` times.
 
 Yields and makes the previous thread active. If there is no previous thread (the first thread is active), yields and makes the current thread active (effectively cancelling the yield in most cases).
 
-If this is a predicate step, instead does nothing.
+If this is a [predicate step](#this-is-a-predicate-step---boolean), instead does nothing.
 
 <details>
   <summary>Internal behavior</summary>
@@ -449,7 +453,7 @@ Yields and makes `ACTIVETHREAD` active.
 
 If `ACTIVETHREAD` is null or not in the [threads array](#threads---arraythread), instead yields to the [end of the tick](#yield-to-end-of-tick---undefined).
 
-If this is a predicate step, instead [yields normally](#yield---undefined).
+If this is a [predicate step](#this-is-a-predicate-step---boolean), instead [yields normally](#yield---undefined).
 
 <details>
   <summary>Internal behavior</summary>
@@ -466,7 +470,7 @@ Yields and makes the thread at `INDEX` active.
 
 If `INDEX` is larger than the normally accepted range, will immediately end the tick. If `INDEX` is too small, will yield to the first thread.
 
-If this is a predicate step, instead [yields normally](#yield---undefined).
+If this is a [predicate step](#this-is-a-predicate-step---boolean), instead [yields normally](#yield---undefined).
 
 <details>
   <summary>Internal behavior</summary>
@@ -479,7 +483,7 @@ If this is a predicate step, instead [yields normally](#yield---undefined).
 
 Yields and immediately ends the tick, skipping all threads that would normally step after this one.
 
-If this is a predicate step, instead [yields normally](#yield---undefined).
+If this is a [predicate step](#this-is-a-predicate-step---boolean), instead [yields normally](#yield---undefined).
 
 <details>
   <summary>Internal behavior</summary>
@@ -500,7 +504,7 @@ Broadcasts `MESSAGE` and then moves all new threads that were created to `INDEX`
 
 Any preexisting threads with a `when I receive [MESSAGE v]` hat block will be restarted and moved to `INDEX` as well.
 
-If this is a predicate step, instead does nothing.
+If this is a [predicate step](#this-is-a-predicate-step---boolean), instead does nothing.
 
 ### `broadcast [MESSAGE v] to (INDEX v) and wait` -> Undefined
 _Menus: `INDEX` uses [Insert Index](#insert-index)_
@@ -518,7 +522,7 @@ Any preexisting threads with a `when I receive [MESSAGE v]` hat block will be re
 
 This has the effect of immediately stepping all new threads once after broadcast, and then stepping the current thread again (as if no yield happened).
 
-If this is a predicate step, instead does nothing.
+If this is a [predicate step](#this-is-a-predicate-step---boolean), instead does nothing.
 
 ### `(last broadcast threads)` -> Array\[Thread\]
 <img src="../assets/blocks/last_broadcast_threads.png">
@@ -581,7 +585,7 @@ If a thread previously in the [threads array](#threads---arraythread) is not inc
 
 If `ACTIVETHREAD` is null or not in the [threads array](#threads---arraythread) after the operation, instead yields to the [end of the tick](#yield-to-end-of-tick---undefined).
 
-If this is a predicate step, `ACTIVETHREAD` will be ignored and a [normal yield](#yield---undefined) will be performed instead; this effectively yields to the first thread in most cases, as predicate steps should occur before the start of a frame.
+If this is a [predicate step](#this-is-a-predicate-step---boolean), `ACTIVETHREAD` will be ignored and a [normal yield](#yield---undefined) will be performed instead; this effectively yields to the first thread in most cases, as predicate steps should occur before the start of a frame.
 
 <details>
   <summary>Internal behavior</summary>
@@ -602,7 +606,7 @@ If a thread previously in the [threads array](#threads---arraythread) is not inc
 
 If `ACTIVEINDEX` is larger than the normally accepted range, will immediately end the tick. If `ACTIVEINDEX` is too small, will yield to the first thread.
 
-If this is a predicate step, `ACTIVEINDEX` will be ignored and a [normal yield](#yield---undefined) will be performed instead; this effectively yields to the first thread in most cases, as predicate steps should occur before the start of a frame.
+If this is a [predicate step](#this-is-a-predicate-step---boolean), `ACTIVEINDEX` will be ignored and a [normal yield](#yield---undefined) will be performed instead; this effectively yields to the first thread in most cases, as predicate steps should occur before the start of a frame.
 
 <details>
   <summary>Internal behavior</summary>
@@ -624,7 +628,7 @@ Moves `THREAD` to `INDEX` if it is in the [threads array](#threads---arraythread
   
   Then, if `sequencer.activeThreadIndex` was equal to the index of `THREAD`, sets it to `INDEX`. Otherwise, if it was greater than or equal to `INDEX`, increments it. This is to ensure that the active thread remains unchanged.
 
-  If this is a predicate step, `sequencer.activeThreadIndex` is actually left unchanged, as we are not currently in the execution phase, so it is `null`.
+  If this is a [predicate step](#this-is-a-predicate-step---boolean), `sequencer.activeThreadIndex` is actually left unchanged, as we are not currently in the execution phase, so it is `null`.
 </details>
 
 ### `swap [THREADONE] with [THREADTWO]` -> Undefined
@@ -639,7 +643,7 @@ Swaps the positions of `THREADONE` and `THREADTWO` if they are distinct threads 
 
   Then, if `sequencer.activeThreadIndex` was equal to the index of `THREADONE` or `THREADTWO`, sets it to the index of the opposite thread. This is to ensure that the active thread remains unchanged.
 
-  If this is a predicate step, `sequencer.activeThreadIndex` is actually left unchanged, as we are not currently in the execution phase, so it is `null`.
+  If this is a [predicate step](#this-is-a-predicate-step---boolean), `sequencer.activeThreadIndex` is actually left unchanged, as we are not currently in the execution phase, so it is `null`.
 </details>
 
 
@@ -779,6 +783,29 @@ Returns the state of a counter that increments every frame and starts at 1 on th
   <summary>Internal behavior</summary>
 
   Sets to 0 on the `BEFORE_EXECUTE` event and increments on the `BEFORE_TICK` event.
+</details>
+
+
+
+## Runtime Phase
+
+### `<this is a predicate step?>` -> Boolean
+<img src="../assets/blocks/warp_mode.png">
+
+Returns `true` if the current step is a "predicate step".
+
+A predicate step is a step performed before the execution phase of a frame, meant to execute only the hat block of the stack to check its predicate (true/false condition). This is always the first step of an executable hat thread, and is performed immediately after the creation of that thread.
+
+During a predicate step, the hat block (and its inputs) are executed. If its condition is `false`, the thread is immediately completed (and yields). If its condition is `true`, the thread only yields, so on its next step it will begin executing the blocks under the hat. This next step will be a normal step during the execution phase later in the frame.
+
+Because predicate steps are performed outside of the execution phase of a frame, most normal sequencer behavior is not present during these. Specifically, the [threads array](#threads---arraythread) and [active index](#active-index---number) are irrelevant here. Instead, predicate steps are always performed before the first tick of a frame, and therefore before any other threads in the threads array step (except other executable hat threads).
+
+Because the only blocks executed during predicate steps are hat blocks and their inputs, the only time this block will ever realistically return `true` is when it is inside an inline block (or similar) inside of an input of a hat block.
+
+<details>
+  <summary>Internal behavior</summary>
+
+  Returns `true` if `runtime.soupThreadsRuntimePhase` is not "execution", as we assume all thread steps not in the execution phase are predicate steps.
 </details>
 
 
