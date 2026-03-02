@@ -10,7 +10,6 @@
 
 // TO-DO
 //
-// - Add "<[THREAD] is an executable hat thread?>" and add documentation on executable hat threads under this block's listing in the reference manual
 // - Add "(runtime phase [STATUSFORMAT v])" block
 // - Add "super mutator shenanagins" so that atomic forever loses its end cap if an "escape loop" block is present inside it
 // - Figure out *exactly* what happens when a hat block is restarted
@@ -447,8 +446,8 @@
   const RuntimePhase = {
     NOT_STEPPING: 'not stepping', // between RUNTIME_STEP_END and RUNTIME_STEP_START events (between frames)
     FRAME_START: 'frame start', // between RUNTIME_STEP_START and BEFORE_EXECUTE events (*before* before execution phase)
-    BEFORE_EXECUTE: 'before execution phase', // between BEFORE_EXCUTE event and start of first thread step (before execution phase)
-    EXECUTION: 'execution phase', // between start of first thread step and AFTER_EXECUTE event
+    BEFORE_EXECUTE: 'before execution', // between BEFORE_EXCUTE event and start of first thread step (before execution phase)
+    EXECUTION: 'execution', // between start of first thread step and AFTER_EXECUTE event
     FRAME_END: 'frame end', // between AFTER_EXECUTE and RUNTIME_STEP_END (after execution phase)
   };
 
