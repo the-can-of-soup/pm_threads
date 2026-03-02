@@ -36,7 +36,7 @@
 
 ## Executable hat threads & predicate steps
 
-- These are threads with the `executableHat` flag.
+- Executable hat threads are threads with the `executableHat` flag.
 - Every _frame_, before the normal execution phase begins (more precisely, before the `BEFORE_EXECUTE` event is fired but after `RUNTIME_STEP_START`), all blocks of the `Scratch.BlockType.HAT` type with the `isEdgeActivated` flag will have their threads created and appended to the end of `runtime.threads`.[^2] These threads are executable hat threads.
 - Also, `Scratch.BlockType.HAT` blocks _without_ the `isEdgeActivated` flag will very likely (but controlled by the extension that added them) have their threads be created and appended every frame on the `BEFORE_EXECUTE` event. These threads are also executable hat threads.
 - Immediately after these threads are created, they are stepped once (call this step their "predicate step"). `sequencer.activeThread` is `null` during this time, because the execution phase has not yet begun, however the `thread` global in the compiled context _is_ set and is the currently stepping executable hat thread.[^3]
