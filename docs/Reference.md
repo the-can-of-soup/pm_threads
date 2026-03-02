@@ -172,7 +172,7 @@ Creates a new thread that will execute in `TARGET`; then, inserts it into the [t
   
   Uses `runtime._pushThread` to create a new thread at the end of the [threads array](#threads---arraythread) containing the contents of `SUBSTACK`. Next, moves it to `INDEX`. Finally, updates `sequencer.activeThreadIndex` if the active thread was moved.
 
-  If this is a [predicate step](#this-is-a-predicate-step---boolean), `sequencer.activeThreadIndex` is actually left unchanged, as we are not currently in the execution phase, so it is `null`.
+  If this is a [predicate step](#this-is-a-predicate-step---boolean), `sequencer.activeThreadIndex` is actually left unchanged, as we are not currently in the [execution phase](#runtime-phase-statusformat-v---number--string), so it is `null`.
 
   The new thread is created by passing the ID of the first block in `SUBSTACK` to `runtime._pushThread`, rather than by starting some precompiled chunk. This means that **`SUBSTACK` is not compiled until the "new thread" block is run**.
 </details>
@@ -388,13 +388,13 @@ Returns `true` if `THREAD` was started by the engine to check the value of a rep
 
 Returns `true` if `THREAD` is an "executable hat thread".
 
-An executable hat thread is a thread that was started before the execution phase (i.e. before the first tick of the frame) in order to prematurely evaluate the predicate (condition) of a hat block.
+An executable hat thread is a thread that was started before the [execution phase](#runtime-phase-statusformat-v---number--string) (i.e. before the first tick of the frame) in order to prematurely evaluate the predicate (condition) of a hat block.
 
 Executable hat threads are created for all scripts whose hat blocks have the `Scratch.BlockType.HAT` block type (not the `Scratch.BlockType.EVENT` one) every frame before the execution phase. These threads are always moved to the end of the [threads array](#threads---arraythread) upon creation.
 
 Immediately after creation, all executable hat threads trigger a [predicate step](#this-is-a-predicate-step---boolean).
 
-For edge-activated hat blocks, their executable hat threads are created very early in the "frame start" phase, whereas non-edge-activated hat blocks have their threads created in the "before execution" phase. However, non-edge-activated hat blocks in rare cases may never have their threads created at all, as [it is only a standard and not actually inbuilt↗](https://docs.turbowarp.org/development/extensions/hats#predicate-based-hat-blocks) (in the linked documentation you can see the use of `startHats` which creates the executable hat thread).
+For edge-activated hat blocks, their executable hat threads are created very early in the ["frame start" phase](#runtime-phase-statusformat-v---number--string), whereas non-edge-activated hat blocks have their threads created in the ["before execution" phase](#runtime-phase-statusformat-v---number--string). However, non-edge-activated hat blocks in rare cases may never have their threads created at all, as [it is only a standard and not actually inbuilt↗](https://docs.turbowarp.org/development/extensions/hats#predicate-based-hat-blocks) (in the linked documentation you can see the use of `startHats` which creates the executable hat thread).
 
 <details>
   <summary>Internal behavior</summary>
@@ -647,7 +647,7 @@ Moves `THREAD` to `INDEX` if it is in the [threads array](#threads---arraythread
   
   Then, if `sequencer.activeThreadIndex` was equal to the index of `THREAD`, sets it to `INDEX`. Otherwise, if it was greater than or equal to `INDEX`, increments it. This is to ensure that the active thread remains unchanged.
 
-  If this is a [predicate step](#this-is-a-predicate-step---boolean), `sequencer.activeThreadIndex` is actually left unchanged, as we are not currently in the execution phase, so it is `null`.
+  If this is a [predicate step](#this-is-a-predicate-step---boolean), `sequencer.activeThreadIndex` is actually left unchanged, as we are not currently in the [execution phase](#runtime-phase-statusformat-v---number--string), so it is `null`.
 </details>
 
 ### `swap [THREADONE] with [THREADTWO]` -> Undefined
@@ -662,7 +662,7 @@ Swaps the positions of `THREADONE` and `THREADTWO` if they are distinct threads 
 
   Then, if `sequencer.activeThreadIndex` was equal to the index of `THREADONE` or `THREADTWO`, sets it to the index of the opposite thread. This is to ensure that the active thread remains unchanged.
 
-  If this is a [predicate step](#this-is-a-predicate-step---boolean), `sequencer.activeThreadIndex` is actually left unchanged, as we are not currently in the execution phase, so it is `null`.
+  If this is a [predicate step](#this-is-a-predicate-step---boolean), `sequencer.activeThreadIndex` is actually left unchanged, as we are not currently in the [execution phase](#runtime-phase-statusformat-v---number--string), so it is `null`.
 </details>
 
 
@@ -813,7 +813,7 @@ Returns the state of a counter that increments every frame and starts at 1 on th
 
 Returns `true` if the current step is a "predicate step".
 
-A predicate step is a step performed before the execution phase of a frame, meant to execute only the hat block of the stack to check its predicate (true/false condition). This is always the first step of an [executable hat thread](#thread-is-an-executable-hat-thread---boolean), and is performed immediately after the creation of that thread.
+A predicate step is a step performed before the [execution phase](#runtime-phase-statusformat-v---number--string) of a frame, meant to execute only the hat block of the stack to check its predicate (true/false condition). This is always the first step of an [executable hat thread](#thread-is-an-executable-hat-thread---boolean), and is performed immediately after the creation of that thread.
 
 During a predicate step, the hat block (and its inputs) are executed. If the hat's predicate (condition) is `false`, the thread is immediately completed (and yields). If its predicate is `true`, the thread only yields, so on its next step it will begin executing the blocks under the hat. This next step will be a normal step during the execution phase later in the frame.
 
@@ -824,7 +824,7 @@ Because the only blocks executed during predicate steps are hat blocks and their
 <details>
   <summary>Internal behavior</summary>
 
-  Returns `true` if `runtime.soupThreadsRuntimePhase` is not "execution", as we assume all thread steps not in the execution phase are predicate steps.
+  Returns `true` if `runtime.soupThreadsRuntimePhase` is not ["execution"](#runtime-phase-statusformat-v---number--string), as we assume all thread steps not in the execution phase are predicate steps.
 </details>
 
 ### `(runtime phase [STATUSFORMAT v])` -> Number | String
@@ -851,7 +851,7 @@ Returns the current "runtime phase" formatted as specified by `STATUSFORMAT`. He
   
   | Internal name    | Set                                                                                                                               |
   |------------------|-----------------------------------------------------------------------------------------------------------------------------------|
-  | `NOT_STEPPING`   | When the exension is initialized and when the `RUNTIME_STEP_END` event is fired.                                                  |
+  | `NOT_STEPPING`   | When the exension is initialized or when the `RUNTIME_STEP_END` event is fired.                                                   |
   | `FRAME_START`    | When the `RUNTIME_STEP_START` event is fired.                                                                                     |
   | `BEFORE_EXECUTE` | When the `BEFORE_EXECUTE` event is fired.                                                                                         |
   | `EXECUTION`      | When the `BEFORE_THREAD_CONSIDERED` event is fired. _([I added that!↗](https://github.com/PenguinMod/PenguinMod-Vm/pull/175) :D)_ |
@@ -931,7 +931,7 @@ Returns the amount of time in seconds that the sequencer is allotted for executi
 ### `(last measured work time)` -> Number
 <img src="../assets/blocks/last_measured_work_time.png">
 
-Returns the duration in seconds of the execution phase of the previous frame. This includes all time that code is being executed, but not the time that the renderer is redrawing the stage or waiting for the next frame.
+Returns the duration in seconds of the [execution phase](#runtime-phase-statusformat-v---number--string) (or more precisely, of the "before execution" and execution phases combined) of the previous frame. This includes all time that code is being executed, but not the time that the renderer is redrawing the stage or waiting for the next frame.
 
 <details>
   <summary>Internal behavior</summary>
@@ -942,7 +942,7 @@ Returns the duration in seconds of the execution phase of the previous frame. Th
 ### `(work timer)` -> Number
 <img src="../assets/blocks/work_timer.png">
 
-Returns the time elapsed for execution so far this frame. Before every tick, if this timer is greater than or equal to [`(target work time)`](#target-work-time---number), no more ticks will execute that frame, and the rest of the frame time is given to the renderer.
+Returns the time elapsed for [execution](#runtime-phase-statusformat-v---number--string) so far this frame. Before every tick, if this timer is greater than or equal to [`(target work time)`](#target-work-time---number), no more ticks will execute that frame, and the rest of the frame time is given to the renderer.
 
 <details>
   <summary>Internal behavior</summary>
