@@ -105,25 +105,25 @@
 ### `(active thread)` -> Thread
 <img src="../assets/blocks/active_thread.png">
 
-Returns the currently active thread.
-
-This is always the thread that contains the block, because it is impossible to run this block without it being in the active thread.
+Returns the current thread.
 
 <details>
   <summary>Internal behavior</summary>
   
-  Reads `sequencer.activeThread`.
+  Reads the `thread` global in the compiled context.
+
+  **Note:** This used to read `sequencer.activeThread`, but this is `null` during predicate steps, so it was changed.
 </details>
 
 ### `(active index)` -> Number
 <img src="../assets/blocks/active_index.png">
 
-Returns the index of the currently active thread.
+Returns the index of the current thread in the [threads array](#threads---arraythread).
 
 <details>
   <summary>Internal behavior</summary>
   
-  Reads `sequencer.activeThreadIndex` _([I added that!](https://github.com/PenguinMod/PenguinMod-Vm/pull/173) :D)_.
+  Reads `sequencer.activeThreadIndex` _([I added that!](https://github.com/PenguinMod/PenguinMod-Vm/pull/173) :D)_, or if this is a predicate step, finds the index of the `thread` compiled global in `runtime.threads`.
 </details>
 
 ### `(null thread)` -> Thread
@@ -167,6 +167,8 @@ Creates a new thread that will execute in `TARGET`; then, inserts it into the [t
   <summary>Internal behavior</summary>
   
   Uses `runtime._pushThread` to create a new thread at the end of the [threads array](#threads---arraythread) containing the contents of `SUBSTACK`. Next, moves it to `INDEX`. Finally, updates `sequencer.activeThreadIndex` if the active thread was moved.
+
+  If this is a predicate step, `sequencer.activeThreadIndex` is actually left unchanged, as we are not currently in the execution phase, so it is `null`.
 
   The new thread is created by passing the ID of the first block in `SUBSTACK` to `runtime._pushThread`, rather than by starting some precompiled chunk. This means that **`SUBSTACK` is not compiled until the "new thread" block is run**.
 </details>
@@ -395,7 +397,7 @@ Returns `true` if `THREAD` was started by the engine to check the value of a rep
 ### `kill [THREAD]` -> Undefined
 <img src="../assets/blocks/kill.png">
 
-Kills `THREAD`, and then yields if `THREAD` was the active thread.
+Kills `THREAD`, and then yields if `THREAD` was the current thread.
 
 <details>
   <summary>Internal behavior</summary>
@@ -406,7 +408,7 @@ Kills `THREAD`, and then yields if `THREAD` was the active thread.
 ### `pause [THREAD]` -> Undefined
 <img src="../assets/blocks/pause.png">
 
-Pauses `THREAD`, and then yields if `THREAD` was the active thread.
+Pauses `THREAD`, and then yields if `THREAD` was the current thread.
 
 ### `unpause [THREAD]` -> Undefined
 <img src="../assets/blocks/unpause.png">
@@ -430,7 +432,9 @@ Yields `TIMES` times.
 ### `yield to previous thread` -> Undefined
 <img src="../assets/blocks/yield_to_previous_thread.png">
 
-Yields and makes the previous thread active. If there is no previous thread (the first thread is active), yields and makes the active thread active (effectively cancelling the yield in most cases).
+Yields and makes the previous thread active. If there is no previous thread (the first thread is active), yields and makes the current thread active (effectively cancelling the yield in most cases).
+
+If this is a predicate step, instead does nothing.
 
 <details>
   <summary>Internal behavior</summary>
@@ -444,6 +448,8 @@ Yields and makes the previous thread active. If there is no previous thread (the
 Yields and makes `ACTIVETHREAD` active.
 
 If `ACTIVETHREAD` is null or not in the [threads array](#threads---arraythread), instead yields to the [end of the tick](#yield-to-end-of-tick---undefined).
+
+If this is a predicate step, instead [yields normally](#yield---undefined).
 
 <details>
   <summary>Internal behavior</summary>
@@ -460,6 +466,8 @@ Yields and makes the thread at `INDEX` active.
 
 If `INDEX` is larger than the normally accepted range, will immediately end the tick. If `INDEX` is too small, will yield to the first thread.
 
+If this is a predicate step, instead [yields normally](#yield---undefined).
+
 <details>
   <summary>Internal behavior</summary>
   
@@ -470,6 +478,8 @@ If `INDEX` is larger than the normally accepted range, will immediately end the 
 <img src="../assets/blocks/yield_to_end_of_tick.png">
 
 Yields and immediately ends the tick, skipping all threads that would normally step after this one.
+
+If this is a predicate step, instead [yields normally](#yield---undefined).
 
 <details>
   <summary>Internal behavior</summary>
@@ -490,6 +500,8 @@ Broadcasts `MESSAGE` and then moves all new threads that were created to `INDEX`
 
 Any preexisting threads with a `when I receive [MESSAGE v]` hat block will be restarted and moved to `INDEX` as well.
 
+If this is a predicate step, instead does nothing.
+
 ### `broadcast [MESSAGE v] to (INDEX v) and wait` -> Undefined
 _Menus: `INDEX` uses [Insert Index](#insert-index)_
 
@@ -504,7 +516,9 @@ Broadcasts `MESSAGE`, moves all new threads to immediately before the active thr
 
 Any preexisting threads with a `when I receive [MESSAGE v]` hat block will be restarted and moved to before the active thread as well.
 
-This has the effect of immediately stepping all new threads once after broadcast, and then stepping the active thread again (as if no yield happened).
+This has the effect of immediately stepping all new threads once after broadcast, and then stepping the current thread again (as if no yield happened).
+
+If this is a predicate step, instead does nothing.
 
 ### `(last broadcast threads)` -> Array\[Thread\]
 <img src="../assets/blocks/last_broadcast_threads.png">
@@ -567,6 +581,8 @@ If a thread previously in the [threads array](#threads---arraythread) is not inc
 
 If `ACTIVETHREAD` is null or not in the [threads array](#threads---arraythread) after the operation, instead yields to the [end of the tick](#yield-to-end-of-tick---undefined).
 
+If this is a predicate step, `ACTIVETHREAD` will be ignored and a [normal yield](#yield---undefined) will be performed instead; this effectively yields to the first thread in most cases, as predicate steps should occur before the start of a frame.
+
 <details>
   <summary>Internal behavior</summary>
   
@@ -586,6 +602,8 @@ If a thread previously in the [threads array](#threads---arraythread) is not inc
 
 If `ACTIVEINDEX` is larger than the normally accepted range, will immediately end the tick. If `ACTIVEINDEX` is too small, will yield to the first thread.
 
+If this is a predicate step, `ACTIVEINDEX` will be ignored and a [normal yield](#yield---undefined) will be performed instead; this effectively yields to the first thread in most cases, as predicate steps should occur before the start of a frame.
+
 <details>
   <summary>Internal behavior</summary>
   
@@ -602,7 +620,11 @@ Moves `THREAD` to `INDEX` if it is in the [threads array](#threads---arraythread
 <details>
   <summary>Internal behavior</summary>
   
-  If `INDEX` is less than or equal to the index of `THREAD`, removes `THREAD` from the threads array and then inserts it at `INDEX`. Otherwise, inserts it at `INDEX` and _then_ removes `THREAD` from the threads array. Then, if `sequencer.activeThreadIndex` was equal to the index of `THREAD`, sets it to `INDEX`. Otherwise, if it was greater than or equal to `INDEX`, increments it. This is to ensure that the active thread remains unchanged.
+  If `INDEX` is less than or equal to the index of `THREAD`, removes `THREAD` from the threads array and then inserts it at `INDEX`. Otherwise, inserts it at `INDEX` and _then_ removes `THREAD` from the threads array.
+  
+  Then, if `sequencer.activeThreadIndex` was equal to the index of `THREAD`, sets it to `INDEX`. Otherwise, if it was greater than or equal to `INDEX`, increments it. This is to ensure that the active thread remains unchanged.
+
+  If this is a predicate step, `sequencer.activeThreadIndex` is actually left unchanged, as we are not currently in the execution phase, so it is `null`.
 </details>
 
 ### `swap [THREADONE] with [THREADTWO]` -> Undefined
@@ -614,6 +636,10 @@ Swaps the positions of `THREADONE` and `THREADTWO` if they are distinct threads 
   <summary>Internal behavior</summary>
 
   Swaps the positions of `THREADONE` and `THREADTWO` in `runtime.threads`.
+
+  Then, if `sequencer.activeThreadIndex` was equal to the index of `THREADONE` or `THREADTWO`, sets it to the index of the opposite thread. This is to ensure that the active thread remains unchanged.
+
+  If this is a predicate step, `sequencer.activeThreadIndex` is actually left unchanged, as we are not currently in the execution phase, so it is `null`.
 </details>
 
 
