@@ -184,6 +184,7 @@
         isExitedNaturally: this.isExitedNaturally(),
         isKilled: this.isKilled(),
         isMonitor: this.thread.updateMonitor,
+        isExecutableHat: this.thread.executableHat,
         isStackClick: this.thread.stackClick,
         variables: Object.fromEntries(this.thread.soupThreadVariables), // appears to be fine if method names in Object.prototype are keys in the map here?
       };
@@ -1195,16 +1196,24 @@
             }
           },
           {
-            opcode: 'isStackClick',
-            text: '[THREAD] was started by clicking in the editor?',
+            opcode: 'isMonitor',
+            text: '[THREAD] is a monitor updater?',
             ...BooleanBlock,
             arguments: {
               THREAD: Thread.Argument,
             }
           },
           {
-            opcode: 'isMonitor',
-            text: '[THREAD] is a monitor updater?',
+            opcode: 'isExecutableHat',
+            text: '[THREAD] is an executable hat thread?',
+            ...BooleanBlock,
+            arguments: {
+              THREAD: Thread.Argument,
+            }
+          },
+          {
+            opcode: 'isStackClick',
+            text: '[THREAD] was started by clicking in the editor?',
             ...BooleanBlock,
             arguments: {
               THREAD: Thread.Argument,
@@ -3031,15 +3040,6 @@
       return THREAD.isLimbo();
     }
 
-    isStackClick({THREAD}, util) {
-      THREAD = ThreadType.toThread(THREAD);
-
-      if (THREAD.thread === null) {
-        return false;
-      }
-      return THREAD.thread.stackClick;
-    }
-
     isMonitor({THREAD}, util) {
       THREAD = ThreadType.toThread(THREAD);
 
@@ -3047,6 +3047,24 @@
         return false;
       }
       return THREAD.thread.updateMonitor;
+    }
+
+    isExecutableHat({THREAD}, util) {
+      THREAD = ThreadType.toThread(THREAD);
+
+      if (THREAD.thread === null) {
+        return false;
+      }
+      return THREAD.thread.executableHat;
+    }
+
+    isStackClick({THREAD}, util) {
+      THREAD = ThreadType.toThread(THREAD);
+
+      if (THREAD.thread === null) {
+        return false;
+      }
+      return THREAD.thread.stackClick;
     }
 
 
