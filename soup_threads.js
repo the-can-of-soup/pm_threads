@@ -441,14 +441,15 @@
     [RawThreadType.STATUS_YIELD_TICK]: 'STATUS_YIELD_TICK',
     [RawThreadType.STATUS_DONE]: 'STATUS_DONE',
     [RawThreadType.STATUS_PAUSED]: 'STATUS_PAUSED',
-  }
+  };
 
   const RuntimePhase = {
     NOT_STEPPING: 'not stepping', // between RUNTIME_STEP_END and RUNTIME_STEP_START events (between frames)
-    BEFORE_EXECUTE: 'before execution phase', // between RUNTIME_STEP_START and BEFORE_EXECUTE events (before execution phase)
-    EXECUTION: 'execution phase', // between BEFORE_EXECUTE and AFTER_EXECUTE events
-    AFTER_EXECUTE: 'after execution phase', // between AFTER_EXECUTE and RUNTIME_STEP_END (after execution phase)
-  }
+    FRAME_START: 'frame start', // between RUNTIME_STEP_START and BEFORE_EXECUTE events (*before* before execution phase)
+    BEFORE_EXECUTE: 'before execution phase', // between BEFORE_EXCUTE event and start of first thread step (before execution phase)
+    EXECUTION: 'execution phase', // between start of first thread step and AFTER_EXECUTE event
+    FRAME_END: 'frame end', // between AFTER_EXECUTE and RUNTIME_STEP_END (after execution phase)
+  };
 
   class SoupThreadsUtil {
 
@@ -529,7 +530,7 @@
      * @returns {number} - A 0-based index to be used on the threads array.
      */
     static handleIndexInput(INDEX, threadGlobal, insertMode = false, absoluteMode = false, constrain = false) {
-      // Convert index to a 1-based integer
+      // Convert index to a 1-based integer (or null for "end")
       switch (Scratch.Cast.toString(INDEX)) {
         case 'start':
         case 'before start':
@@ -538,7 +539,7 @@
 
         case 'end':
         case 'after end':
-          INDEX = 0;
+          INDEX = null;
           break;
 
         case 'previous index':
@@ -565,11 +566,14 @@
         default:
           INDEX = Scratch.Cast.toNumber(INDEX);
           INDEX = Math.floor(INDEX);
+          if (INDEX === 0) {
+            INDEX = null;
+          }
       }
 
-      // Index 0 means "end", otherwise index is 1-based
+      // Index null means "end", otherwise index is 1-based
       let end = runtime.threads.length - 1 + insertMode;
-      let unconstrained = INDEX === 0 ? end : INDEX - 1;
+      let unconstrained = INDEX === null ? end : INDEX - 1;
       return constrain ? Math.max(0, Math.min(unconstrained, end)) : unconstrained;
     }
 
@@ -782,7 +786,7 @@
       runtime.on('RUNTIME_STEP_START', function() {
         // Runs before every frame.
 
-        runtime.soupThreadsRuntimePhase = RuntimePhase.BEFORE_EXECUTE;
+        runtime.soupThreadsRuntimePhase = RuntimePhase.FRAME_START;
 
         runtime.soupThreadsFrameFromInit += 1;
         runtime.soupThreadsFrameFromStart += 1;
@@ -796,17 +800,23 @@
       runtime.on('BEFORE_EXECUTE', function() {
         // Runs before the execution phase every frame.
 
-        runtime.soupThreadsRuntimePhase = RuntimePhase.EXECUTION;
+        runtime.soupThreadsRuntimePhase = RuntimePhase.BEFORE_EXECUTE;
 
         // Calculate work time
         // Mimics this line from sequencer.js: https://github.com/PenguinMod/PenguinMod-Vm/blob/b88731f3f93ed36d2b57024f8e8d758b6b60b54e/src/engine/sequencer.js#L74
         runtime.sequencer.soupThreadsWorkTime = 0.75 * runtime.currentStepTime;
       });
 
+      runtime.on('BEFORE_THREAD_CONSIDERED', function(rawThread) {
+        // Runs before every thread step.
+
+        runtime.soupThreadsRuntimePhase = RuntimePhase.EXECUTION;
+      });
+
       runtime.on('AFTER_EXECUTE', function() {
         // Runs after execution phase every frame but before redraw.
 
-        runtime.soupThreadsRuntimePhase = RuntimePhase.AFTER_EXECUTE;
+        runtime.soupThreadsRuntimePhase = RuntimePhase.FRAME_END;
 
         runtime.soupThreadsLastFrameWorkEndTime = Date.now();
       });
@@ -1623,6 +1633,14 @@
           '---',
 
           {
+            opcode: 'isEdgeStep',
+            text: 'this is a predicate step?',
+            ...BooleanBlock,
+          },
+
+          '---',
+
+          {
             opcode: 'getTickOverall',
             text: 'tick # from init',
             ...ReporterBlock,
@@ -1968,7 +1986,7 @@
               INDEX: generator.descendInputOfBlock(block, 'INDEX'),
             }
           };
-        }
+        },
 
 
 
@@ -2251,7 +2269,7 @@
           source += `(`;
 
           // Use "thread" global instead of active thread if not currently in the execution phase;
-          // this catches the edge step edge case.
+          // this catches the predicate step edge case.
           source += `runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION`;
           source += ` ? runtime.sequencer.activeThreadIndex`;
           source += ` : runtime.threads.indexOf(thread)`;
@@ -2264,14 +2282,22 @@
         },
 
         threadAt(node, compiler, imports) {
+          let source = '';
+
+          source += `(function(){`;
+
           let INDEX = compiler.localVariables.next();
-          compiler.source += `let ${INDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.INDEX).asUnknown()}, thread);`;
+          source += `let ${INDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.INDEX).asUnknown()}, thread);`;
 
-          compiler.source += `if (${INDEX} < 0 || ${INDEX} >= runtime.threads.length) {`;
-          compiler.source += `return new vm.SoupThreads.Type();`;
-          compiler.source += `}`;
+          source += `if (${INDEX} < 0 || ${INDEX} >= runtime.threads.length) {`;
+          source += `return new vm.SoupThreads.Type();`;
+          source += `}`;
 
-          compiler.source += `return new vm.SoupThreads.Type(runtime.threads[${INDEX}]);`;
+          source += `return new vm.SoupThreads.Type(runtime.threads[${INDEX}]);`;
+
+          source += `})()`; // no semicolon
+
+          return new imports.TypedInput(source, imports.TYPE_UNKNOWN);
         },
 
 
@@ -2328,10 +2354,15 @@
           source += `runtime.threads.splice(${INDEX}, 0, ${rawThread});`;
 
           // Update activeThreadIndex if the active thread moved.
+          // This only done if we are in the execution phase, as otherwise it would do nothing.
+
+          compiler.source += `if (runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION) {`;
 
           source += `if (${INDEX} <= runtime.sequencer.activeThreadIndex) {`;
           // The active thread was indirectly moved.
           source += `runtime.sequencer.activeThreadIndex += 1;`;
+          source += `}`;
+
           source += `}`;
 
 
@@ -2628,8 +2659,8 @@
 
           // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
 
-          // Will yield normally if not in execution phase; it is assumed that this is a edge step, so this will
-          // move to the first thread after all edge steps for the frame are finished.
+          // Will yield normally if not in execution phase; it is assumed that this is a predicate step, so this will
+          // move to the first thread after all predicate steps for the frame are finished.
           compiler.source += `if (runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION) {`;
 
           compiler.source += `if (${ACTIVEINDEX} < 0) {`;
@@ -2664,8 +2695,8 @@
 
           // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
 
-          // Will yield normally if not in execution phase; it is assumed that this is a edge step, so this will
-          // move to the first thread after all edge steps for the frame are finished.
+          // Will yield normally if not in execution phase; it is assumed that this is a predicate step, so this will
+          // move to the first thread after all predicate steps for the frame are finished.
           compiler.source += `if (runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION) {`;
 
           compiler.source += `let threadIndex;`;
@@ -3104,6 +3135,13 @@
 
       let variables = THREAD.thread.soupThreadVariables;
       variables.delete(VARIABLE);
+    }
+
+
+
+    isEdgeStep({}, util) {
+      // We assume that this is a predicate step if not currently in the execution phase.
+      return runtime.soupThreadsRuntimePhase !== RuntimePhase.EXECUTION;
     }
 
 
