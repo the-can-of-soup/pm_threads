@@ -34,7 +34,7 @@
 
 - Is defined here as everything that happens during [this call to `sequencer.stepThreads`](https://github.com/PenguinMod/PenguinMod-Vm/blob/6aae00994609a76f74f81036893e5511f0f2a9ed/src/engine/runtime.js#L3126C47-L3126C47).
 
-## Executable hat threads
+## Executable hat threads & predicate steps
 
 - These are threads with the `executableHat` flag.
 - Every _frame_, before the normal execution phase begins (more precisely, before the `BEFORE_EXECUTE` event is fired but after `RUNTIME_STEP_START`), all blocks of the `Scratch.BlockType.HAT` type with the `isEdgeActivated` flag will have their threads created and appended to the end of `runtime.threads`.[^2] These threads are executable hat threads.
