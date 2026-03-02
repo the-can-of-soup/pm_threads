@@ -394,7 +394,7 @@ Executable hat threads are created for all scripts whose hat blocks have the `Sc
 
 Immediately after creation, all executable hat threads trigger a [predicate step](#this-is-a-predicate-step---boolean).
 
-For edge-activated hat blocks, their executable hat threads are created very early in the ["frame start" phase](#runtime-phase-statusformat-v---number--string), whereas non-edge-activated hat blocks have their threads created in the ["before execution" phase](#runtime-phase-statusformat-v---number--string). However, non-edge-activated hat blocks in rare cases may never have their threads created at all, as [it is only a standard and not actually inbuilt↗](https://docs.turbowarp.org/development/extensions/hats#predicate-based-hat-blocks) (in the linked documentation you can see the use of `startHats` which creates the executable hat thread).
+For edge-activated hat blocks, their executable hat threads are created very early in the ["frame start" phase](#runtime-phase-statusformat-v---number--string), whereas non-edge-activated hat blocks have their threads created in the ["before execution" phase](#runtime-phase-statusformat-v---number--string). However, non-edge-activated hat blocks in rare cases may never have their threads created at all, as [it is only a standard and not actually inbuilt↗](https://docs.turbowarp.org/development/extensions/hats#predicate-based-hat-blocks) (in the linked documentation you can see the use of `startHats` on every `BEFORE_EXECUTE` event which creates the executable hat thread during the "before execution" phase every frame).
 
 <details>
   <summary>Internal behavior</summary>
