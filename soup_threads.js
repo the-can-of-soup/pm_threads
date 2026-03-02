@@ -1640,14 +1640,6 @@
           '---',
 
           {
-            opcode: 'isEdgeStep',
-            text: 'this is a predicate step?',
-            ...BooleanBlock,
-          },
-
-          '---',
-
-          {
             opcode: 'getTickOverall',
             text: 'tick # from init',
             ...ReporterBlock,
@@ -1693,6 +1685,14 @@
                 dataURI: BlueFlagIcon,
               },
             }
+          },
+
+          '---',
+
+          {
+            opcode: 'isPredicateStep',
+            text: 'this is a predicate step?',
+            ...BooleanBlock,
           },
 
           '---',
@@ -3146,7 +3146,7 @@
 
 
 
-    isEdgeStep({}, util) {
+    isPredicateStep({}, util) {
       // We assume that this is a predicate step if not currently in the execution phase.
       return runtime.soupThreadsRuntimePhase !== RuntimePhase.EXECUTION;
     }
