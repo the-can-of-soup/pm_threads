@@ -3,8 +3,7 @@
 [← Back to Home](https://github.com/the-can-of-soup/pm_threads)
 
 ### Pages
-- [Threads Documentation](https://github.com/the-can-of-soup/pm_threads/blob/main/docs/Documentation.md)
-- [Threads Reference Manual](https://github.com/the-can-of-soup/pm_threads/blob/main/docs/Reference.md) <sup>_(rigorous explanation of everything; for lookups rather than beginner knowledge)_</sup>
+- [Reference Manual](https://github.com/the-can-of-soup/pm_threads/blob/main/docs/Reference.md)
 - [Dev Notes](https://github.com/the-can-of-soup/pm_threads/blob/main/docs/Misc%20Dev%20Notes.md)
 
 ### Table of Contents
