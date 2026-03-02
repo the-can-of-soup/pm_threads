@@ -390,7 +390,7 @@ Returns `true` if `THREAD` is an "executable hat thread".
 
 An executable hat thread is a thread that was started before the [execution phase](#runtime-phase-statusformat-v---number--string) (i.e. before the first tick of the frame) in order to prematurely evaluate the predicate (condition) of a hat block.
 
-Executable hat threads are created for all scripts whose hat blocks have the `Scratch.BlockType.HAT` block type (not the `Scratch.BlockType.EVENT` one) every frame before the execution phase. These threads are always moved to the end of the [threads array](#threads---arraythread) upon creation.
+Executable hat threads are created for all scripts whose hat blocks have the `Scratch.BlockType.HAT` block type (not the `Scratch.BlockType.EVENT` one) every frame before the execution phase (except if the extension standard is disobeyed as explained below). These threads are always moved to the end of the [threads array](#threads---arraythread) upon creation.
 
 Immediately after creation, all executable hat threads trigger a [predicate step](#this-is-a-predicate-step---boolean).
 
