@@ -230,14 +230,14 @@ _Menus: `STATUSFORMAT` uses [Status Format](#status-format)_
 
 Returns the current status code of `THREAD`, the status code in text format if `STATUSFORMAT` is "text", or the internal name of the status code if `STATUSFORMAT` is "internal name". These are the possible values:
 
-| Status # | Status text          | Internal name         | Description                                                                                                                    |
-|----------|----------------------|-----------------------|--------------------------------------------------------------------------------------------------------------------------------|
-| 0        | Running              | `STATUS_RUNNING`      | The default status of a thread.[^1]                                                                                            |
-| 1        | Waiting for promise  | `STATUS_PROMISE_WAIT` | Behavior unknown                                                                                                               |
-| 2        | Yielded              | `STATUS_YIELD`        | Behavior unknown                                                                                                               |
-| 3        | Yielded for one tick | `STATUS_YIELD_TICK`   | Behavior unknown                                                                                                               |
-| 4        | Completed            | `STATUS_DONE`         | The thread is "dead", i.e. it will never run code again.[^1]                                                                   |
-| 5        | Paused               | `STATUS_PAUSED`       | The thread is paused either from the [`pause [THREAD]`](#pause-thread---undefined) block, the pause button, or another source. |
+| Status # | Status text          | Internal name         | Description                                                                                                                                         |
+|----------|----------------------|-----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| 0        | Running              | `STATUS_RUNNING`      | The default status of a thread.[^1]                                                                                                                 |
+| 1        | Waiting for promise  | `STATUS_PROMISE_WAIT` | Behavior unknown                                                                                                                                    |
+| 2        | Yielded              | `STATUS_YIELD`        | Behavior unknown                                                                                                                                    |
+| 3        | Yielded for one tick | `STATUS_YIELD_TICK`   | Behavior unknown                                                                                                                                    |
+| 4        | Completed            | `STATUS_DONE`         | The thread is "dead", i.e. it will never run code again.[^1]                                                                                        |
+| 5        | Paused               | `STATUS_PAUSED`       | The thread is paused either from the [`pause [THREAD]`](#pause-thread---undefined) block, the pause button, or another source, and will be skipped. |
 
 <details>
   <summary>Internal behavior</summary>
