@@ -1,4 +1,4 @@
-# Threads Miscellaneous Dev Notes
+# Threads Dev Notes
 
 [← Back to Documentation](https://github.com/the-can-of-soup/pm_threads/blob/main/docs/Documentation.md)
 
