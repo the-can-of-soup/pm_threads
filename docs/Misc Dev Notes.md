@@ -30,14 +30,19 @@
 
 [^4]: https://github.com/PenguinMod/PenguinMod-Vm/blob/5510cff79cd043256dcb6dac0375f2261e56be09/src/engine/runtime.js#L3118
 
+## Execution phase
+
+- Is defined here as everything that happens during [this call to `sequencer.stepThreads`](https://github.com/PenguinMod/PenguinMod-Vm/blob/6aae00994609a76f74f81036893e5511f0f2a9ed/src/engine/runtime.js#L3126C47-L3126C47).
+
 ## Executable hat threads
 
 - These are threads with the `executableHat` flag.
-- Every _frame_, before the normal execution phase begins (therefore before the `BEFORE_EXECUTE` event is fired but after `RUNTIME_STEP_START`), all blocks of the `Scratch.BlockType.HAT` type with the `isEdgeActivated` flag will have their threads created and appended to the end of `runtime.threads`.[^2] These threads are executable hat threads.
+- Every _frame_, before the normal execution phase begins (more precisely, before the `BEFORE_EXECUTE` event is fired but after `RUNTIME_STEP_START`), all blocks of the `Scratch.BlockType.HAT` type with the `isEdgeActivated` flag will have their threads created and appended to the end of `runtime.threads`.[^2] These threads are executable hat threads.
+- Also, `Scratch.BlockType.HAT` blocks _without_ the `isEdgeActivated` flag will very likely (but controlled by the extension that added them) have their threads be created and appended every frame on the `BEFORE_EXECUTE` event. These threads are also executable hat threads.
 - Immediately after these threads are created, they are stepped once (call this step their "edge step"). `sequencer.activeThread` is `null` during this time, because the execution phase has not yet begun, however the `thread` global in the compiled context _is_ set and is the currently stepping executable hat thread.[^3]
-- In an edge step, the first thing that happens is its hat block evaluates its inputs and then its predicate. If its predicate is `true`, the step then continues, and the body of the script steps _(even though the execution phase has not yet begun!)_. If the predicate is `false`, the thread completes with status 4 (completed) and ends the step.
-- When the edge step evaluates the hat's inputs, this will execute whatever blocks are in the inputs (again _even though the execution phase hasn't begun yet_). I have yet to determine what happens if an input block yields while being executed.
-- Interestingly, executable hat threads are created and therefore initially stepped _before `runtime.redrawRequested` (graphics updated) is set to `false`_; this means that the graphics updated value from the end of the previous frame should actually bleed into edge steps of the current frame (although this has yet to be tested).[^2][^5]
+- In an edge step, the hat block evaluates its inputs and then its predicate. If its predicate is `true` (and it wasn't `true` on the last check if edge-activated), the thread yields, and on its next step, it will step the body (blocks below the hat). If the predicate is `false`, the thread completes with status 4 (completed) and ends the step.
+- When the edge step evaluates the hat's inputs, this will execute whatever blocks are in the inputs _(even though this is outside of the execution phase!)_. I have yet to determine what happens if an input block yields while being executed.
+- Interestingly, edge-activated executable hat threads are created and therefore initially stepped _before `runtime.redrawRequested` (graphics updated) is set to `false`_; this means that the graphics updated value from the end of the previous frame should actually bleed into edge steps of the current frame (although this has yet to be tested).[^2][^5]
 - Keep in mind that both during and after the edge step, the thread is still an executable hat thread, so `executableHat` will be `true` even while the thread is being stepped normally by the sequencer during the execution phase.
 
 [^2]: https://github.com/PenguinMod/PenguinMod-Vm/blob/5510cff79cd043256dcb6dac0375f2261e56be09/src/engine/runtime.js#L3109
