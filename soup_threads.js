@@ -10,7 +10,6 @@
 
 // TO-DO
 //
-// - Add "(runtime phase [STATUSFORMAT v])" block
 // - Add "super mutator shenanagins" so that atomic forever loses its end cap if an "escape loop" block is present inside it
 // - Figure out *exactly* what happens when a hat block is restarted
 // - Figure out *exactly* what happens when an async block is run
@@ -444,11 +443,27 @@
   };
 
   const RuntimePhase = {
-    NOT_STEPPING: 'not stepping', // between RUNTIME_STEP_END and RUNTIME_STEP_START events (between frames)
-    FRAME_START: 'frame start', // between RUNTIME_STEP_START and BEFORE_EXECUTE events (*before* before execution phase)
-    BEFORE_EXECUTE: 'before execution', // between BEFORE_EXCUTE event and start of first thread step (before execution phase)
-    EXECUTION: 'execution', // between start of first thread step and AFTER_EXECUTE event
-    FRAME_END: 'frame end', // between AFTER_EXECUTE and RUNTIME_STEP_END (after execution phase)
+    NOT_STEPPING: 0, // between RUNTIME_STEP_END and RUNTIME_STEP_START events (between frames)
+    FRAME_START: 1, // between RUNTIME_STEP_START and BEFORE_EXECUTE events (*before* before execution phase)
+    BEFORE_EXECUTE: 2, // between BEFORE_EXCUTE event and start of first thread step (before execution phase)
+    EXECUTION: 3, // between start of first thread step and AFTER_EXECUTE event
+    FRAME_END: 4, // between AFTER_EXECUTE and RUNTIME_STEP_END (after execution phase)
+  };
+
+  const RuntimePhaseText = {
+    [RuntimePhase.NOT_STEPPING]: 'not stepping',
+    [RuntimePhase.FRAME_START]: 'frame start',
+    [RuntimePhase.BEFORE_EXECUTE]: 'before execution',
+    [RuntimePhase.EXECUTION]: 'execution',
+    [RuntimePhase.FRAME_END]: 'frame end',
+  };
+
+  const RuntimePhaseInternalName = {
+    [RuntimePhase.NOT_STEPPING]: 'NOT_STEPPING',
+    [RuntimePhase.FRAME_START]: 'FRAME_START',
+    [RuntimePhase.BEFORE_EXECUTE]: 'BEFORE_EXECUTE',
+    [RuntimePhase.EXECUTION]: 'EXECUTION',
+    [RuntimePhase.FRAME_END]: 'FRAME_END',
   };
 
   class SoupThreadsUtil {
@@ -1101,7 +1116,7 @@
                 exemptFromNormalization: true,
                 menu: 'statusFormat',
                 defaultValue: '#',
-              }
+              },
             }
           },
           {
@@ -1115,7 +1130,7 @@
                 exemptFromNormalization: true,
                 menu: 'statusFormat',
                 defaultValue: '#',
-              }
+              },
             }
           },
           {
@@ -1694,6 +1709,19 @@
             opcode: 'isPredicateStep',
             text: 'this is a predicate step?',
             ...BooleanBlock,
+          },
+          {
+            opcode: 'getRuntimePhase',
+            text: 'runtime phase [STATUSFORMAT]',
+            ...ReporterBlock,
+            arguments: {
+              STATUSFORMAT: {
+                type: Scratch.ArgumentType.STRING,
+                exemptFromNormalization: true,
+                menu: 'statusFormat',
+                defaultValue: '#',
+              },
+            }
           },
 
           '---',
@@ -3159,6 +3187,16 @@
     isPredicateStep({}, util) {
       // We assume that this is a predicate step if not currently in the execution phase.
       return runtime.soupThreadsRuntimePhase !== RuntimePhase.EXECUTION;
+    }
+
+    getRuntimePhase({STATUSFORMAT}, util) {
+      if (STATUSFORMAT === 'text') {
+        return RuntimePhaseText[runtime.soupThreadsRuntimePhase];
+      }
+      if (STATUSFORMAT === 'internal name') {
+        return RuntimePhaseInternalName[runtime.soupThreadsRuntimePhase];
+      }
+      return runtime.soupThreadsRuntimePhase;
     }
 
 
