@@ -790,9 +790,9 @@
       runtime.soupThreadsTickFromStart = 0;
       runtime.soupThreadsFrameFromStart = 0;
       runtime.soupThreadsTickWithinFrame = 0;
-      runtime.soupThreadsFrameStartTime = null;
-      runtime.soupThreadsLastFrameStartTime = null;
-      runtime.soupThreadsLastFrameWorkEndTime = null;
+      runtime.soupThreadsExecuteStartTime = null;
+      runtime.soupThreadsLastExecuteStartTime = null;
+      runtime.soupThreadsLastExecuteEndTime = null;
       runtime.soupThreadsLastBroadcastRawThreads = [];
       runtime.soupThreadsRuntimePhase = RuntimePhase.NOT_STEPPING;
 
@@ -807,15 +807,15 @@
         runtime.soupThreadsFrameFromStart += 1;
 
         runtime.soupThreadsTickWithinFrame = 0;
-
-        runtime.soupThreadsLastFrameStartTime = runtime.soupThreadsFrameStartTime;
-        runtime.soupThreadsFrameStartTime = Date.now();
       });
 
       runtime.on('BEFORE_EXECUTE', function() {
         // Runs before the execution phase every frame.
 
         runtime.soupThreadsRuntimePhase = RuntimePhase.BEFORE_EXECUTE;
+
+        runtime.soupThreadsLastExecuteStartTime = runtime.soupThreadsExecuteStartTime;
+        runtime.soupThreadsExecuteStartTime = Date.now();
 
         // Calculate work time
         // Mimics this line from sequencer.js: https://github.com/PenguinMod/PenguinMod-Vm/blob/b88731f3f93ed36d2b57024f8e8d758b6b60b54e/src/engine/sequencer.js#L74
@@ -833,7 +833,7 @@
 
         runtime.soupThreadsRuntimePhase = RuntimePhase.FRAME_END;
 
-        runtime.soupThreadsLastFrameWorkEndTime = Date.now();
+        runtime.soupThreadsLastExecuteEndTime = Date.now();
       });
 
       runtime.on('RUNTIME_STEP_END', function() {
@@ -3240,10 +3240,10 @@
     }
 
     getLastFrameMeasuredTime({}, util) {
-      if (runtime.soupThreadsFrameStartTime === null || runtime.soupThreadsLastFrameStartTime === null) {
+      if (runtime.soupThreadsExecuteStartTime === null || runtime.soupThreadsLastExecuteStartTime === null) {
         return 0;
       }
-      return (runtime.soupThreadsFrameStartTime - runtime.soupThreadsLastFrameStartTime) / 1000;
+      return (runtime.soupThreadsExecuteStartTime - runtime.soupThreadsLastExecuteStartTime) / 1000;
     }
 
     getWorkTime({}, util) {
@@ -3252,10 +3252,10 @@
     }
 
     getLastFrameMeasuredWorkTime({}, util) {
-      if (runtime.soupThreadsLastFrameStartTime === null || runtime.soupThreadsLastFrameWorkEndTime === null) {
+      if (runtime.soupThreadsLastExecuteStartTime === null || runtime.soupThreadsLastExecuteEndTime === null) {
         return 0;
       }
-      return (runtime.soupThreadsLastFrameWorkEndTime - runtime.soupThreadsLastFrameStartTime) / 1000;
+      return (runtime.soupThreadsLastExecuteEndTime - runtime.soupThreadsLastExecuteStartTime) / 1000;
     }
 
     getWorkTimer({}, util) {
