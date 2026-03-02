@@ -10,9 +10,9 @@
 
 // TO-DO
 //
-// - Make order of thread data display in objects table display: ID, label (if present), header
+// - Add "<[THREAD] is an executable hat thread?>" and add documentation on executable hat threads under this block's listing in the reference manual
+// - Add "(runtime phase [STATUSFORMAT v])" block
 // - Add "super mutator shenanagins" so that atomic forever loses its end cap if an "escape loop" block is present inside it
-// - Figure out *exactly* when and how Scratch.BlockType.HAT blocks have their condition checked
 // - Figure out *exactly* what happens when a hat block is restarted
 // - Figure out *exactly* what happens when an async block is run
 // - Make compat atomic loops (atomic "for" loops for looping through arrays, objects, sets, etc.)
@@ -243,26 +243,19 @@
     }
 
     dogeiscutObjectHandler() {
-      let content = '';
-
       let label = this.getLabel();
 
-      if (label === undefined) {
-        content += `<span style="white-space: nowrap;">`;
+      let content = '';
 
-        content += `<small style="font-family: Consolas, 'Courier New', monospace;">${escapeHTML(this.getId())}</small>`;
-        content += ` ${escapeHTML(this.getHeader())}`;
+      content += `<span style="white-space: nowrap;">`;
 
-        content += `</span>`;
-      } else {
-        content += `<span style="white-space: nowrap;">`;
-
-        content += `<i>${escapeHTML(label)}</i>`;
-        content += ` <small style="font-family: Consolas, 'Courier New', monospace;">${escapeHTML(this.getId())}</small>`;
-        content += ` ${escapeHTML(this.getHeader())}`;
-
-        content += `</span>`;
+      content += `<small style="font-family: Consolas, 'Courier New', monospace;">${escapeHTML(this.getId())}</small>`;
+      if (label !== undefined) {
+        content += ` <i>${escapeHTML(label)}</i>`;
       }
+      content += ` ${escapeHTML(this.getHeader())}`;
+
+      content += `</span>`;
 
       return content;
     }
