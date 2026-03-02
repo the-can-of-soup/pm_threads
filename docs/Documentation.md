@@ -19,16 +19,18 @@
 >   - Sequencer Basics (threads array, steps vs ticks vs frames, etc.)
 >   - Redraw Conditions (work timer, graphics updated, turbo mode, etc.)
 >   - Monitor Threads
+>   - Executable Hat Threads & Predicate Steps
 > - Threads Extension
 >   - Thread Type (reporter bubble formatting, `toString` and `toJSON` behavior, serialization, etc.)
 >   - Thread Variables
 >   - Atomic Loop Blocks
 >   - Broadcast Blocks
->   - Common Patterns (thread manager, "data" thread variable when creating a new thread, etc.)
+>   - Common Patterns (thread manager, `data` thread variable when creating a new thread, `__label__` thread variable, etc.)
 > - Vanilla Block Reimplementations
 >   - Vanilla Loop Blocks
 >   - Vanilla Broadcast Blocks
 >   - Vanilla New Thread Block
+>   - Vanilla All At Once Block
 > - Threads Block Reimplementations
 >   - Broadcast Blocks
 >   - Atomic Loop Blocks
