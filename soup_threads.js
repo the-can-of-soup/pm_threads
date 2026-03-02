@@ -451,11 +451,11 @@
   };
 
   const RuntimePhaseText = {
-    [RuntimePhase.NOT_STEPPING]: 'not stepping',
-    [RuntimePhase.FRAME_START]: 'frame start',
-    [RuntimePhase.BEFORE_EXECUTE]: 'before execution',
-    [RuntimePhase.EXECUTION]: 'execution',
-    [RuntimePhase.FRAME_END]: 'frame end',
+    [RuntimePhase.NOT_STEPPING]: 'Not stepping',
+    [RuntimePhase.FRAME_START]: 'Frame start',
+    [RuntimePhase.BEFORE_EXECUTE]: 'Before execution',
+    [RuntimePhase.EXECUTION]: 'Execution',
+    [RuntimePhase.FRAME_END]: 'Frame end',
   };
 
   const RuntimePhaseInternalName = {
