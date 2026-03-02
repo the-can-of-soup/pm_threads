@@ -1,4 +1,4 @@
-# Threads Reference
+# Threads Reference Manual
 
 [← Back to Documentation](https://github.com/the-can-of-soup/pm_threads/blob/main/docs/Documentation.md)
 
