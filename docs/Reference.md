@@ -31,7 +31,7 @@
     - [`<[THREAD] was paused manually?>` -> Boolean](#thread-was-paused-manually---boolean)
     - [`<[THREAD] is in limbo?>` -> Boolean](#thread-is-in-limbo---boolean)
     - [`<[THREAD] is a monitor updater?>` -> Boolean](#thread-is-a-monitor-updater---boolean)
-    - **TODO:** `<[THREAD] is an executable hat thread?>` -> Boolean
+    - [`<[THREAD] is an executable hat thread?>` -> Boolean](#thread-is-an-executable-hat-thread---boolean)
     - [`<[THREAD] was started by clicking in the editor?>` -> Boolean](#thread-was-started-by-clicking-in-the-editor---boolean)
   - [Thread Actions](#thread-actions)
     - [`kill [THREAD]` -> Undefined](#kill-thread---undefined)
@@ -382,6 +382,19 @@ Returns `true` if `THREAD` was started by the engine to check the value of a rep
   
   Returns the `updateMonitor` key from the raw thread object.
 </details>
+
+### `<[THREAD] is an executable hat thread?>` -> Boolean
+<img src="../assets/blocks/is_an_executable_hat_thread.png">
+
+Returns `true` if `THREAD` is an "executable hat thread".
+
+An executable hat thread is a thread that was started before the execution phase (i.e. before the first tick of the frame) in order to prematurely evaluate the predicate (condition) of a hat block.
+
+Executable hat threads are created for all scripts whose hat blocks have the `Scratch.BlockType.HAT` block type (not the `Scratch.BlockType.EVENT` one) every frame before the execution phase. These threads are always moved to the end of the [threads array](#threads---arraythread) upon creation.
+
+Immediately after creation, all executable hat threads trigger a [predicate step](#this-is-a-predicate-step---boolean).
+
+For edge-activated hat blocks, their executable hat threads are created very early in the "frame start" phase, whereas non-edge-activated hat blocks have their threads created in the "before execution" phase. However, non-edge-activated hat blocks in rare cases may never have their threads created at all, as [it is only a standard and not actually inbuilt↗](https://docs.turbowarp.org/development/extensions/hats#predicate-based-hat-blocks) (in the linked documentation you can see the use of `startHats` which creates the executable hat thread).
 
 ### `<[THREAD] was started by clicking in the editor?>` -> Boolean
 <img src="../assets/blocks/was_started_by_clicking_in_the_editor.png">
@@ -794,7 +807,7 @@ Returns the state of a counter that increments every frame and starts at 1 on th
 
 Returns `true` if the current step is a "predicate step".
 
-A predicate step is a step performed before the execution phase of a frame, meant to execute only the hat block of the stack to check its predicate (true/false condition). This is always the first step of an executable hat thread, and is performed immediately after the creation of that thread.
+A predicate step is a step performed before the execution phase of a frame, meant to execute only the hat block of the stack to check its predicate (true/false condition). This is always the first step of an [executable hat thread](#thread-is-an-executable-hat-thread---boolean), and is performed immediately after the creation of that thread.
 
 During a predicate step, the hat block (and its inputs) are executed. If the hat's predicate (condition) is `false`, the thread is immediately completed (and yields). If its predicate is `true`, the thread only yields, so on its next step it will begin executing the blocks under the hat. This next step will be a normal step during the execution phase later in the frame.
 
