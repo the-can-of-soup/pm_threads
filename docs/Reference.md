@@ -30,9 +30,9 @@
     - [`<[THREAD] was killed?>` -> Boolean](#thread-was-killed---boolean)
     - [`<[THREAD] was paused manually?>` -> Boolean](#thread-was-paused-manually---boolean)
     - [`<[THREAD] is in limbo?>` -> Boolean](#thread-is-in-limbo---boolean)
-    - [`<[THREAD] was started by clicking in the editor?>` -> Boolean](#thread-was-started-by-clicking-in-the-editor---boolean)
     - [`<[THREAD] is a monitor updater?>` -> Boolean](#thread-is-a-monitor-updater---boolean)
     - **TODO:** `<[THREAD] is an executable hat thread?>` -> Boolean
+    - [`<[THREAD] was started by clicking in the editor?>` -> Boolean](#thread-was-started-by-clicking-in-the-editor---boolean)
   - [Thread Actions](#thread-actions)
     - [`kill [THREAD]` -> Undefined](#kill-thread---undefined)
     - [`pause [THREAD]` -> Undefined](#pause-thread---undefined)
@@ -372,17 +372,6 @@ In many cases when a thread is stopped, it will enter limbo. Limbo is when a dea
   - The thread's status is not [4 (completed)](#status-statusformat-v-of-thread---number--string).
 </details>
 
-### `<[THREAD] was started by clicking in the editor?>` -> Boolean
-<img src="../assets/blocks/was_started_by_clicking_in_the_editor.png">
-
-Returns `true` if `THREAD` was started by manually clicking a stack in the code editor.
-
-<details>
-  <summary>Internal behavior</summary>
-  
-  Returns the `stackClick` key from the raw thread object.
-</details>
-
 ### `<[THREAD] is a monitor updater?>` -> Boolean
 <img src="../assets/blocks/is_a_monitor_updater.png">
 
@@ -392,6 +381,17 @@ Returns `true` if `THREAD` was started by the engine to check the value of a rep
   <summary>Internal behavior</summary>
   
   Returns the `updateMonitor` key from the raw thread object.
+</details>
+
+### `<[THREAD] was started by clicking in the editor?>` -> Boolean
+<img src="../assets/blocks/was_started_by_clicking_in_the_editor.png">
+
+Returns `true` if `THREAD` was started by manually clicking a stack in the code editor.
+
+<details>
+  <summary>Internal behavior</summary>
+  
+  Returns the `stackClick` key from the raw thread object.
 </details>
 
 
