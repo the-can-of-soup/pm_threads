@@ -790,7 +790,7 @@ Returns the state of a counter that increments every frame and starts at 1 on th
 ## Runtime Phase
 
 ### `<this is a predicate step?>` -> Boolean
-<img src="../assets/blocks/warp_mode.png">
+<img src="../assets/blocks/this_is_a_predicate_step.png">
 
 Returns `true` if the current step is a "predicate step".
 
