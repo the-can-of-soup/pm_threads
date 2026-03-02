@@ -77,7 +77,7 @@
     - [`(tick # this frame)` -> Number](#tick--this-frame---number)
   - [Runtime Phase](#runtime-phase)
     - [`<this is a predicate step?>` -> Boolean](#this-is-a-predicate-step---boolean)
-    - **TODO:** `(runtime phase [STATUSFORMAT v])` -> Number | String
+    - [`(runtime phase [STATUSFORMAT v])` -> Number | String](#runtime-phase-statusformat-v---numberstring)
   - [Warp Mode](#warp-mode)
     - [`<warp mode>` -> Boolean](#warp-mode---boolean)
     - [`[SETBOOLEAN v] warp mode for {SUBSTACK}` -> Undefined](#setboolean-v-warp-mode-for-substack---undefined)
@@ -127,7 +127,7 @@ Returns the index of the current thread in the [threads array](#threads---arrayt
 <details>
   <summary>Internal behavior</summary>
   
-  Reads `sequencer.activeThreadIndex` _([I added that!](https://github.com/PenguinMod/PenguinMod-Vm/pull/173) :D)_, or if this is a [predicate step](#this-is-a-predicate-step---boolean), finds the index of the `thread` compiled global in `runtime.threads`.
+  Reads `sequencer.activeThreadIndex` _([I added that!↗](https://github.com/PenguinMod/PenguinMod-Vm/pull/173) :D)_, or if this is a [predicate step](#this-is-a-predicate-step---boolean), finds the index of the `thread` compiled global in `runtime.threads`.
 </details>
 
 ### `(null thread)` -> Thread
@@ -228,7 +228,7 @@ _Menus: `STATUSFORMAT` uses [Status Format](#status-format)_
 
 <img src="../assets/blocks/status_%23_of.png">
 
-Returns the current status code of `THREAD`, the status code in text format if `STATUSFORMAT` is "text", or the internal name of the status code if `STATUSFORMAT` is "internal name". These are the possible values:
+Returns the current status code of `THREAD`, formatted as specified by `STATUSFORMAT`. These are the possible values:
 
 | Status # | Status text          | Internal name         | Description                                                                                                                                         |
 |----------|----------------------|-----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -827,6 +827,37 @@ Because the only blocks executed during predicate steps are hat blocks and their
   Returns `true` if `runtime.soupThreadsRuntimePhase` is not "execution", as we assume all thread steps not in the execution phase are predicate steps.
 </details>
 
+### `(runtime phase [STATUSFORMAT v])` -> Number | String
+_Menus: `STATUSFORMAT` uses [Status Format](#status-format)_
+
+<img src="../assets/blocks/runtime_phase_%23.png">
+
+Returns the current "runtime phase" formatted as specified by `STATUSFORMAT`. Here are the possible return values:
+
+| Phase # | Phase text       | Internal name    | Description                                                                               |
+|---------|------------------|------------------|-------------------------------------------------------------------------------------------|
+| 0       | Not stepping     | `NOT_STEPPING`   | `runtime._step` (function that executes a frame) is not currently running.*               |
+| 1       | Frame start      | `FRAME_START`    | No ticks have occurred yet this frame.                                                    |
+| 2       | Before execution | `BEFORE_EXECUTE` | Fully prepared to start the first tick.                                                   |
+| 3       | Execution        | `EXECUTION`      | The first step of the first tick of the frame is about to happen or has already happened. |
+| 4       | Frame end        | `FRAME_END`      | All ticks this frame have executed.*                                                      |
+
+*This should never be returned in practice.
+
+<details>
+  <summary>Internal behavior</summary>
+
+  Reads the custom property `runtime.soupThreadsRuntimePhase`, which is set at these times:
+  
+  | Internal name    | Set                                                                                                                               |
+  |------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+  | `NOT_STEPPING`   | When the exension is initialized and when the `RUNTIME_STEP_END` event is fired.                                                  |
+  | `FRAME_START`    | When the `RUNTIME_STEP_START` event is fired.                                                                                     |
+  | `BEFORE_EXECUTE` | When the `BEFORE_EXECUTE` event is fired.                                                                                         |
+  | `EXECUTION`      | When the `BEFORE_THREAD_CONSIDERED` event is fired. _([I added that!↗](https://github.com/PenguinMod/PenguinMod-Vm/pull/175) :D)_ |
+  | `FRAME_END`      | When the `AFTER_EXECUTE` event is fired.                                                                                          |
+</details>
+
 
 
 ## Warp Mode
@@ -1027,14 +1058,15 @@ The value can be overridden by a target or target ID.
 _Used in:_
 - [`(status [STATUSFORMAT v] of [THREAD])`](#status-statusformat-v-of-thread---number--string)
 - [`(unpaused status [STATUSFORMAT v] of [THREAD])`](#unpaused-status-statusformat-v-of-thread---number--string)
+- [`(runtime phase [STATUSFORMAT v])`](#runtime-phase-statusformat-v---number--string)
 
 _Type: **Static**_
 
-| Item          | Description                                                 |
-|---------------|-------------------------------------------------------------|
-| #             | Gives the status as an integer.                             |
-| text          | Gives the status as a user-friendly string.                 |
-| internal name | Gives the status as the name of its variable in the engine. |
+| Item          | Description                                               |
+|---------------|-----------------------------------------------------------|
+| #             | Gives the status as an integer.                           |
+| text          | Gives the status as a user-friendly string.               |
+| internal name | Gives the status as the name of its variable in the code. |
 
 ### Set Boolean
 _Used in:_
