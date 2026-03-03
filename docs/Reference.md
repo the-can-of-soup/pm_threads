@@ -815,7 +815,7 @@ Returns `true` if the current step is a "predicate step".
 
 A predicate step is a step performed before the [execution phase](#runtime-phase-statusformat-v---number--string) of a frame, meant to execute only the hat block of the stack to check its predicate (true/false condition). This is always the first step of an [executable hat thread](#thread-is-an-executable-hat-thread---boolean), and is performed immediately after the creation of that thread.
 
-During a predicate step, the hat block (and its inputs) are executed. If the hat's predicate (condition) is `false`, the thread is immediately completed (and yields). If its predicate is `true`, the thread only yields, so on its next step it will begin executing the blocks under the hat. This next step will be a normal step during the execution phase later in the frame.
+During a predicate step, the hat block (and its inputs) are executed. If the hat's predicate (condition) returns `false`, the thread is immediately completed (and yields). If its predicate returns `true`, the thread only yields, so on its next step it will begin executing the blocks under the hat. This next step will be a normal step during the execution phase later in the frame.
 
 Because predicate steps are performed outside of the execution phase of a frame, most normal sequencer behavior is not present during these. Specifically, the [threads array](#threads---arraythread) and [active index](#active-index---number) are irrelevant here. Instead, predicate steps are always performed before the first tick of a frame, and therefore before any other threads in the threads array step (except other executable hat threads).
 
