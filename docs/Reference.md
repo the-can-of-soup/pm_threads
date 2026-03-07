@@ -282,7 +282,7 @@ Note that the `<[] = []>` block in Operators is not meant for this, as that bloc
 <details>
   <summary>Internal behavior</summary>
   
-  Uses the `soupThreadId` key of the raw thread objects to compare the threads.
+  Uses the `===` operator to compare the threads.
 </details>
 
 ### `<[THREAD] is null?>` -> Boolean
