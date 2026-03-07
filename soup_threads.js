@@ -148,6 +148,9 @@
       if (this.isLimbo()) {
         result += ` (limbo)`;
       }
+      if (this.thread.stackClick) {
+        result += ` clicked`;
+      }
       if (this.thread.updateMonitor) {
         result += ` monitor`;
       }
