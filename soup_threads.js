@@ -11,7 +11,6 @@
 // TO-DO
 //
 // - Add "super mutator shenanagins" so that atomic forever loses its end cap if an "escape loop" block is present inside it
-// - Figure out *exactly* what happens when a hat block is restarted
 // - Figure out *exactly* what happens when an async block is run
 // - Make compat atomic loops (atomic "for" loops for looping through arrays, objects, sets, etc.)
 // - Yell at @jwklong until they fix the lip that is happening in the `builder` block and the wrongly positioned arrows in dropdown textboxes with custom block shape addon enabled
@@ -145,7 +144,7 @@
       if (this.thread.status === RawThreadType.STATUS_PAUSED) {
         result += `<${ThreadStatus[this.thread.originalStatus]}>`;
       }
-      if (this.isLimbo()) {
+      if (this.isLimbo(false)) {
         result += ` (limbo)`;
       }
       if (this.thread.stackClick) {
@@ -180,10 +179,11 @@
         targetId: this.thread.target.id,
         status: this.thread.status,
         originalStatus: this.getUnpausedStatus(),
-        isLimbo: this.isLimbo(),
-        isAlive: this.isAlive(),
-        isExitedNaturally: this.isExitedNaturally(),
-        isKilled: this.isKilled(),
+        isLimbo: this.isLimbo(false),
+        isAlive: this.isAlive(false),
+        isExitedNaturally: this.isExitedNaturally(false),
+        isKilled: this.isKilled(false),
+        isOrphaned: this.isOrphaned(),
         isMonitor: this.thread.updateMonitor,
         isExecutableHat: this.thread.executableHat,
         isStackClick: this.thread.stackClick,
@@ -275,13 +275,17 @@
       return edit;
     }
 
-    deadThreadWasKilled() {
+    static deadThreadWasKilled(rawThread) {
       // Should only be used if the thread is known to be dead.
 
       // Thread is considered killed if its status is not "completed"
       // because dead threads are only not "completed" if they are
       // in limbo.
-      return this.thread.isKilled || this.thread.status !== RawThreadType.STATUS_DONE;
+      return rawThread.isKilled || rawThread.status !== RawThreadType.STATUS_DONE;
+    }
+
+    deadThreadWasKilled() {
+      return ThreadType.deadThreadWasKilled(this.thread);
     }
 
     getId() {
@@ -291,8 +295,12 @@
       return this.thread.soupThreadId;
     }
 
+    static getUnpausedStatus(rawThread) {
+      return rawThread.status === RawThreadType.STATUS_PAUSED ? rawThread.originalStatus : rawThread.status;
+    }
+
     getUnpausedStatus() {
-      return this.thread.status === RawThreadType.STATUS_PAUSED ? this.thread.originalStatus : this.thread.status;
+      return ThreadType.getUnpausedStatus(this.thread);
     }
 
     getLabel() {
@@ -304,82 +312,140 @@
       return variables.has('__label__') ? Scratch.Cast.toString(variables.get('__label__')) : undefined;
     }
 
-    isLimbo() {
+    static isLimbo(rawThread, orphanedCurrentThreadIsNotAlive = false) {
       // Limbo is when a dead thread's status is not STATUS_DONE.
-      // NOTE: This may be reimplemented in other places where raw threads are used.
-
-      if (this.thread === null) {
-        return false;
-      }
+      // `orphanedCurrentThreadIsNotAlive` disables the override that makes the active thread considered alive even if orphaned.
 
       // Returns true if:
       //
-      // - The thread is not in the threads list (it is dead).
+      // - The thread is orphaned (not in the threads list) (it is dead unless it is active).
+      // - Not all of:
+      //   - The thread is the active thread.*
+      //   - `orphanedCurrentThreadIsNotAlive` is false.
       // - The thread's unpaused status is not STATUS_DONE.
+      //
+      // *This is false if this is a predicate step.
       //
       // Note: the case where dead threads are in the threads list are not considered,
       // as those threads always have status STATUS_DONE.
 
-      return this.getUnpausedStatus() !== RawThreadType.STATUS_DONE && !runtime.threads.includes(this.thread);
+      return ThreadType.getUnpausedStatus(rawThread) !== RawThreadType.STATUS_DONE && ThreadType.isOrphaned(rawThread)
+        && !(!orphanedCurrentThreadIsNotAlive && rawThread === runtime.sequencer.activeThread);
     }
 
-    isAlive() {
-      // NOTE: This may be reimplemented in other places where raw threads are used.
-
+    isLimbo(orphanedCurrentThreadIsNotAlive = false) {
       if (this.thread === null) {
         return false;
       }
+
+      return ThreadType.isLimbo(this.thread, orphanedCurrentThreadIsNotAlive);
+    }
+
+    static isOrphaned(rawThread) {
+      // Returns true if:
+      //
+      // - The thread is not in the threads list (it died this tick if its status is STATUS_DONE).
+
+      return !runtime.threads.includes(rawThread);
+    }
+
+    isOrphaned() {
+      if (this.thread === null) {
+        return false;
+      }
+
+      return ThreadType.isOrphaned(this.thread);
+    }
+
+    static isAlive(rawThread, orphanedCurrentThreadIsNotAlive = false) {
+      // `orphanedCurrentThreadIsNotAlive` disables the override that makes the active thread considered alive even if orphaned.
 
       // Returns true if:
       //
       // - The thread is in the threads list (it died this tick if its status is STATUS_DONE).
       // - The thread's status is not STATUS_DONE.
+      // OR
+      // - The thread is the active thread.*
+      // - The thread is orphaned.
+      // - `orphanedCurrentThreadIsNotAlive` is false.
+      //
+      // *This is false if this is a predicate step.
 
-      return runtime.threads.includes(this.thread) && this.thread.status !== RawThreadType.STATUS_DONE;
+      let orphaned;
+      return (rawThread.status !== RawThreadType.STATUS_DONE && !(orphaned = ThreadType.isOrphaned(rawThread)))
+        || (!orphanedCurrentThreadIsNotAlive && orphaned && rawThread === runtime.sequencer.activeThread);
     }
 
-    isExitedNaturally() {
-      // NOTE: This may be reimplemented in other places where raw threads are used.
-
+    isAlive(orphanedCurrentThreadIsNotAlive = false) {
       if (this.thread === null) {
         return false;
       }
 
+      return ThreadType.isAlive(this.thread, orphanedCurrentThreadIsNotAlive);
+    }
+
+    static isExitedNaturally(rawThread, orphanedCurrentThreadIsNotAlive = false) {
+      // `orphanedCurrentThreadIsNotAlive` disables the override that makes the active thread considered alive even if orphaned.
+
       // Returns true if:
       //
-      // - The thread is not in the threads list (it is dead).
+      // - The thread is orphaned (not in the threads list) (it is dead unless it is active).
       // - The thread was not killed (as defined in `deadThreadWasKilled()`).
+      // - Not all of:
+      //   - The thread is the active thread.*
+      //   - `orphanedCurrentThreadIsNotAlive` is false.
       // OR
-      // - The thread *is* in the threads list (it died this tick if its status is STATUS_DONE).
+      // - The thread is in the threads list (it died this tick if its status is STATUS_DONE).
       // - The thread's status is STATUS_DONE.
       // - The thread's `isKilled` property is `false`.
+      //
+      // *This is false if this is a predicate step.
 
-      if (runtime.threads.includes(this.thread)) {
-        return this.thread.status === RawThreadType.STATUS_DONE && !this.thread.isKilled;
+      let orphaned = ThreadType.isOrphaned(rawThread);
+      if (!orphaned) {
+        return rawThread.status === RawThreadType.STATUS_DONE && !rawThread.isKilled;
       }
-      return !this.deadThreadWasKilled();
+      return !ThreadType.deadThreadWasKilled(rawThread) && !(!orphanedCurrentThreadIsNotAlive && rawThread === runtime.sequencer.activeThread);
     }
 
-    isKilled() {
-      // NOTE: This may be reimplemented in other places where raw threads are used.
-
+    isExitedNaturally(orphanedCurrentThreadIsNotAlive = false) {
       if (this.thread === null) {
         return false;
       }
 
+      return ThreadType.isExitedNaturally(this.thread, orphanedCurrentThreadIsNotAlive);
+    }
+
+    static isKilled(rawThread, orphanedCurrentThreadIsNotAlive = false) {
+      // `orphanedCurrentThreadIsNotAlive` disables the override that makes the active thread considered alive even if orphaned.
+
       // Returns true if:
       //
-      // - The thread is not in the threads list (it is dead).
+      // - The thread is orphaned (not in the threads list) (it is dead unless it is active).
       // - The thread was killed (as defined in `deadThreadWasKilled()`).
+      // - Not all of:
+      //   - The thread is the active thread.*
+      //   - `orphanedCurrentThreadIsNotAlive` is false.
       // OR
-      // - The thread *is* in the threads list (it died this tick if its status is STATUS_DONE).
+      // - The thread is in the threads list (it died this tick if its status is STATUS_DONE).
       // - The thread's status is STATUS_DONE.
       // - The thread's `isKilled` property is `true`.
+      //
+      // *This is false if this is a predicate step.
 
-      if (runtime.threads.includes(this.thread)) {
-        return this.thread.status === RawThreadType.STATUS_DONE && this.thread.isKilled;
+      let orphaned = ThreadType.isOrphaned(rawThread);
+      if (!orphaned) {
+        return rawThread.status === RawThreadType.STATUS_DONE && rawThread.isKilled;
       }
-      return this.deadThreadWasKilled();
+      return ThreadType.deadThreadWasKilled(rawThread) && !(!orphanedCurrentThreadIsNotAlive && rawThread === runtime.sequencer.activeThread);
+    }
+
+    isKilled(orphanedCurrentThreadIsNotAlive = false) {
+      if (this.thread === null) {
+        return false;
+      }
+
+      return ThreadType.isKilled(this.thread, orphanedCurrentThreadIsNotAlive);
     }
   }
 
@@ -532,6 +598,8 @@
      * @returns {number} - A 0-based index within the threads array.
      */
     static getCurrentThreadIndex(threadGlobal) {
+      // Use "thread" global instead of active thread if not currently in the execution phase;
+      // this catches the predicate step edge case.
       return runtime.soupThreadsRuntimePhase === RuntimePhase.EXECUTION ? runtime.sequencer.activeThreadIndex : runtime.threads.indexOf(threadGlobal);
     }
 
@@ -1207,6 +1275,14 @@
           {
             opcode: 'isLimbo',
             text: '[THREAD] is in limbo?',
+            ...BooleanBlock,
+            arguments: {
+              THREAD: Thread.Argument,
+            }
+          },
+          {
+            opcode: 'isOrphaned',
+            text: '[THREAD] is orphaned?',
             ...BooleanBlock,
             arguments: {
               THREAD: Thread.Argument,
@@ -2305,15 +2381,7 @@
 
           source += `(`;
 
-          source += `(`;
-
-          // Use "thread" global instead of active thread if not currently in the execution phase;
-          // this catches the predicate step edge case.
-          source += `runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION`;
-          source += ` ? runtime.sequencer.activeThreadIndex`;
-          source += ` : runtime.threads.indexOf(thread)`;
-
-          source += `) + 1`;
+          source += `vm.SoupThreadsUtil.getCurrentThreadIndex(thread) + 1`;
 
           source += `)`;
 
@@ -2393,7 +2461,7 @@
           source += `runtime.threads.splice(${INDEX}, 0, ${rawThread});`;
 
           // Update activeThreadIndex if the active thread moved.
-          // This only done if we are in the execution phase, as otherwise it would do nothing.
+          // This is only done if we are in the execution phase, because otherwise `activeThreadIndex` would be uninitialized.
 
           compiler.source += `if (runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION) {`;
 
@@ -2441,16 +2509,17 @@
           let THREAD = compiler.localVariables.next();
           compiler.source += `let ${THREAD} = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREAD).asUnknown()});`;
 
-          compiler.source += `if (${THREAD}.thread !== null && ${THREAD}.thread.status !== vm.exports.Thread.STATUS_DONE && runtime.threads.includes(${THREAD}.thread)) {`;
+          // No need to kill if it is the active thread and is orphaned, hence `true` flag
+          compiler.source += `if (${THREAD}.isAlive(true)) {`;
 
           // Sets isKilled to true, sets status to STATUS_DONE, clears some other properties
           compiler.source += `runtime._stopThread(${THREAD}.thread);`;
 
-          // Yield if active thread was killed.
-          compiler.source += `if (${THREAD}.thread === thread) {`;
-          compiler.source += `yield;`;
           compiler.source += `}`;
 
+          // Yield if active thread was killed (or was attempted to be killed).
+          compiler.source += `if (${THREAD}.thread === thread) {`;
+          compiler.source += `yield;`;
           compiler.source += `}`;
         },
 
@@ -2459,14 +2528,12 @@
           compiler.source += `let ${THREAD} = vm.SoupThreads.Type.toThread(${compiler.descendInput(node.args.THREAD).asUnknown()});`;
 
           compiler.source += `if (${THREAD}.thread !== null && !${THREAD}.thread.soupThreadsPaused) {`;
-
           compiler.source += `vm.SoupThreadsUtil.pauseThreadAsSoupThreads.call(${THREAD}.thread);`;
-
-          // Yield if active thread was paused.
-          compiler.source += `if (${THREAD}.thread === thread) {`;
-          compiler.source += `yield;`;
           compiler.source += `}`;
 
+          // Yield if active thread was paused (or was attempted to be paused).
+          compiler.source += `if (${THREAD}.thread === thread) {`;
+          compiler.source += `yield;`;
           compiler.source += `}`;
         },
 
@@ -2493,7 +2560,7 @@
         },
 
         yieldBack(node, compiler, imports) {
-          // Will do nothing if not in the execution phase.
+          // Will do nothing if not in the execution phase, because `activeThreadIndex` is uninitialized.
           compiler.source += `if (runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION) {`;
 
           // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
@@ -2511,7 +2578,7 @@
         },
 
         yieldToThread(node, compiler, imports) {
-          // Will skip special behavior and yield normally if not in execution phase.
+          // Will skip special behavior and yield normally if not in execution phase, because `activeThreadIndex` is uninitialized.
           compiler.source += `if (runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION) {`;
 
           let ACTIVETHREAD = compiler.localVariables.next();
@@ -2534,7 +2601,7 @@
         },
 
         yieldToIndex(node, compiler, imports) {
-          // Will skip special behavior and yield normally if not in execution phase.
+          // Will skip special behavior and yield normally if not in execution phase, because `activeThreadIndex` is uninitialized.
           compiler.source += `if (runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION) {`;
 
           let ACTIVEINDEX = compiler.localVariables.next();
@@ -2558,7 +2625,7 @@
         },
 
         yieldToEnd(node, compiler, imports) {
-          // Will skip special behavior and yield normally if not in execution phase.
+          // Will skip special behavior and yield normally if not in execution phase, because `activeThreadIndex` is uninitialized.
           compiler.source += `if (runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION) {`;
 
           // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
@@ -2572,7 +2639,7 @@
 
 
         broadcastAt(node, compiler, imports, wait = false, atomic = false) {
-          // Will do nothing if not in the execution phase.
+          // Will do nothing if not in the execution phase, because `activeThreadIndex` is uninitialized.
           compiler.source += `if (runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION) {`;
 
           let INDEX = compiler.localVariables.next();
@@ -2646,7 +2713,7 @@
             compiler.source += `let ${allDone} = true;`;
             compiler.source += `for (let ${rawThread} of ${newThreads}) {`;
 
-            compiler.source += `if (${rawThread}.status !== vm.exports.Thread.STATUS_DONE && runtime.threads.includes(${rawThread})) {`;
+            compiler.source += `if (vm.SoupThreads.Type.isAlive(${rawThread}, false)) {`;
             compiler.source += `${allDone} = false;`;
             compiler.source += `break;`;
             compiler.source += `}`;
@@ -2696,8 +2763,9 @@
 
           // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
 
-          // Will yield normally if not in execution phase; it is assumed that this is a predicate step, so this will
-          // move to the first thread after all predicate steps for the frame are finished.
+          // Will yield normally if not in execution phase, because `activeThreadIndex` is uninitialized; it is assumed
+          // that this is a predicate step, so this will move to the first thread after all predicate steps for the
+          // frame are finished.
           compiler.source += `if (runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION) {`;
 
           compiler.source += `let threadIndex;`;
@@ -2732,8 +2800,9 @@
 
           // activeThreadIndex is incremented immediately after yield, so it is set to 1 less than the desired value.
 
-          // Will yield normally if not in execution phase; it is assumed that this is a predicate step, so this will
-          // move to the first thread after all predicate steps for the frame are finished.
+          // Will yield normally if not in execution phase, because `activeThreadIndex` is uninitialized; it is assumed
+          // that this is a predicate step, so this will move to the first thread after all predicate steps for the
+          // frame are finished.
           compiler.source += `if (runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION) {`;
 
           compiler.source += `if (${ACTIVEINDEX} < 0) {`;
@@ -2783,7 +2852,7 @@
           compiler.source += `}`;
 
           // Update activeThreadIndex if the active thread moved
-          // This only done if we are in the execution phase, as otherwise it would do nothing.
+          // This is only done if we are in the execution phase, because otherwise `activeThreadIndex` would be uninitialized.
 
           compiler.source += `if (runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION) {`;
 
@@ -2821,7 +2890,7 @@
           compiler.source += `if (runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION) {`;
 
           // Update activeThreadIndex if the active thread moved
-          // This only done if we are in the execution phase, as otherwise it would do nothing.
+          // This is only done if we are in the execution phase, because otherwise `activeThreadIndex` would be uninitialized.
           compiler.source += `if (runtime.sequencer.activeThreadIndex === ${threadIndex1}) {`;
           compiler.source += `runtime.sequencer.activeThreadIndex = ${threadIndex2};`;
           compiler.source += `} else if (runtime.sequencer.activeThreadIndex === ${threadIndex2}) {`;
@@ -3028,7 +3097,9 @@
       THREADONE = ThreadType.toThread(THREADONE);
       THREADTWO = ThreadType.toThread(THREADTWO);
 
-      return THREADONE.getId() === THREADTWO.getId();
+      // This is reliable because any given raw thread may only have one associated thread wrapper,
+      // i.e. if two thread wrappers are created for the same raw thread, they are the same wrapper.
+      return THREADONE === THREADTWO;
     }
 
     isNull({THREAD}, util) {
@@ -3040,19 +3111,19 @@
     isRunning({THREAD}, util) {
       THREAD = ThreadType.toThread(THREAD);
 
-      return THREAD.isAlive();
+      return THREAD.isAlive(false);
     }
 
     isFinished({THREAD}, util) {
       THREAD = ThreadType.toThread(THREAD);
 
-      return THREAD.isExitedNaturally();
+      return THREAD.isExitedNaturally(false);
     }
 
     isKilled({THREAD}, util) {
       THREAD = ThreadType.toThread(THREAD);
 
-      return THREAD.isKilled();
+      return THREAD.isKilled(false);
     }
 
     isPaused({THREAD}, util) {
@@ -3067,7 +3138,13 @@
     isLimbo({THREAD}, util) {
       THREAD = ThreadType.toThread(THREAD);
 
-      return THREAD.isLimbo();
+      return THREAD.isLimbo(false);
+    }
+
+    isOrphaned({THREAD}, util) {
+      THREAD = ThreadType.toThread(THREAD);
+
+      return THREAD.isOrphaned();
     }
 
     isMonitor({THREAD}, util) {
