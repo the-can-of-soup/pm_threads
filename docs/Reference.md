@@ -599,6 +599,8 @@ Returns the first thread that was started by the most recent broadcast (or the n
 
 Returns most[^8] threads that are currently [alive](#thread-is-alive---boolean) and most[^5] threads that exited this tick in their execution order.
 
+Threads that are not in this array are called [orphaned](#thread-is-orphaned---boolean); there is some documentation about the behavior of such threads.
+
 <details>
   <summary>Internal behavior</summary>
   
