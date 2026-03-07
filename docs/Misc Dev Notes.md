@@ -55,4 +55,4 @@ Note: if the thread is the current thread and it is orphaned (not in `runtime.th
 
 - A hat block is restartable if its `shouldRestartExistingThreads` flag is set in `getInfo`; otherwise, it is non-restartable.
 - When a non-restartable hat is attempted to be started when there is already a thread in the target with the same top block, nothing will happen.
-- When a restartable hat is attempted to be started when there is already a thread in the target with the same top block, the original thread will be replaced by the new thread in `runtime.threads`. This causes the old thread to be put into limbo, even if it is currently stepping.
+- When a restartable hat is attempted to be started when there is already a thread in the target with the same top block, the original thread will be replaced by the new thread in `runtime.threads`. This causes the old thread to become orphaned, even if it is currently stepping.
