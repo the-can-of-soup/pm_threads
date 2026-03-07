@@ -30,6 +30,7 @@
     - [`<[THREAD] was killed?>` -> Boolean](#thread-was-killed---boolean)
     - [`<[THREAD] was paused manually?>` -> Boolean](#thread-was-paused-manually---boolean)
     - [`<[THREAD] is in limbo?>` -> Boolean](#thread-is-in-limbo---boolean)
+    - [`<[THREAD] is orphaned?>` -> Boolean](#thread-is-orphaned---boolean)
     - [`<[THREAD] is a monitor updater?>` -> Boolean](#thread-is-a-monitor-updater---boolean)
     - [`<[THREAD] is an executable hat thread?>` -> Boolean](#thread-is-an-executable-hat-thread---boolean)
     - [`<[THREAD] was started by clicking in the editor?>` -> Boolean](#thread-was-started-by-clicking-in-the-editor---boolean)
@@ -122,12 +123,14 @@ Returns the current thread.
 ### `(active index)` -> Number
 <img src="../assets/blocks/active_index.png">
 
-Returns the index of the current thread in the [threads array](#threads---arraythread).
+Returns the index of the [current thread](#active-thread---thread) in the [threads array](#threads---arraythread), or the last index of the current thread if the current thread is [orphaned](#thread-is-orphaned---boolean).
+
+If both this is a [predicate step](#this-is-a-predicate-step---boolean) and the current thread is orphaned, returns an empty string.
 
 <details>
   <summary>Internal behavior</summary>
   
-  Reads `sequencer.activeThreadIndex` _([I added that!↗](https://github.com/PenguinMod/PenguinMod-Vm/pull/173) :D)_, or if this is a [predicate step](#this-is-a-predicate-step---boolean), finds the index of the `thread` compiled global in `runtime.threads`.
+  Reads `sequencer.activeThreadIndex` _([I added that!↗](https://github.com/PenguinMod/PenguinMod-Vm/pull/173) :D)_, or if this is a [predicate step](#this-is-a-predicate-step---boolean), finds the index of the `thread` compiled global in `runtime.threads`. If the `thread` compiled global is not in `runtime.threads`, returns an empty string.
 </details>
 
 ### `(null thread)` -> Thread
@@ -298,7 +301,13 @@ Returns `true` if `THREAD` is alive, i.e. it is not finished.
 <details>
   <summary>Internal behavior</summary>
   
-  Returns `true` if the raw thread is in the `runtime.threads` array and its status is not [4 (completed)](#status-statusformat-v-of-thread---number--string).
+  Returns `true` if either:
+  - All of:
+    - The raw thread is in the `runtime.threads` array (therefore it died this tick if its status is [4](#status-statusformat-v-of-thread---number--string)).
+    - The raw thread's status is not [4 (completed)](#status-statusformat-v-of-thread---number--string).
+  - All of:
+    - The thread is the current thread.
+    - The thread is [orphaned](#thread-is-orphaned---boolean).
 </details>
 
 ### `<[THREAD] exited naturally?>` -> Boolean
@@ -311,7 +320,8 @@ Returns `true` if `THREAD` is dead, but was not killed, i.e. it exited of its ow
   
   Returns `true` if either:
   - All of:
-    - The raw thread is not in the `runtime.threads` array (therefore it is dead).
+    - The raw thread is [orphaned](#thread-is-orphaned---boolean) (not in the `runtime.threads` array) (therefore it is dead unless it is the [current thread](#active-thread---thread)).
+    - The thread is not the current thread.
     - The raw thread's `isKilled` key is `false`.
     - The thread's status is [4 (completed)](#status-statusformat-v-of-thread---number--string). This catches limbo[^1] cases in which killed threads have `isKilled` set to `false` and `status` unchanged.
   - All of:
@@ -330,7 +340,8 @@ Returns `true` if `THREAD` exited due to an external cause.[^2]
   
   Returns `true` if either:
   - All of:
-    - The raw thread is not in the `runtime.threads` array (therefore it is dead).
+    - The raw thread is [orphaned](#thread-is-orphaned---boolean) (not in the `runtime.threads` array) (therefore it is dead unless it is the [current thread](#active-thread---thread)).
+    - The thread is not the current thread.
     - Either:
       - The raw thread's `isKilled` key is `true`.
       - The raw thead's `status` key is not 4 (completed). This catches limbo[^1] cases in which killed threads have `isKilled` set to `false` and `status` unchanged.
@@ -368,8 +379,22 @@ In many cases when a thread is stopped, it will enter limbo. Limbo is when a dea
   <summary>Internal behavior</summary>
   
   Returns `true` if all of:
-  - The raw thread is not in the `runtime.threads` array (therefore it is dead).
+  - The raw thread is not in the `runtime.threads` array (therefore it is dead unless it is the current thread).
+  - The thread is not the current thread.
   - The thread's status is not [4 (completed)](#status-statusformat-v-of-thread---number--string).
+</details>
+
+### `<[THREAD] is orphaned?>` -> Boolean
+<img src="../assets/blocks/is_orphaned.png">
+
+Returns `true` if `THREAD` is orphaned, i.e. it is not in the [threads array](#threads---arraythread).
+
+Once a thread is orphaned, it will never be stepped again. However, a thread may become orphaned mid-step, in which case it will still complete that step. Because of this, if, for example, the [current thread](#active-thread---thread) is orphaned because its block stack is restarted by the hat block, during that step `<(active thread) is orphaned?>` will return `true`.
+
+<details>
+  <summary>Internal behavior</summary>
+
+  Returns `true` if the raw thread is not in `runtime.threads`.
 </details>
 
 ### `<[THREAD] is a monitor updater?>` -> Boolean
@@ -420,7 +445,7 @@ Returns `true` if `THREAD` was started by manually clicking a stack in the code 
 ### `kill [THREAD]` -> Undefined
 <img src="../assets/blocks/kill.png">
 
-Kills `THREAD`, and then yields if `THREAD` was the current thread.
+Kills `THREAD` if it is [alive](#thread-is-alive---thread) and not [orphaned](#thread-is-orphaned---boolean). Then, yields if `THREAD` was the current thread.
 
 <details>
   <summary>Internal behavior</summary>
@@ -431,7 +456,7 @@ Kills `THREAD`, and then yields if `THREAD` was the current thread.
 ### `pause [THREAD]` -> Undefined
 <img src="../assets/blocks/pause.png">
 
-Pauses `THREAD`, and then yields if `THREAD` was the current thread.
+Pauses `THREAD` if it was not already [paused manually](#thread-was-paused-manually---boolean). Then, yields if `THREAD` was the current thread.
 
 ### `unpause [THREAD]` -> Undefined
 <img src="../assets/blocks/unpause.png">
@@ -572,7 +597,7 @@ Returns the first thread that was started by the most recent broadcast (or the n
 ### `(threads)` -> Array\[Thread\]
 <img src="../assets/blocks/threads.png">
 
-Returns all threads that are currently alive and most[^5] threads that exited this tick in their execution order.
+Returns most[^8] threads that are currently [alive](#thread-is-alive---boolean) and most[^5] threads that exited this tick in their execution order.
 
 <details>
   <summary>Internal behavior</summary>
@@ -1092,8 +1117,10 @@ _Type: **Static**_
 
 [^4]: This block _will_ yield after a loop if the editor is frozen and warp timer is enabled to prevent crashes.
 
-[^5]: Threads that entered limbo[^1] this tick are not present in the [threads array](#threads---arraythread).
+[^5]: Threads that entered [limbo](#thread-is-in-limbo---boolean) this tick are not present in the [threads array](#threads---arraythread).
 
 [^6]: In practice, this should only be returned during a [predicate step](#this-is-a-predicate-step---boolean) of an edge-activated hat block.
 
 [^7]: In practice, this should only be returned during a [predicate step](#this-is-a-predicate-step---boolean) of a non-edge-activated hat block.
+
+[^8]: The current thread may become [orphaned](#thread-is-orphaned---boolean), in which case it is still considered [alive](#thread-is-alive---boolean), but it is not in the [threads array](#threads---arraythread) (by the definition of "orphaned").
