@@ -48,3 +48,9 @@
 [^2]: https://github.com/PenguinMod/PenguinMod-Vm/blob/5510cff79cd043256dcb6dac0375f2261e56be09/src/engine/runtime.js#L3109
 [^3]: https://github.com/PenguinMod/PenguinMod-Vm/blob/5510cff79cd043256dcb6dac0375f2261e56be09/src/engine/runtime.js#L2786
 [^5]: https://github.com/PenguinMod/PenguinMod-Vm/blob/5510cff79cd043256dcb6dac0375f2261e56be09/src/engine/runtime.js#L3117
+
+## Restartable and non-restartable hats
+
+- A hat block is restartable if its `shouldRestartExistingThreads` flag is set in `getInfo`; otherwise, it is non-restartable.
+- When a non-restartable hat is attempted to be started when there is already a thread in the target with the same top block, nothing will happen.
+- When a restartable hat is attempted to be started when there is already a thread in the target with the same top block, the original thread will be replaced by the new thread in `runtime.threads`. This causes the old thread to be put into limbo, even if it is currently stepping.
