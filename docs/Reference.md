@@ -298,6 +298,8 @@ Returns `true` if `THREAD` is the null thread.
 
 Returns `true` if `THREAD` is alive, i.e. it is not finished.
 
+If this is a [predicate step](#this-is-a-predicate-step---boolean), will return `false` if `THREAD` is the [current thread](#active-thread---thread) and is [orphaned](#thread-is-orphaned---boolean).[^9]
+
 <details>
   <summary>Internal behavior</summary>
   
@@ -307,6 +309,7 @@ Returns `true` if `THREAD` is alive, i.e. it is not finished.
     - The raw thread's status is not [4 (completed)](#status-statusformat-v-of-thread---number--string).
   - All of:
     - The thread is the current thread.
+    - This is not a [predicate step](#this-is-a-predicate-step---boolean).[^9]
     - The thread is [orphaned](#thread-is-orphaned---boolean).
 </details>
 
@@ -315,13 +318,15 @@ Returns `true` if `THREAD` is alive, i.e. it is not finished.
 
 Returns `true` if `THREAD` is dead, but was not killed, i.e. it exited of its own accord.[^2]
 
+If this is a [predicate step](#this-is-a-predicate-step---boolean), may not return `false` if `THREAD` is the [current thread](#active-thread---thread) and is [orphaned](#thread-is-orphaned---boolean).[^9]
+
 <details>
   <summary>Internal behavior</summary>
   
   Returns `true` if either:
   - All of:
     - The raw thread is [orphaned](#thread-is-orphaned---boolean) (not in the `runtime.threads` array) (therefore it is dead unless it is the [current thread](#active-thread---thread)).
-    - The thread is not the current thread.
+    - The thread is not the current thread, or this is a [predicate step](#this-is-a-predicate-step---boolean).[^9]
     - The raw thread's `isKilled` key is `false`.
     - The thread's status is [4 (completed)](#status-statusformat-v-of-thread---number--string). This catches limbo[^1] cases in which killed threads have `isKilled` set to `false` and `status` unchanged.
   - All of:
@@ -335,13 +340,15 @@ Returns `true` if `THREAD` is dead, but was not killed, i.e. it exited of its ow
 
 Returns `true` if `THREAD` exited due to an external cause.[^2]
 
+If this is a [predicate step](#this-is-a-predicate-step---boolean), may not return `false` if `THREAD` is the [current thread](#active-thread---thread) and is [orphaned](#thread-is-orphaned---boolean).[^9]
+
 <details>
   <summary>Internal behavior</summary>
   
   Returns `true` if either:
   - All of:
     - The raw thread is [orphaned](#thread-is-orphaned---boolean) (not in the `runtime.threads` array) (therefore it is dead unless it is the [current thread](#active-thread---thread)).
-    - The thread is not the current thread.
+    - The thread is not the current thread, or this is a [predicate step](#this-is-a-predicate-step---boolean).[^9]
     - Either:
       - The raw thread's `isKilled` key is `true`.
       - The raw thead's `status` key is not 4 (completed). This catches limbo[^1] cases in which killed threads have `isKilled` set to `false` and `status` unchanged.
@@ -375,12 +382,14 @@ In many cases when a thread is stopped, it will enter limbo. Limbo is when a dea
   - When a stack restarts because its hat is triggered again, the old thread enters limbo.
   - When [`set threads to [THREADS] and yield to [ACTIVETHREAD]`](#set-threads-to-threads-and-yield-to-activethread---undefined) or [`set threads to [THREADS] and yield to thread at (ACTIVEINDEX v)`](#set-threads-to-threads-and-yield-to-thread-at-activeindex-v---undefined) is used to kill a thread, that thread enters limbo.
 
+If this is a [predicate step](#this-is-a-predicate-step---boolean), will return `true` if `THREAD` is the [current thread](#active-thread---thread) and is [orphaned](#thread-is-orphaned---boolean).[^9]
+
 <details>
   <summary>Internal behavior</summary>
   
   Returns `true` if all of:
   - The raw thread is not in the `runtime.threads` array (therefore it is dead unless it is the current thread).
-  - The thread is not the current thread.
+  - The thread is not the current thread, or this is a [predicate step](#this-is-a-predicate-step---boolean).[^9]
   - The thread's status is not [4 (completed)](#status-statusformat-v-of-thread---number--string).
 </details>
 
@@ -417,7 +426,7 @@ An executable hat thread is a thread that was started before the [execution phas
 
 Executable hat threads are created for all scripts whose hat blocks have the `Scratch.BlockType.HAT` block type (not the `Scratch.BlockType.EVENT` one) every frame before the execution phase (except if the extension standard is disobeyed as explained below). These threads are always moved to the end of the [threads array](#threads---arraythread) upon creation.
 
-Immediately after creation, all executable hat threads trigger a [predicate step](#this-is-a-predicate-step---boolean).
+Immediately after creation, all executable hat threads trigger a [predicate step](#this-is-a-predicate-step---boolean) on themselves.
 
 For edge-activated hat blocks, their executable hat threads are created very early in the ["frame start" phase](#runtime-phase-statusformat-v---number--string), whereas non-edge-activated hat blocks have their threads created in the ["before execution" phase](#runtime-phase-statusformat-v---number--string). However, non-edge-activated hat blocks in rare cases may never have their threads created at all, as [it is only a standard and not actually inbuilt↗](https://docs.turbowarp.org/development/extensions/hats#predicate-based-hat-blocks) (in the linked documentation you can see the use of `startHats` on every `BEFORE_EXECUTE` event which creates the executable hat thread during the "before execution" phase every frame).
 
@@ -445,7 +454,7 @@ Returns `true` if `THREAD` was started by manually clicking a stack in the code 
 ### `kill [THREAD]` -> Undefined
 <img src="../assets/blocks/kill.png">
 
-Kills `THREAD` if it is [alive](#thread-is-alive---thread) and not [orphaned](#thread-is-orphaned---boolean). Then, yields if `THREAD` was the current thread.
+Kills `THREAD` if it is [alive](#thread-is-alive---thread) and not [orphaned](#thread-is-orphaned---boolean). Then, yields if `THREAD` was the [current thread](#active-thread---thread).
 
 <details>
   <summary>Internal behavior</summary>
@@ -456,7 +465,7 @@ Kills `THREAD` if it is [alive](#thread-is-alive---thread) and not [orphaned](#t
 ### `pause [THREAD]` -> Undefined
 <img src="../assets/blocks/pause.png">
 
-Pauses `THREAD` if it was not already [paused manually](#thread-was-paused-manually---boolean). Then, yields if `THREAD` was the current thread.
+Pauses `THREAD` if it was not already [paused manually](#thread-was-paused-manually---boolean). Then, yields if `THREAD` was the [current thread](#active-thread---thread).
 
 ### `unpause [THREAD]` -> Undefined
 <img src="../assets/blocks/unpause.png">
@@ -480,7 +489,7 @@ Yields `TIMES` times.
 ### `yield to previous thread` -> Undefined
 <img src="../assets/blocks/yield_to_previous_thread.png">
 
-Yields and makes the previous thread active. If there is no previous thread (the first thread is active), yields and makes the current thread active (effectively cancelling the yield in most cases).
+Yields and makes the previous thread active. If there is no previous thread (the first thread is active), yields and makes the [current thread](#active-thread---thread) active (effectively cancelling the yield in most cases).
 
 If this is a [predicate step](#this-is-a-predicate-step---boolean), instead does nothing.
 
@@ -560,7 +569,7 @@ Executes the behavior of [`broadcast [MESSAGE v] to (INDEX v)`](#broadcast-messa
 ### `step [MESSAGE v] immediately and return` -> Undefined
 <img src="../assets/blocks/step_message1_immediately_and_return.png">
 
-Broadcasts `MESSAGE`, moves all new threads to immediately before the active thread in the [threads array](#threads---arraythread), yields, and makes the first new thread active.
+Broadcasts `MESSAGE`, moves all new threads to immediately before the [active thread](#active-thread---thread) in the [threads array](#threads---arraythread), yields, and makes the first new thread active.
 
 Any preexisting threads with a `when I receive [MESSAGE v]` hat block will be restarted and moved to before the active thread as well.
 
@@ -1126,3 +1135,7 @@ _Type: **Static**_
 [^7]: In practice, this should only be returned during a [predicate step](#this-is-a-predicate-step---boolean) of a non-edge-activated hat block.
 
 [^8]: The current thread may become [orphaned](#thread-is-orphaned---boolean), in which case it is still considered [alive](#thread-is-alive---boolean), but it is not in the [threads array](#threads---arraythread) (by the definition of "orphaned").
+
+[^9]: Due to technical limitations[^10], during [predicate steps](#this-is-a-predicate-step---boolean), if the [current thread](#active-thread---thread) is [orphaned](#thread-is-orphaned---boolean), it is considered dead even though it should be considered alive (as it is not finished running).
+
+[^10]: Specifically, `sequencer.activeThread` is `null` during [predicate steps](#this-is-a-predicate-step---boolean). This means that in blocks that need to check if a thread is [alive](#thread-is-alive---boolean), when checking if the thread in question is the [current thread](#active-thread---thread), that will always be `false`, because there is no way of knowing what the current thread is. This could be resolved by passing the `thread` compiled global as an argument to all relevant functions, but I choose not to do that as then certain functions like `toJSON` that need to check if a thread is alive but do not have access to the `thread` compiled global would not work or show a slightly inaccurate result.
