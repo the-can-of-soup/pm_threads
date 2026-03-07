@@ -54,5 +54,6 @@ Note: if the thread is the current thread and it is orphaned (not in `runtime.th
 ## Restartable and non-restartable hats
 
 - A hat block is restartable if its `shouldRestartExistingThreads` flag is set in `getInfo`; otherwise, it is non-restartable.
+- "Attempting to start a hat" is defined here as a call to `startHats` that would trigger the hat. This includes when edge-activated `Scratch.BlockType.HAT` blocks are started internally in the "frame start" phase or by an extension in the "before execute" phase.
 - When a non-restartable hat is attempted to be started when there is already a thread in the target with the same top block, nothing will happen.
 - When a restartable hat is attempted to be started when there is already a thread in the target with the same top block, the original thread will be replaced by the new thread in `runtime.threads`. This causes the old thread to become orphaned, even if it is currently stepping.
