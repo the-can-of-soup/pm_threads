@@ -4,7 +4,7 @@
 
 ## Thread state table
 
-Note: if the thread is the current thread, `<[THREAD] is alive?>` will be `true`, `<[THREAD] exited naturally?>` will be `false`, and `<[THREAD] was killed?>` will be `false`, regardless of the table.
+Note: if the thread is the current thread and it is orphaned (not in `runtime.threads`), `<[THREAD] is alive?>` will be `true`, `<[THREAD] exited naturally?>` will be `false`, and `<[THREAD] was killed?>` will be `false`, regardless of the table.
 
 | Status is `STATUS_DONE`? | `isKilled` | In `runtime.threads`? | `<[THREAD] is alive?>` | `<[THREAD] exited naturally?>` | `<[THREAD] was killed?>` | Limbo?  |
 |--------------------------|------------|-----------------------|------------------------|--------------------------------|--------------------------|---------|
