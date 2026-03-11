@@ -88,6 +88,8 @@
     customId = 'soupThread';
 
     thread = null;
+    monitorUpToDate = true;
+    lastMonitorState = null;
 
     static serialize(thread) {
       return [];
@@ -144,7 +146,7 @@
       if (this.thread.status === RawThreadType.STATUS_PAUSED) {
         result += `<${ThreadStatus[this.thread.originalStatus]}>`;
       }
-      if (this.isLimbo(false)) {
+      if (this.isLimbo(true)) {
         result += ` (limbo)`;
       }
       if (this.thread.stackClick) {
@@ -220,6 +222,7 @@
     }
 
     toMonitorContent() {
+      this.monitorUpToDate = true;
       return this.toReporterContent();
     }
 
@@ -237,7 +240,61 @@
 
       content += `</span>`;
 
+      this.monitorUpToDate = true;
       return span(content);
+    }
+
+    getNewMonitorState() {
+      if (this.thread === null) {
+        return {
+          id: this.getId(), // "undefined"
+        };
+      }
+
+      return {
+        id: this.getId(),
+        label: this.getLabel(),
+        status: this.thread.status,
+        originalStatus: this.thread.originalStatus,
+        isStackClick: this.thread.stackClick,
+        isMonitor: this.thread.updateMonitor,
+        spriteName: this.thread.target.sprite.name,
+        isLimboLoose: this.isLimbo(true),
+      };
+    }
+
+    static monitorStatesEqual(a, b) {
+      if (a === null || b === null) {
+        return a === null && b === null;
+      }
+
+      return true
+        && a.id === b.id
+        && a.label === b.label
+        && a.status === b.status
+        && a.originalStatus === b.originalStatus
+        && a.isStackClick === b.isStackClick
+        && a.isMonitor === b.isMonitor
+        && a.spriteName === b.spriteName
+        && a.isLimboLoose === b.isLimboLoose
+        && true;
+    }
+
+    get _monitorUpToDate() {
+      // Will return true until the thread monitor should update, after which this
+      // will return false until toMonitorContent or toListItem is called.
+      // Initializes to true.
+
+      // Leave unchanged if already false; waiting for setter.
+      if (!this.monitorUpToDate) {
+        return this.monitorUpToDate;
+      }
+
+      let newMonitorState = this.getNewMonitorState();
+      this.monitorUpToDate = ThreadType.monitorStatesEqual(newMonitorState, this.lastMonitorState);
+      this.lastMonitorState = newMonitorState;
+
+      return this.monitorUpToDate;
     }
 
     jwArrayHandler() {
@@ -595,7 +652,7 @@
      * 
      * @static
      * @param {RawThreadType} threadGlobal - The "thread" global in the compiled context.
-     * @returns {number} - A 0-based index within the threads array.
+     * @returns {number} - A 0-based index within the threads array, or -1 if the current thread index doesn't exist.
      */
     static getCurrentThreadIndex(threadGlobal) {
       // Use "thread" global instead of active thread if not currently in the execution phase;
@@ -631,22 +688,31 @@
         case 'previous index':
         case 'before previous':
           if (!absoluteMode) {
-            INDEX = SoupThreadsUtil.getCurrentThreadIndex(threadGlobal);
-            break;
+            let activeIndex = SoupThreadsUtil.getCurrentThreadIndex(threadGlobal);
+            if (activeIndex !== -1) {
+              INDEX = activeIndex;
+              break;
+            }
           }
 
         case 'active index':
         case 'before active':
           if (!absoluteMode) {
-            INDEX = SoupThreadsUtil.getCurrentThreadIndex(threadGlobal) + 1;
-            break;
+            let activeIndex = SoupThreadsUtil.getCurrentThreadIndex(threadGlobal);
+            if (activeIndex !== -1) {
+              INDEX = activeIndex + 1;
+              break;
+            }
           }
 
         case 'next index':
         case 'after active':
           if (!absoluteMode) {
-            INDEX = SoupThreadsUtil.getCurrentThreadIndex(threadGlobal) + 2;
-            break;
+            let activeIndex = SoupThreadsUtil.getCurrentThreadIndex(threadGlobal);
+            if (activeIndex !== -1) {
+              INDEX = activeIndex + 2;
+              break;
+            }
           }
 
         default:
@@ -2379,11 +2445,13 @@
         currentThreadIdx(node, compiler, imports) {
           let source = '';
 
-          source += `(`;
+          source += `(function(){`;
 
-          source += `vm.SoupThreadsUtil.getCurrentThreadIndex(thread) + 1`;
+          let activeIndex = compiler.localVariables.next();
+          source += `let ${activeIndex} = vm.SoupThreadsUtil.getCurrentThreadIndex(thread);`
+          source += `return activeIndex === -1 ? '' : activeIndex;`;
 
-          source += `)`;
+          source += `})()`; // no semicolon
 
           return new imports.TypedInput(source, imports.TYPE_NUMBER);
         },
