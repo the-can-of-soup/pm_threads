@@ -146,7 +146,7 @@
       if (this.thread.status === RawThreadType.STATUS_PAUSED) {
         result += `<${ThreadStatus[this.thread.originalStatus]}>`;
       }
-      if (this.isLimbo(true)) {
+      if (this.isLimbo(false)) {
         result += ` (limbo)`;
       }
       if (this.thread.stackClick) {
@@ -259,7 +259,7 @@
         isStackClick: this.thread.stackClick,
         isMonitor: this.thread.updateMonitor,
         spriteName: this.thread.target.sprite.name,
-        isLimboLoose: this.isLimbo(true),
+        isLimbo: this.isLimbo(false),
       };
     }
 
