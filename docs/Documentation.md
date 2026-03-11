@@ -21,7 +21,7 @@
 >   - Executable Hat Threads & Predicate Steps
 >   - Full Timeline of a Frame
 > - Threads Extension
->   - Thread Type (reporter bubble formatting, `toString` and `toJSON` behavior, serialization, etc.)
+>   - Thread Type (reporter bubble formatting, `toString` and `toJSON` behavior, serialization, etc.) **(actually probably put this in reference manual)**
 >   - Thread Variables
 >   - Atomic Loop Blocks
 >   - Broadcast Blocks
