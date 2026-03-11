@@ -276,7 +276,7 @@
         && a.isStackClick === b.isStackClick
         && a.isMonitor === b.isMonitor
         && a.spriteName === b.spriteName
-        && a.isLimboLoose === b.isLimboLoose
+        && a.isLimbo === b.isLimbo
         && true;
     }
 
