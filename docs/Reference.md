@@ -264,7 +264,7 @@ Same as [`(status [STATUSFORMAT v] of [THREAD])`](#status-statusformat-v-of-thre
 ### `(info text of [THREAD])` -> String
 <img src="../assets/blocks/info_text_of.png">
 
-Returns user-friendly info text for the thread as shown in the reporter bubble.
+Returns user-friendly info text for the thread as shown in the reporter bubble.[^11]
 
 
 
@@ -374,7 +374,7 @@ To check if a thread is paused in general, use the [`(status [STATUSFORMAT v] of
 ### `<[THREAD] is in limbo?>` -> Boolean
 <img src="../assets/blocks/is_in_limbo.png">
 
-Returns `true` if `THREAD` is in limbo.
+Returns `true` if `THREAD` is in limbo.[^11]
 
 In many cases when a thread is stopped, it will enter limbo. Limbo is when a dead thread's [status](#status-statusformat-v-of-thread---number--string) does not get set to 4 (completed). Some known cases where a thread enters limbo:
   - When <img alt="blue flag" style="height: 1em;" src="https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/flag.svg"> is clicked, all previously running threads will enter limbo.
@@ -1139,3 +1139,5 @@ _Type: **Static**_
 [^9]: Due to technical limitations[^10], during [predicate steps](#this-is-a-predicate-step---boolean), if the [current thread](#active-thread---thread) is [orphaned](#thread-is-orphaned---boolean), it is considered dead even though it should be considered alive (as it is not finished running).
 
 [^10]: Specifically, `sequencer.activeThread` is `null` during [predicate steps](#this-is-a-predicate-step---boolean). This means that in blocks that need to check if a thread is [alive](#thread-is-alive---boolean), when checking if the thread in question is the [current thread](#active-thread---thread), that will always be `false`, because there is no way of knowing what the current thread is. This could be resolved by passing the `thread` compiled global as an argument to all relevant functions, but I choose not to do that as then certain functions like `toJSON` that need to check if a thread is alive but do not have access to the `thread` compiled global would not work or show a slightly inaccurate result.
+
+[^11]: In the [info text](#info-text-of-thread---string) of a thread, specifically in thread reporter bubbles and monitors during [predicate steps](#this-is-a-predicate-step---boolean) (the latter of which I am fairly sure is impossible), the "limbo" text will appear with slightly wrong conditions; if the [current thread](#active-thread---thread) is [orphaned](#thread-is-orphaned---boolean), it should not be considered in [limbo](#thread-is-in-limbo---boolean), because it is considered [alive](#thread-is-alive---boolean). However, in this case, the "limbo" text will appear anyway. As far as I am aware, this should never be an issue in thread reporter bubbles nor monitors. In the first case, when thread reporter bubbles are created, there is no defined current thread, so the issue shouldn't arise. In the second case, I do not think monitor threads can both be orphaned and the current thread simultaneously (but this is untested).
