@@ -228,7 +228,7 @@
 
     toListItem() {
       let label = this.getLabel();
-      
+
       let content = '';
 
       content += `<span style="white-space: nowrap;">`;
@@ -246,6 +246,9 @@
     }
 
     getNewMonitorState() {
+      // When adding or removing keys, also add or remove the corresponding check(s)
+      // in `monitorStatesEqual`.
+
       if (this.thread === null) {
         return {
           id: this.getId(), // "undefined"
@@ -269,6 +272,7 @@
         return a === null && b === null;
       }
 
+      // These keys are defined in `getNewMonitorState` and may be `undefined`.
       return true
         && a.id === b.id
         && a.label === b.label
