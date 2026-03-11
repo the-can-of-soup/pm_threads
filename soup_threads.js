@@ -227,16 +227,17 @@
     }
 
     toListItem() {
+      let label = this.getLabel();
+      
       let content = '';
 
-      content += `<span style="white-space: normal;">`;
+      content += `<span style="white-space: nowrap;">`;
 
-      content += escapeHTML(this.getHeader());
-      let label = this.getLabel();
+      content += `<small style="font-family: Consolas, 'Courier New', monospace;">${escapeHTML(this.getId())}</small>`;
       if (label !== undefined) {
         content += ` <i>${escapeHTML(label)}</i>`;
       }
-      content += ` <small style="font-family: Consolas, 'Courier New', monospace;">${escapeHTML(this.getId())}</small>`;
+      content += ` ${escapeHTML(this.getHeader())}`;
 
       content += `</span>`;
 
