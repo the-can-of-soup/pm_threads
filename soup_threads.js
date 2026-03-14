@@ -10,11 +10,11 @@
 
 // TO-DO
 //
-// - Add "super mutator shenanagins" so that atomic forever loses its end cap if an "escape loop" block is present inside it
 // - Figure out *exactly* what happens when an async block is run
 // - Make compat atomic loops (atomic "for" loops for looping through arrays, objects, sets, etc.)
 // - Yell at @jwklong until they fix the lip that is happening in the `builder` block and the wrongly positioned arrows in dropdown textboxes with custom block shape addon enabled
 // - Make all blocks compiled
+// - Use block switcher API to allow right click switch block addon to switch between vanilla and atomic loops
 
 // NOTES
 //
@@ -1730,6 +1730,20 @@
               ICON: {
                 type: Scratch.ArgumentType.IMAGE,
                 dataURI: LoopIcon,
+              },
+            },
+            mutations: {
+              init(block) {
+                block.nextStatementIsDynamic_ = true;
+                block.hasBreak_ = false;
+              },
+              serialize(block, settings) {
+                // Key names need to be all lowercase for some reason
+                settings.isterminal = block.hasBreak_;
+              },
+              deserialize(block, settings) {
+                // Partially stolen from PenguinMod Block Mutator API documentation
+                block.setNextStatement(settings.isterminal !== false && settings.isterminal !== 'false', 'normal');
               },
             }
           },
