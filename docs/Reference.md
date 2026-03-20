@@ -934,7 +934,7 @@ Enables or disables [warp mode](#warp-mode---boolean) for `SUBSTACK`.
 ### `(target frame time)` -> Number
 <img src="../assets/blocks/target_frame_time.png">
 
-Returns the ideal time in seconds between every frame.
+Returns the ideal time in seconds between the start of every frame.
 
 <details>
   <summary>Internal behavior</summary>
