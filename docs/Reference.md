@@ -1124,7 +1124,7 @@ _Type: **Static**_
     - When `stop (SPRITE v)` is run, all threads running as `SPRITE` are considered killed, even if they caused it.
     - When a clone is deleted, all threads running as that clone are considered killed, even if they caused the deletion.
 
-[^3]: The _contents_ of the loop will **NOT** be run with warp mode (all at once); only the loop itself has this behavior.
+[^3]: The _contents_ of the loop will **NOT** be run with [warp mode](#warp-mode---boolean) (all at once); only the loop itself has this behavior.
 
 [^4]: This block _will_ yield after a loop if the editor is frozen and warp timer is enabled to prevent crashes.
 
