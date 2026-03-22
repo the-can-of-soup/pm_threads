@@ -10,6 +10,7 @@
 
 // TO-DO
 //
+// - EPIC THREADS BLOCK SHAPE
 // - Figure out *exactly* what happens when an async block is run
 // - Make compat atomic loops (atomic "for" loops for looping through arrays, objects, sets, etc.)
 // - Yell at @jwklong until they fix the lip that is happening in the `builder` block and the wrongly positioned arrows in dropdown textboxes with custom block shape addon enabled
@@ -518,6 +519,7 @@
         blockShape: Scratch.BlockShape.ARROW,
         // blockShape: 'soupThreads-wave',
         // blockShape: 'soupThreads-flag',
+        // blockShape: 'soupThreads-thread',
         forceOutputType: 'soupThread',
         disableMonitor: true,
     },
@@ -525,6 +527,7 @@
         shape: Scratch.BlockShape.ARROW,
         // shape: 'soupThreads-wave',
         // shape: 'soupThreads-flag',
+        // shape: 'soupThreads-thread',
         check: ['soupThread'],
         exemptFromNormalization: true,
     }
@@ -767,9 +770,13 @@
      *     The "h 0" and "v 0" commands can be used to begin and end an unscaled section respectively.
      *     All commands in an unscaled section (between "h 0" and "v 0") will not have their coordinates scaled as
      *     the block changes size.
-     *     Finally, the "c 0 <offset> 0 0 0 0" command pattern indicates that the magnitude of the next
-     *     "v" command's parameter should be overwritten by the height of the block minus `offset`. This is intended
-     *     to be used for the line separating the top and bottom of the block so that it stretches vertically.
+     *     Finally, the "c <coefficient> <offset> <scaledOffset> 0 0 0" command pattern indicates that the magnitude
+     *     of the next "v" command's parameter should be overwritten by the height of the block multiplied by
+     *     `coefficient`, then plus `offset`, then plus `scaledOffset` (scaled by the same factor as scaled sections).
+     *     This is intended to be used for the line separating the top and bottom of the block so that it stretches
+     *     vertically.
+     *     Note: if both the `offset` and `scaledOffset` paremeters of the special "c" command pattern are nonzero
+     *     at once, the command will not be fully invisible in the SVG path editor, and will instead create a bulge.
      * @returns {Object} An object containing the `leftPath` and `rightPath` keys; to be merged with the custom
      *     shape definition.
      */
@@ -830,7 +837,9 @@
           let resultCommands = [];
           let unscaledSection = false;
           let separatorLine = false;
+          let separatorLineCoefficient = null;
           let separatorLineOffset = null;
+          let separatorLineScaledOffset = null;
           for (const command of edgeCommands) {
             let specialCommand = true;
 
@@ -841,9 +850,11 @@
             } else if (command[0] === 'v' && command[1] === '0') {
               // "v 0" command; end unscaled section
               unscaledSection = false;
-            } else if (command[0] === 'c' && command[1] === '0' && command[3] === '0' && command[4] === '0' && command[5] === '0' && command[6] === '0') {
-              // "c 0 <offset> 0 0 0 0" command pattern
+            } else if (command[0] === 'c' && command[4] === '0' && command[5] === '0' && command[6] === '0') {
+              // "c <coefficient> <offset> <scaledOffset> 0 0 0" command pattern (separator line)
+              separatorLineCoefficient = Number.parseFloat(command[1]);
               separatorLineOffset = Number.parseFloat(command[2]);
+              separatorLineScaledOffset = Number.parseFloat(command[3]);
               separatorLine = true;
             } else {
               specialCommand = false;
@@ -852,8 +863,9 @@
             // Handle normal commands
             if (!specialCommand) {
               if (command[0] === 'v' && separatorLine) {
+                // Handle separator line
                 let sign = Math.sign(Number.parseFloat(command[1]));
-                resultCommands.push(['v', (sign * (height - separatorLineOffset)).toString()]);
+                resultCommands.push(['v', (sign * (separatorLineCoefficient * height + separatorLineOffset + separatorLineScaledOffset * scalingFactor)).toString()]);
                 separatorLine = false;
               } else if (unscaledSection) {
                 resultCommands.push(command);
@@ -1014,14 +1026,17 @@
 
       const BlockSvg = ScratchBlocks.BlockSvg;
 
+      const threadScaledShapeEdges = SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 h 12 l 0 0 h 3 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -2 v 1.5 h 1 c 0.5 0 1 0.5 1 1 c 0.5 0 -10.5 0 0 0 v 5.5 c 1 0 1 -0.5 2 -0.5 c 2 0 2 1 4 1 c 1 0 1 -0.5 2 -0.5 v 4 c -1 0 -1 0.5 -2 0.5 c -1.9 0 -2 -1 -4 -1 c -1 0 -1 0.5 -2 0.5 c 0.5 0 -10.5 0 0 0 v 5.5 c 0 0.5 -0.5 1 -1 1 h -1 v 1.5 h 2 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -3 l 0 0 h -12 h -16 h -12 l 0 0 h -3 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 2 v -1.5 h -1 c -0.5 0 -1 -0.5 -1 -1 c 1 0 -17 0 0 0 v -15 c 0 -0.5 0.5 -1 1 -1 h 1 v -1.5 h -2 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 3 l 0 0 z');
+      const threadUnscaledShapeEdges = SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 h 12 l 0 0 h 0 h 3 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -2 v 1.5 h 1 c 0.5 0 1 0.5 1 1 v 0 c 0.5 -10.5 0 0 0 0 v 5.5 h 0 c 1 0 1 -0.5 2 -0.5 c 2 0 2 1 4 1 c 1 0 1 -0.5 2 -0.5 v 4 c -1 0 -1 0.5 -2 0.5 c -1.9 0 -2 -1 -4 -1 c -1 0 -1 0.5 -2 0.5 v 0 c 0.5 -10.5 0 0 0 0 v 5.5 h 0 c 0 0.5 -0.5 1 -1 1 h -1 v 1.5 h 2 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -3 v 0 l 0 0 h -12 h -16 h -12 l 0 0 h 0 h -3 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 2 v -1.5 h -1 c -0.5 0 -1 -0.5 -1 -1 v 0 c 1 -17 0 0 0 0 v -15 h 0 c 0 -0.5 0.5 -1 1 -1 h 1 v -1.5 h -2 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 3 v 0 l 0 0 z');
+
       return {
 
         wave: {
-          emptyInputPath: 'm 16 0 h 16 l 0 0 h 0 c 3 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 v 0 c 0 0 0 0 0 0 v 32 h 0 c -4 1 -4 2 -8 2 c -9 0 -9 -4 -16 -4 c -4 0 -4 1 -8 2 v 0 l 0 0 h -16 l 0 0 h 0 c -4 1 -4 2 -8 2 c -8 0 -8 -4 -16 -4 c -4 0 -4 1 -8 2 v 0 c 0 0 0 0 0 0 v -32 h 0 c 4 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 v 0 l 0 0 z',
+          emptyInputPath: 'm 16 0 h 16 l 0 0 h 0 c 3 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 v 0 c 1 0 0 0 0 0 v 32 h 0 c -4 1 -4 2 -8 2 c -9 0 -9 -4 -16 -4 c -4 0 -4 1 -8 2 v 0 l 0 0 h -16 l 0 0 h 0 c -4 1 -4 2 -8 2 c -8 0 -8 -4 -16 -4 c -4 0 -4 1 -8 2 v 0 c 1 0 0 0 0 0 v -32 h 0 c 4 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 v 0 l 0 0 z',
           emptyInputWidth: 20 * BlockSvg.GRID_UNIT,
 
-          // See docstring of generateCustomShapeEdges for info
-          ...SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 l 0 0 h 0 c 3 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 v 0 c 0 0 0 0 0 0 v 32 h 0 c -4 1 -4 2 -8 2 c -9 0 -9 -4 -16 -4 c -4 0 -4 1 -8 2 v 0 l 0 0 h -16 l 0 0 h 0 c -4 1 -4 2 -8 2 c -8 0 -8 -4 -16 -4 c -4 0 -4 1 -8 2 v 0 c 0 0 0 0 0 0 v -32 h 0 c 4 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 v 0 l 0 0 z'),
+          // See docstring of `generateCustomShapeEdges` for info.
+          ...SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 l 0 0 h 0 c 3 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 v 0 c 1 0 0 0 0 0 v 32 h 0 c -4 1 -4 2 -8 2 c -9 0 -9 -4 -16 -4 c -4 0 -4 1 -8 2 v 0 l 0 0 h -16 l 0 0 h 0 c -4 1 -4 2 -8 2 c -8 0 -8 -4 -16 -4 c -4 0 -4 1 -8 2 v 0 c 1 0 0 0 0 0 v -32 h 0 c 4 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 v 0 l 0 0 z'),
 
           // Negative values allow for shape edges to overlap with start and end of block text in reporters
           blockPaddingStart(block, otherShape, firstInput, firstField, row) {
@@ -1050,17 +1065,17 @@
         },
 
         flag: {
-          // emptyInputPath: 'm 16 0 c 3 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 c 0 0 0 0 0 0 v 32 c -4 1 -4 2 -8 2 c -9 0 -9 -4 -16 -4 c -4 0 -4 1 -8 2 l 0 4 c 0 1 -1 2 -2 2 c -1 0 -2 -1 -2 -2 l 0 -4 v -32 c 0 -1 1 -2 2 -2 c 1 0 2 1 2 2 z',
-          // emptyInputPath: 'm 4 0 c 3 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 c 0 0 0 0 0 0 v 28 c -4 1 -4 2 -8 2 c -9 0 -9 -4 -16 -4 c -4 0 -4 1 -8 2 l 0 4 c 0 1 -1 2 -2 2 c -1 0 -2 -1 -2 -2 v -32 c 0 -1 1 -2 2 -2 c 1 0 2 1 2 2 z',
-          emptyInputPath: 'm 4 0 c 3 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 c 0 0 0 0 0 0 v 26 c -4 1 -4 2 -8 2 c -9 0 -9 -4 -16 -4 c -4 0 -4 1 -8 2 l 0 6 c 0 1 -1 2 -2 2 c -1 0 -2 -1 -2 -2 v -32 c 0 -1 1 -2 2 -2 c 1 0 2 1 2 2 z',
+          // emptyInputPath: 'm 16 0 c 3 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 c 1 0 0 0 0 0 v 32 c -4 1 -4 2 -8 2 c -9 0 -9 -4 -16 -4 c -4 0 -4 1 -8 2 l 0 4 c 0 1 -1 2 -2 2 c -1 0 -2 -1 -2 -2 l 0 -4 v -32 c 0 -1 1 -2 2 -2 c 1 0 2 1 2 2 z',
+          // emptyInputPath: 'm 4 0 c 3 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 c 1 0 0 0 0 0 v 28 c -4 1 -4 2 -8 2 c -9 0 -9 -4 -16 -4 c -4 0 -4 1 -8 2 l 0 4 c 0 1 -1 2 -2 2 c -1 0 -2 -1 -2 -2 v -32 c 0 -1 1 -2 2 -2 c 1 0 2 1 2 2 z',
+          emptyInputPath: 'm 4 0 c 3 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 c 1 0 0 0 0 0 v 26 c -4 1 -4 2 -8 2 c -9 0 -9 -4 -16 -4 c -4 0 -4 1 -8 2 l 0 6 c 0 1 -1 2 -2 2 c -1 0 -2 -1 -2 -2 v -32 c 0 -1 1 -2 2 -2 c 1 0 2 1 2 2 z',
           emptyInputWidth: 9 * BlockSvg.GRID_UNIT,
 
-          // See docstring of generateCustomShapeEdges for info
-          // ...SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 l 0 0 h 0 c 3 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 v 0 c 0 0 0 0 0 0 v 32 h 0 c -4 1 -4 2 -8 2 c -9 0 -9 -4 -16 -4 c -4 0 -4 1 -8 2 v 0 l 0 0 h -16 l 0 0 h 0 c -2 0 -2 -2 -4 -2 l 0 6 c 0 1 -1 2 -2 2 c -1 0 -2 -1 -2 -2 l 0 -4 v 0 c 0 0 0 0 0 0 v -32 h 0 c 0 -1 1 -2 2 -2 c 1 0 2 1 2 2 l 0 2 c 2 0 2 -2 4 -2 v 0 l 0 0 z'),
-          // ...SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 l 0 0 h 0 c 3 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 v 0 c 0 0 0 0 0 0 v 32 h 0 c -4 1 -4 2 -8 2 c -9 0 -9 -4 -16 -4 c -4 0 -4 1 -8 2 v 0 l 0 0 h -16 l 0 0 h 0 c -6 0 -6 -8 -12 -8 l 0 8 c 0 1 -1 2 -2 2 c -1 0 -2 -1 -2 -2 v 0 c 0 0 0 0 0 0 v -32 h 0 c 0 -1 1 -2 2 -2 c 1 0 2 1 2 2 l 0 4 c 6 0 6 -4 12 -4 v 0 l 0 0 z'),
-          // ...SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 l 0 0 h 0 c 3 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 v 0 c 0 0 0 0 0 0 v 32 h 0 c -4 1 -4 2 -8 2 c -9 0 -9 -4 -16 -4 c -4 0 -4 1 -8 2 v 0 l 0 0 h -16 l 0 0 h 0 l 0 2 c 0 1 -1 2 -2 2 c -1 0 -2 -1 -2 -2 v 0 v -2 c 0 0 0 0 0 0 v -32 h 0 c 0 -1 1 -2 2 -2 c 1 0 2 1 2 2 v 0 l 0 0 z'),
-          // ...SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 l 0 0 h 0 c 4 1 4 2 8 2 c 4 0 4 -1 8 -2 v 0 c 0 0 0 0 0 0 v 32 h 0 c -4 1 -4 2 -8 2 c -4 0 -4 -1 -8 -2 v 0 l 0 0 h -16 l 0 0 h 0 c -4 -1 -4 -2 -8 -2 c -4 0 -4 1 -8 2 l 0 2 c 0 1 -1 2 -2 2 c -1 0 -2 -1 -2 -2 v -2 v 0 c 0 0 0 0 0 0 v -32 h 0 c 0 -1 1 -2 2 -2 c 1 0 2 1 2 2 c 4 -1 4 -2 8 -2 c 4 0 4 1 8 2 v 0 l 0 0 z'),
-          ...SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 l 0 0 h 0 c 4 1 4 2 8 2 c 4 0 4 -1 8 -2 v 0 c 0 0 0 0 0 0 v 32 h 0 c -4 1 -4 2 -8 2 c -4 0 -4 -1 -8 -2 v 0 l 0 0 h -16 l 0 0 h 0 c -4 -1 -4 -2 -8 -2 c -4 0 -4 1 -8 2 c 0 1 -1 2 -2 2 c -1 0 -2 -1 -2 -2 v 0 c 0 0 0 0 0 0 v -32 h 0 c 0 -1 1 -2 2 -2 c 1 0 2 1 2 2 c 4 -1 4 -2 8 -2 c 4 0 4 1 8 2 v 0 l 0 0 z'),
+          // See docstring of `generateCustomShapeEdges` for info.
+          // ...SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 l 0 0 h 0 c 3 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 v 0 c 1 0 0 0 0 0 v 32 h 0 c -4 1 -4 2 -8 2 c -9 0 -9 -4 -16 -4 c -4 0 -4 1 -8 2 v 0 l 0 0 h -16 l 0 0 h 0 c -2 0 -2 -2 -4 -2 l 0 6 c 0 1 -1 2 -2 2 c -1 0 -2 -1 -2 -2 l 0 -4 v 0 c 1 0 0 0 0 0 v -32 h 0 c 0 -1 1 -2 2 -2 c 1 0 2 1 2 2 l 0 2 c 2 0 2 -2 4 -2 v 0 l 0 0 z'),
+          // ...SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 l 0 0 h 0 c 3 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 v 0 c 1 0 0 0 0 0 v 32 h 0 c -4 1 -4 2 -8 2 c -9 0 -9 -4 -16 -4 c -4 0 -4 1 -8 2 v 0 l 0 0 h -16 l 0 0 h 0 c -6 0 -6 -8 -12 -8 l 0 8 c 0 1 -1 2 -2 2 c -1 0 -2 -1 -2 -2 v 0 c 1 0 0 0 0 0 v -32 h 0 c 0 -1 1 -2 2 -2 c 1 0 2 1 2 2 l 0 4 c 6 0 6 -4 12 -4 v 0 l 0 0 z'),
+          // ...SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 l 0 0 h 0 c 3 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 v 0 c 1 0 0 0 0 0 v 32 h 0 c -4 1 -4 2 -8 2 c -9 0 -9 -4 -16 -4 c -4 0 -4 1 -8 2 v 0 l 0 0 h -16 l 0 0 h 0 l 0 2 c 0 1 -1 2 -2 2 c -1 0 -2 -1 -2 -2 v 0 v -2 c 1 0 0 0 0 0 v -32 h 0 c 0 -1 1 -2 2 -2 c 1 0 2 1 2 2 v 0 l 0 0 z'),
+          // ...SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 l 0 0 h 0 c 4 1 4 2 8 2 c 4 0 4 -1 8 -2 v 0 c 1 0 0 0 0 0 v 32 h 0 c -4 1 -4 2 -8 2 c -4 0 -4 -1 -8 -2 v 0 l 0 0 h -16 l 0 0 h 0 c -4 -1 -4 -2 -8 -2 c -4 0 -4 1 -8 2 l 0 2 c 0 1 -1 2 -2 2 c -1 0 -2 -1 -2 -2 v -2 v 0 c 1 0 0 0 0 0 v -32 h 0 c 0 -1 1 -2 2 -2 c 1 0 2 1 2 2 c 4 -1 4 -2 8 -2 c 4 0 4 1 8 2 v 0 l 0 0 z'),
+          ...SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 l 0 0 h 0 c 4 1 4 2 8 2 c 4 0 4 -1 8 -2 v 0 c 1 0 0 0 0 0 v 32 h 0 c -4 1 -4 2 -8 2 c -4 0 -4 -1 -8 -2 v 0 l 0 0 h -16 l 0 0 h 0 c -4 -1 -4 -2 -8 -2 c -4 0 -4 1 -8 2 c 0 1 -1 2 -2 2 c -1 0 -2 -1 -2 -2 v 0 c 1 0 0 0 0 0 v -32 h 0 c 0 -1 1 -2 2 -2 c 1 0 2 1 2 2 c 4 -1 4 -2 8 -2 c 4 0 4 1 8 2 v 0 l 0 0 z'),
 
           // Negative values allow for shape edges to overlap with start and end of block text in reporters
           blockPaddingStart(block, otherShape, firstInput, firstField, row) {
@@ -1086,7 +1101,46 @@
 
             return padding;
           },
-        }
+        },
+
+        thread: {
+          emptyInputPath: 'm 16 0 h 12 h 3 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -2 v 1.5 h 1 c 0.5 0 1 0.5 1 1 c 0.5 -10.5 0 0 0 0 v 5.5 c 1 0 1 -0.5 2 -0.5 c 2 0 2 1 4 1 c 1 0 1 -0.5 2 -0.5 v 4 c -1 0 -1 0.5 -2 0.5 c -1.9 0 -2 -1 -4 -1 c -1 0 -1 0.5 -2 0.5 v 5.5 c 0 0.5 -0.5 1 -1 1 h -1 v 1.5 h 2 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -3 h -12 h -12 h -3 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 2 v -1.5 h -1 c -0.5 0 -1 -0.5 -1 -1 v -15 c 0 -0.5 0.5 -1 1 -1 h 1 v -1.5 h -2 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 3 z',
+          emptyInputWidth: 16 * BlockSvg.GRID_UNIT,
+
+          leftPath(block) {
+            const edgeWidth = block.height / 2;
+            const height = edgeWidth * 2;
+
+            if (height > 100) {
+              return threadUnscaledShapeEdges.leftPath(block);
+            }
+            return threadScaledShapeEdges.leftPath(block);
+          },
+
+          rightPath(block) {
+            const edgeWidth = block.edgeShapeWidth_;
+            const height = edgeWidth * 2;
+
+            if (height > 100) {
+              return threadUnscaledShapeEdges.rightPath(block);
+            }
+            return threadScaledShapeEdges.rightPath(block);
+          },
+
+          outputLeftPadding(block) {
+            let padding = 0;
+
+            // Patches bug where reporter blocks with branches will move to the right as they get taller.
+            // Copied from here: https://github.com/Dicuo/Iterators-Extension/blob/849b32e5b1566e2710cfbdffa00d24c1a1e4e94a/Iterators%20Extension.js#L503-L506
+            // div got it from jwklong. no clue why this works but lets just roll with it
+            let hasASubstack = block.inputList.some(i => i.type == ScratchBlocks.NEXT_STATEMENT);
+            if (hasASubstack) {
+              padding += -block.height/2 + (5.5 * BlockSvg.GRID_UNIT);
+            }
+
+            return padding;
+          },
+        },
 
       };
     }
@@ -2550,7 +2604,7 @@
           // Update activeThreadIndex if the active thread moved.
           // This is only done if we are in the execution phase, because otherwise `activeThreadIndex` would be uninitialized.
 
-          compiler.source += `if (runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION) {`;
+          source += `if (runtime.soupThreadsRuntimePhase === vm.SoupThreadsUtil.RuntimePhase.EXECUTION) {`;
 
           source += `if (${INDEX} <= runtime.sequencer.activeThreadIndex) {`;
           // The active thread was indirectly moved.
