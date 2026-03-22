@@ -1861,18 +1861,18 @@
             }
           },
 
-          '---',
+          // '---',
 
-          {
-            opcode: 'afterDeath',
-            text: '(not implemented) immediately after [THREAD] dies',
-            blockType: Scratch.BlockType.HAT,
-            isEdgeActivated: false,
-            shouldRestartExistingThreads: false, // While there is already a thread alive from this hat, repeated events will be ignored.
-            arguments: {
-              THREAD: Thread.Argument,
-            }
-          },
+          // {
+          //   opcode: 'afterDeath',
+          //   text: '(not implemented) immediately after [THREAD] dies',
+          //   blockType: Scratch.BlockType.HAT,
+          //   isEdgeActivated: false,
+          //   shouldRestartExistingThreads: false, // While there is already a thread alive from this hat, repeated events will be ignored.
+          //   arguments: {
+          //     THREAD: Thread.Argument,
+          //   }
+          // },
 
           '---',
 
