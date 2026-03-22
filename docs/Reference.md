@@ -68,8 +68,6 @@
     - [`set [VARIABLE] in [THREAD] to [VALUE]` -> Undefined](#set-variable-in-thread-to-value---undefined)
     - [`(variables in [THREAD])` -> Array\[String\]](#variables-in-thread---arraystring)
     - [`delete [VARIABLE] in [THREAD]` -> Undefined](#delete-variable-in-thread---undefined)
-  - Events
-    - **TODO:** `immediately after [THREAD] dies` -> Undefined
   - [Counters](#counters)
     - [`(tick # from init)` -> Number](#tick--from-init---number)
     - [`(frame # from init)` -> Number](#frame--from-init---number)
