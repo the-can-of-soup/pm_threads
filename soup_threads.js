@@ -2521,13 +2521,13 @@
         currentThreadIdx(node, compiler, imports) {
           let source = '';
 
-          source += compiler.script.yields ? `(yield* function*(){` : `(function(){`;
+          source += compiler.script.yields ? `(yield* (function*(){` : `(function(){`;
 
           let activeIndex = compiler.localVariables.next();
           source += `let ${activeIndex} = vm.SoupThreadsUtil.getCurrentThreadIndex(thread);`
           source += `return activeIndex === -1 ? '' : activeIndex;`;
 
-          source += `})()`; // no semicolon
+          source += compiler.script.yields ? `})())` : `})()`; // no semicolon
 
           return new imports.TypedInput(source, imports.TYPE_NUMBER);
         },
@@ -2535,7 +2535,7 @@
         threadAt(node, compiler, imports) {
           let source = '';
 
-          source += compiler.script.yields ? `(yield* function*(){` : `(function(){`;
+          source += compiler.script.yields ? `(yield* (function*(){` : `(function(){`;
 
           let INDEX = compiler.localVariables.next();
           source += `let ${INDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.INDEX).asUnknown()}, thread);`;
@@ -2546,7 +2546,7 @@
 
           source += `return new vm.SoupThreads.Type(runtime.threads[${INDEX}]);`;
 
-          source += `})()`; // no semicolon
+          source += compiler.script.yields ? `})())` : `})()`; // no semicolon
 
           return new imports.TypedInput(source, imports.TYPE_UNKNOWN);
         },
@@ -2636,13 +2636,13 @@
         builder(node, compiler, imports) {
           let source = '';
 
-          source += compiler.script.yields ? `(yield* function*(){` : `(function(){`;
+          source += compiler.script.yields ? `(yield* (function*(){` : `(function(){`;
 
           let compiledBuilderCore = SoupThreadsExtension.compileInfo.js._builderCore(node, compiler, imports);
           source += compiledBuilderCore.source;
           source += `return new vm.SoupThreads.Type(${compiledBuilderCore.rawThread});`;
 
-          source += `})()`; // no semicolon
+          source += compiler.script.yields ? `})())` : `})()`; // no semicolon
 
           return new imports.TypedInput(source, imports.TYPE_UNKNOWN);
         },
