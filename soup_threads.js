@@ -1344,6 +1344,62 @@
           '---',
 
           {
+            opcode: 'getThreadVar',
+            text: 'get [VARIABLE] in [THREAD]',
+            ...ReporterBlock,
+            allowDropAnywhere: true,
+            arguments: {
+              VARIABLE: {
+                type: Scratch.ArgumentType.STRING,
+                exemptFromNormalization: true,
+                defaultValue: 'foo',
+              },
+              THREAD: Thread.Argument,
+            }
+          },
+          {
+            opcode: 'setThreadVar',
+            text: 'set [VARIABLE] in [THREAD] to [VALUE]',
+            ...CommandBlock,
+            arguments: {
+              VARIABLE: {
+                type: Scratch.ArgumentType.STRING,
+                exemptFromNormalization: true,
+                defaultValue: 'foo',
+              },
+              VALUE: {
+                type: Scratch.ArgumentType.STRING,
+                exemptFromNormalization: true,
+                defaultValue: 'bar',
+              },
+              THREAD: Thread.Argument,
+            }
+          },
+          {
+            opcode: 'getThreadVarNames',
+            text: 'variables in [THREAD]',
+            ...jwArray.Block,
+            arguments: {
+              THREAD: Thread.Argument,
+            }
+          },
+          {
+            opcode: 'deleteThreadVar',
+            text: 'delete [VARIABLE] in [THREAD]',
+            ...CommandBlock,
+            arguments: {
+              VARIABLE: {
+                type: Scratch.ArgumentType.STRING,
+                exemptFromNormalization: true,
+                defaultValue: 'foo',
+              },
+              THREAD: Thread.Argument,
+            }
+          },
+
+          '---',
+
+          {
             opcode: 'isThread',
             text: '[VALUE] is a thread?',
             ...BooleanBlock,
@@ -1802,62 +1858,6 @@
                 // Partially stolen from PenguinMod Block Mutator API documentation
                 block.setNextStatement(settings.isterminal !== false && settings.isterminal !== 'false', 'normal');
               },
-            }
-          },
-
-          '---',
-
-          {
-            opcode: 'getThreadVar',
-            text: 'get [VARIABLE] in [THREAD]',
-            ...ReporterBlock,
-            allowDropAnywhere: true,
-            arguments: {
-              VARIABLE: {
-                type: Scratch.ArgumentType.STRING,
-                exemptFromNormalization: true,
-                defaultValue: 'foo',
-              },
-              THREAD: Thread.Argument,
-            }
-          },
-          {
-            opcode: 'setThreadVar',
-            text: 'set [VARIABLE] in [THREAD] to [VALUE]',
-            ...CommandBlock,
-            arguments: {
-              VARIABLE: {
-                type: Scratch.ArgumentType.STRING,
-                exemptFromNormalization: true,
-                defaultValue: 'foo',
-              },
-              VALUE: {
-                type: Scratch.ArgumentType.STRING,
-                exemptFromNormalization: true,
-                defaultValue: 'bar',
-              },
-              THREAD: Thread.Argument,
-            }
-          },
-          {
-            opcode: 'getThreadVarNames',
-            text: 'variables in [THREAD]',
-            ...jwArray.Block,
-            arguments: {
-              THREAD: Thread.Argument,
-            }
-          },
-          {
-            opcode: 'deleteThreadVar',
-            text: 'delete [VARIABLE] in [THREAD]',
-            ...CommandBlock,
-            arguments: {
-              VARIABLE: {
-                type: Scratch.ArgumentType.STRING,
-                exemptFromNormalization: true,
-                defaultValue: 'foo',
-              },
-              THREAD: Thread.Argument,
             }
           },
 
@@ -3233,6 +3233,55 @@
 
 
 
+    getThreadVar({THREAD, VARIABLE}, util) {
+      THREAD = ThreadType.toThread(THREAD);
+      VARIABLE = Scratch.Cast.toString(VARIABLE);
+
+      if (THREAD.thread === null) {
+        return '';
+      }
+
+      let variables = THREAD.thread.soupThreadVariables;
+      return variables.has(VARIABLE) ? variables.get(VARIABLE) : '';
+    }
+
+    setThreadVar({THREAD, VARIABLE, VALUE}, util) {
+      THREAD = ThreadType.toThread(THREAD);
+      VARIABLE = Scratch.Cast.toString(VARIABLE);
+
+      if (THREAD.thread === null) {
+        return;
+      }
+
+      let variables = THREAD.thread.soupThreadVariables;
+      variables.set(VARIABLE, VALUE);
+    }
+
+    getThreadVarNames({THREAD}, util) {
+      THREAD = ThreadType.toThread(THREAD);
+
+      if (THREAD.thread === null) {
+        return new jwArray.Type([]);
+      }
+
+      let variables = THREAD.thread.soupThreadVariables;
+      return new jwArray.Type(Array.from(variables.keys()));
+    }
+
+    deleteThreadVar({THREAD, VARIABLE}, util) {
+      THREAD = ThreadType.toThread(THREAD);
+      VARIABLE = Scratch.Cast.toString(VARIABLE);
+
+      if (THREAD.thread === null) {
+        return;
+      }
+
+      let variables = THREAD.thread.soupThreadVariables;
+      variables.delete(VARIABLE);
+    }
+
+
+
     isThread({VALUE}, util) {
       return VALUE instanceof ThreadType;
     }
@@ -3355,55 +3404,6 @@
         .filter((rawThread) => (rawThread.target.id === TARGET))
         .map((rawThread) => (new ThreadType(rawThread)))
       );
-    }
-
-
-
-    getThreadVar({THREAD, VARIABLE}, util) {
-      THREAD = ThreadType.toThread(THREAD);
-      VARIABLE = Scratch.Cast.toString(VARIABLE);
-
-      if (THREAD.thread === null) {
-        return '';
-      }
-
-      let variables = THREAD.thread.soupThreadVariables;
-      return variables.has(VARIABLE) ? variables.get(VARIABLE) : '';
-    }
-
-    setThreadVar({THREAD, VARIABLE, VALUE}, util) {
-      THREAD = ThreadType.toThread(THREAD);
-      VARIABLE = Scratch.Cast.toString(VARIABLE);
-
-      if (THREAD.thread === null) {
-        return;
-      }
-
-      let variables = THREAD.thread.soupThreadVariables;
-      variables.set(VARIABLE, VALUE);
-    }
-
-    getThreadVarNames({THREAD}, util) {
-      THREAD = ThreadType.toThread(THREAD);
-
-      if (THREAD.thread === null) {
-        return new jwArray.Type([]);
-      }
-
-      let variables = THREAD.thread.soupThreadVariables;
-      return new jwArray.Type(Array.from(variables.keys()));
-    }
-
-    deleteThreadVar({THREAD, VARIABLE}, util) {
-      THREAD = ThreadType.toThread(THREAD);
-      VARIABLE = Scratch.Cast.toString(VARIABLE);
-
-      if (THREAD.thread === null) {
-        return;
-      }
-
-      let variables = THREAD.thread.soupThreadVariables;
-      variables.delete(VARIABLE);
     }
 
 
