@@ -21,6 +21,11 @@
     - [`(status [STATUSFORMAT v] of [THREAD])` -> Number | String](#status-statusformat-v-of-thread---number--string)
     - [`(unpaused status [STATUSFORMAT v] of [THREAD])` -> Number | String](#unpaused-status-statusformat-v-of-thread---number--string)
     - [`(info text of [THREAD])` -> String](#info-text-of-thread---string)
+  - [Thread Variables](#thread-variables)
+    - [`(get [VARIABLE] in [THREAD])` -> Any](#get-variable-in-thread---any)
+    - [`set [VARIABLE] in [THREAD] to [VALUE]` -> Undefined](#set-variable-in-thread-to-value---undefined)
+    - [`(variables in [THREAD])` -> Array\[String\]](#variables-in-thread---arraystring)
+    - [`delete [VARIABLE] in [THREAD]` -> Undefined](#delete-variable-in-thread---undefined)
   - [Boolean Thread Operators](#boolean-thread-operators)
     - [`<[VALUE] is a thread?>` -> Boolean](#value-is-a-thread---boolean)
     - [`<[THREADONE] is [THREADTWO]>` -> Boolean](#threadone-is-threadtwo---boolean)
@@ -63,11 +68,6 @@
     - [`repeat until [CONDITION] without yielding {SUBSTACK}` -> Undefined](#repeat-until-condition-without-yielding-substack---undefined)
     - [`while [CONDITION] without yielding {SUBSTACK}` -> Undefined](#while-condition-without-yielding-substack---undefined)
     - [`forever without yielding {SUBSTACK}` -> Undefined](#forever-without-yielding-substack---undefined)
-  - [Thread Variables](#thread-variables)
-    - [`(get [VARIABLE] in [THREAD])` -> Any](#get-variable-in-thread---any)
-    - [`set [VARIABLE] in [THREAD] to [VALUE]` -> Undefined](#set-variable-in-thread-to-value---undefined)
-    - [`(variables in [THREAD])` -> Array\[String\]](#variables-in-thread---arraystring)
-    - [`delete [VARIABLE] in [THREAD]` -> Undefined](#delete-variable-in-thread---undefined)
   - [Counters](#counters)
     - [`(tick # from init)` -> Number](#tick--from-init---number)
     - [`(frame # from init)` -> Number](#frame--from-init---number)
@@ -263,6 +263,62 @@ Same as [`(status [STATUSFORMAT v] of [THREAD])`](#status-statusformat-v-of-thre
 <img src="../assets/blocks/info_text_of.png">
 
 Returns user-friendly info text for the thread as shown in the reporter bubble.[^11]
+
+
+
+## Thread Variables
+
+> [!NOTE]
+>
+> The variable name `__label__` is special. If this variable exists in a thread, that thread's reporter bubble will show the stringified contents of it italicised next to other info. This is meant to be used to add human-readable identifiers or notes to a thread, which will then be seen in the editor or when debugging.
+>
+> Other than visuals in the editor, this variable can be used entirely as a normal variable, and even hold non-string types; this is just not recommended.
+
+### `(get [VARIABLE] in [THREAD])` -> Any
+<img src="../assets/blocks/get_foo_in.png">
+
+Gets the thread variable named `VARIABLE` from `THREAD`. These thread variables are unique to this extension and are not used by the PenguinMod engine.
+
+The null thread cannot store thread variables.
+
+<details>
+  <summary>Internal behavior</summary>
+
+  Gets the `VARIABLE` key from the object at the `soupThreadVariables` key of the raw thread.
+</details>
+
+### `set [VARIABLE] in [THREAD] to [VALUE]` -> Undefined
+<img src="../assets/blocks/set_foo_in_to_bar.png">
+
+Sets the [thread variable](#get-variable-in-thread---any) named `VARIABLE` in `THREAD` to `VALUE`.
+
+<details>
+  <summary>Internal behavior</summary>
+
+  Sets the `VARIABLE` key to `VALUE` in the object at the `soupThreadVariables` key of the raw thread.
+</details>
+
+### `(variables in [THREAD])` -> Array\[String\]
+<img src="../assets/blocks/variables_in.png">
+
+Returns an array containing the name of every [thread variable](#get-variable-in-thread---any) stored in `THREAD`.
+
+<details>
+  <summary>Internal behavior</summary>
+
+  Gets the list of keys in the object at the `soupThreadVariables` key of the raw thread.
+</details>
+
+### `delete [VARIABLE] in [THREAD]` -> Undefined
+<img src="../assets/blocks/delete_foo_in.png">
+
+Deletes the [thread variable](#get-variable-in-thread---any) named `VARIABLE` from `THREAD`.
+
+<details>
+  <summary>Internal behavior</summary>
+
+  Deletes the `VARIABLE` key from the object at the `soupThreadVariables` key of the raw thread.
+</details>
 
 
 
@@ -722,62 +778,6 @@ Repeatedly executes `SUBSTACK` until `CONDITION` is falsy. The difference betwee
 <img src="../assets/blocks/forever_without_yielding.png">
 
 Repeatedly executes `SUBSTACK` forever. The difference between this block and the normal forever block is that this block **does not yield after every loop**.[^3][^4]
-
-
-
-## Thread Variables
-
-> [!NOTE]
->
-> The variable name `__label__` is special. If this variable exists in a thread, that thread's reporter bubble will show the stringified contents of it italicised next to other info. This is meant to be used to add human-readable identifiers or notes to a thread, which will then be seen in the editor or when debugging.
->
-> Other than visuals in the editor, this variable can be used entirely as a normal variable, and even hold non-string types; this is just not recommended.
-
-### `(get [VARIABLE] in [THREAD])` -> Any
-<img src="../assets/blocks/get_foo_in.png">
-
-Gets the thread variable named `VARIABLE` from `THREAD`. These thread variables are unique to this extension and are not used by the PenguinMod engine.
-
-The null thread cannot store thread variables.
-
-<details>
-  <summary>Internal behavior</summary>
-
-  Gets the `VARIABLE` key from the object at the `soupThreadVariables` key of the raw thread.
-</details>
-
-### `set [VARIABLE] in [THREAD] to [VALUE]` -> Undefined
-<img src="../assets/blocks/set_foo_in_to_bar.png">
-
-Sets the [thread variable](#get-variable-in-thread---any) named `VARIABLE` in `THREAD` to `VALUE`.
-
-<details>
-  <summary>Internal behavior</summary>
-
-  Sets the `VARIABLE` key to `VALUE` in the object at the `soupThreadVariables` key of the raw thread.
-</details>
-
-### `(variables in [THREAD])` -> Array\[String\]
-<img src="../assets/blocks/variables_in.png">
-
-Returns an array containing the name of every [thread variable](#get-variable-in-thread---any) stored in `THREAD`.
-
-<details>
-  <summary>Internal behavior</summary>
-
-  Gets the list of keys in the object at the `soupThreadVariables` key of the raw thread.
-</details>
-
-### `delete [VARIABLE] in [THREAD]` -> Undefined
-<img src="../assets/blocks/delete_foo_in.png">
-
-Deletes the [thread variable](#get-variable-in-thread---any) named `VARIABLE` from `THREAD`.
-
-<details>
-  <summary>Internal behavior</summary>
-
-  Deletes the `VARIABLE` key from the object at the `soupThreadVariables` key of the raw thread.
-</details>
 
 
 
