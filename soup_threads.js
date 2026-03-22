@@ -1027,7 +1027,10 @@
       const BlockSvg = ScratchBlocks.BlockSvg;
 
       const threadScaledShapeEdges = SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 h 12 l 0 0 h 3 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -2 v 1.5 h 1 c 0.5 0 1 0.5 1 1 c 0.5 0 -10.5 0 0 0 v 5.5 c 1 0 1 -0.5 2 -0.5 c 2 0 2 1 4 1 c 1 0 1 -0.5 2 -0.5 v 4 c -1 0 -1 0.5 -2 0.5 c -1.9 0 -2 -1 -4 -1 c -1 0 -1 0.5 -2 0.5 c 0.5 0 -10.5 0 0 0 v 5.5 c 0 0.5 -0.5 1 -1 1 h -1 v 1.5 h 2 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -3 l 0 0 h -12 h -16 h -12 l 0 0 h -3 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 2 v -1.5 h -1 c -0.5 0 -1 -0.5 -1 -1 c 1 0 -17 0 0 0 v -15 c 0 -0.5 0.5 -1 1 -1 h 1 v -1.5 h -2 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 3 l 0 0 z');
-      const threadUnscaledShapeEdges = SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 h 12 l 0 0 h 0 h 3 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -2 v 1.5 h 1 c 0.5 0 1 0.5 1 1 v 0 c 0.5 -10.5 0 0 0 0 v 5.5 h 0 c 1 0 1 -0.5 2 -0.5 c 2 0 2 1 4 1 c 1 0 1 -0.5 2 -0.5 v 4 c -1 0 -1 0.5 -2 0.5 c -1.9 0 -2 -1 -4 -1 c -1 0 -1 0.5 -2 0.5 v 0 c 0.5 -10.5 0 0 0 0 v 5.5 h 0 c 0 0.5 -0.5 1 -1 1 h -1 v 1.5 h 2 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -3 v 0 l 0 0 h -12 h -16 h -12 l 0 0 h 0 h -3 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 2 v -1.5 h -1 c -0.5 0 -1 -0.5 -1 -1 v 0 c 1 -17 0 0 0 0 v -15 h 0 c 0 -0.5 0.5 -1 1 -1 h 1 v -1.5 h -2 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 3 v 0 l 0 0 z');
+      // const threadUnscaledShapeEdges = SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 h 12 l 0 0 h 0 h 3 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -2 v 1.5 h 1 c 0.5 0 1 0.5 1 1 v 0 c 0.5 -10.5 0 0 0 0 v 5.5 h 0 c 1 0 1 -0.5 2 -0.5 c 2 0 2 1 4 1 c 1 0 1 -0.5 2 -0.5 v 4 c -1 0 -1 0.5 -2 0.5 c -1.9 0 -2 -1 -4 -1 c -1 0 -1 0.5 -2 0.5 v 0 c 0.5 -10.5 0 0 0 0 v 5.5 h 0 c 0 0.5 -0.5 1 -1 1 h -1 v 1.5 h 2 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -3 v 0 l 0 0 h -12 h -16 h -12 l 0 0 h 0 h -3 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 2 v -1.5 h -1 c -0.5 0 -1 -0.5 -1 -1 v 0 c 1 -17 0 0 0 0 v -15 h 0 c 0 -0.5 0.5 -1 1 -1 h 1 v -1.5 h -2 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 3 v 0 l 0 0 z');
+      const threadUnscaledShapeEdges = SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 h 12 l 0 0 h 0 h 9 c 1.5 0 3 1.5 3 3 v 12 c 0 1.5 -1.5 3 -3 3 h -6 v 4.5 h 3 c 1.5 0 3 1.5 3 3 v 0 c 0.5 -31.5 0 0 0 0 v 16.5 h 0 c 3 0 3 -1.5 6 -1.5 c 6 0 6 3 12 3 c 3 0 3 -1.5 6 -1.5 v 12 c -3 0 -3 1.5 -6 1.5 c -6 0 -6 -3 -12 -3 c -3 0 -3 1.5 -6 1.5 v 0 c 0.5 -31.5 0 0 0 0 v 16.5 h 0 c 0 1.5 -1.5 3 -3 3 h -3 v 4.5 h 6 c 1.5 0 3 1.5 3 3 v 12 c 0 1.5 -1.5 3 -3 3 h -9 v 0 l 0 0 h -12 h -16 h -12 l 0 0 h 0 h -9 c -1.5 0 -3 -1.5 -3 -3 v -12 c 0 -1.5 1.5 -3 3 -3 h 6 v -4.5 h -3 c -1.5 0 -3 -1.5 -3 -3 v 0 c 1 -51 0 0 0 0 v -45 h 0 c 0 -1.5 1.5 -3 3 -3 h 3 v -4.5 h -6 c -1.5 0 -3 -1.5 -3 -3 v -12 c 0 -1.5 1.5 -3 3 -3 h 9 v 0 l 0 0 z');
+      const threadShapeMaxScaledHeight = 96;
+      const threadArgumentShapePath = 'm 16 0 h 12 h 3 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -2 v 1.5 h 1 c 0.5 0 1 0.5 1 1 c 0.5 -10.5 0 0 0 0 v 5.5 c 1 0 1 -0.5 2 -0.5 c 2 0 2 1 4 1 c 1 0 1 -0.5 2 -0.5 v 4 c -1 0 -1 0.5 -2 0.5 c -1.9 0 -2 -1 -4 -1 c -1 0 -1 0.5 -2 0.5 v 5.5 c 0 0.5 -0.5 1 -1 1 h -1 v 1.5 h 2 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -3 h -12 h -12 h -3 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 2 v -1.5 h -1 c -0.5 0 -1 -0.5 -1 -1 v -15 c 0 -0.5 0.5 -1 1 -1 h 1 v -1.5 h -2 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 3 z';
 
       return {
 
@@ -1104,14 +1107,14 @@
         },
 
         thread: {
-          emptyInputPath: 'm 16 0 h 12 h 3 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -2 v 1.5 h 1 c 0.5 0 1 0.5 1 1 c 0.5 -10.5 0 0 0 0 v 5.5 c 1 0 1 -0.5 2 -0.5 c 2 0 2 1 4 1 c 1 0 1 -0.5 2 -0.5 v 4 c -1 0 -1 0.5 -2 0.5 c -1.9 0 -2 -1 -4 -1 c -1 0 -1 0.5 -2 0.5 v 5.5 c 0 0.5 -0.5 1 -1 1 h -1 v 1.5 h 2 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -3 h -12 h -12 h -3 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 2 v -1.5 h -1 c -0.5 0 -1 -0.5 -1 -1 v -15 c 0 -0.5 0.5 -1 1 -1 h 1 v -1.5 h -2 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 3 z',
+          emptyInputPath: threadArgumentShapePath,
           emptyInputWidth: 16 * BlockSvg.GRID_UNIT,
 
           leftPath(block) {
             const edgeWidth = block.height / 2;
             const height = edgeWidth * 2;
 
-            if (height > 100) {
+            if (height > threadShapeMaxScaledHeight) {
               return threadUnscaledShapeEdges.leftPath(block);
             }
             return threadScaledShapeEdges.leftPath(block);
@@ -1121,7 +1124,7 @@
             const edgeWidth = block.edgeShapeWidth_;
             const height = edgeWidth * 2;
 
-            if (height > 100) {
+            if (height > threadShapeMaxScaledHeight) {
               return threadUnscaledShapeEdges.rightPath(block);
             }
             return threadScaledShapeEdges.rightPath(block);
@@ -2518,7 +2521,7 @@
         currentThreadIdx(node, compiler, imports) {
           let source = '';
 
-          source += `(function(){`;
+          source += compiler.script.yields ? `(yield* function*(){` : `(function(){`;
 
           let activeIndex = compiler.localVariables.next();
           source += `let ${activeIndex} = vm.SoupThreadsUtil.getCurrentThreadIndex(thread);`
@@ -2532,7 +2535,7 @@
         threadAt(node, compiler, imports) {
           let source = '';
 
-          source += `(function(){`;
+          source += compiler.script.yields ? `(yield* function*(){` : `(function(){`;
 
           let INDEX = compiler.localVariables.next();
           source += `let ${INDEX} = vm.SoupThreadsUtil.handleIndexInput(${compiler.descendInput(node.args.INDEX).asUnknown()}, thread);`;
@@ -2633,7 +2636,7 @@
         builder(node, compiler, imports) {
           let source = '';
 
-          source += `(function(){`;
+          source += compiler.script.yields ? `(yield* function*(){` : `(function(){`;
 
           let compiledBuilderCore = SoupThreadsExtension.compileInfo.js._builderCore(node, compiler, imports);
           source += compiledBuilderCore.source;
@@ -3108,7 +3111,7 @@
         getWarpMode(node, compiler, imports) {
           let source = '';
 
-          source += `${compiler.isWarp}`;
+          source += `${JSON.stringify(compiler.isWarp)}`;
 
           return new imports.TypedInput(source, imports.TYPE_BOOLEAN);
         },
