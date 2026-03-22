@@ -901,7 +901,7 @@ Returns the current "runtime phase" formatted as specified by `STATUSFORMAT`. He
 ### `<warp mode>` -> Boolean
 <img src="../assets/blocks/warp_mode.png">
 
-Returns `true` if warp mode is enabled. When warp mode is enabled, **all yields are ignored**.
+Returns `true` if warp mode is enabled. When warp mode is enabled, **all vanilla yields are ignored**[^12].
 
 Some cases where warp mode is enabled:
 - Code inside an `all at once` block
@@ -1141,3 +1141,5 @@ _Type: **Static**_
 [^10]: Specifically, `sequencer.activeThread` is `null` during [predicate steps](#this-is-a-predicate-step---boolean). This means that in blocks that need to check if a thread is [alive](#thread-is-alive---boolean), when checking if the thread in question is the [current thread](#active-thread---thread), that will always be `false`, because there is no way of knowing what the current thread is. This could be resolved by passing the `thread` compiled global as an argument to all relevant functions, but I choose not to do that as then certain functions like `toJSON` that need to check if a thread is alive but do not have access to the `thread` compiled global would not work or show a slightly inaccurate result.
 
 [^11]: In the [info text](#info-text-of-thread---string) of a thread, specifically in thread reporter bubbles and monitors during [predicate steps](#this-is-a-predicate-step---boolean) (the latter of which I am fairly sure is impossible), the "limbo" text will appear with slightly wrong conditions; if the [current thread](#active-thread---thread) is [orphaned](#thread-is-orphaned---boolean), it should not be considered in [limbo](#thread-is-in-limbo---boolean), because it is considered [alive](#thread-is-alive---boolean). However, in this case, the "limbo" text will appear anyway. As far as I am aware, this should never be an issue in thread reporter bubbles nor monitors. In the first case, when thread reporter bubbles are created, there is no defined current thread, so the issue shouldn't arise. In the second case, I do not think monitor threads can both be orphaned and the current thread simultaneously (but this is untested).
+
+[^12]: Yield blocks in this extension and also possibly in other extensions will not have their yields suppressed. However, you can be confident that all yields in vanilla (non-extension) blocks are suppressed.
