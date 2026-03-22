@@ -7,7 +7,7 @@ URL: [`https://raw.githubusercontent.com/the-can-of-soup/pm_threads/refs/heads/m
 
 > [!IMPORTANT]
 >
-> This extension is still in beta. Breaking changes may be introduced at any point. The following have not been finished:
+> This extension is still in beta. Though I will avoid it as much as possible, breaking changes may still be introduced. Also, expect bugs. The following have not been finished:
 > - Code for one or more blocks
 > - Thumbnail (?)
 > - Icon (?)
