@@ -1142,4 +1142,4 @@ _Type: **Static**_
 
 [^12]: Yield blocks in this extension and also possibly in other extensions will not have their yields suppressed. However, you can be confident that all yields in vanilla (non-extension) blocks are suppressed.
 
-[^13]: This has yet to be tested.
+[^13]: This is currently unconfirmed.
