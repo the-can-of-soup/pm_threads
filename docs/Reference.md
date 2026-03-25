@@ -238,7 +238,7 @@ Returns the current status code of `THREAD`, formatted as specified by `STATUSFO
 | 2        | Yielded              | `STATUS_YIELD`        | Only used when the compiler is disabled, and disabling the compiler is a deprecated feature.                                                        |
 | 3        | Yielded for one tick | `STATUS_YIELD_TICK`   | Behavior unknown                                                                                                                                    |
 | 4        | Completed            | `STATUS_DONE`         | The thread is "dead", i.e. it will never run code again.[^1]                                                                                        |
-| 5        | Paused               | `STATUS_PAUSED`       | The thread is paused either from the [`pause [THREAD]`](#pause-thread---undefined) block, the pause button, or another source, and will be skipped. |
+| 5        | Paused               | `STATUS_PAUSED`       | The thread is paused either from the [`pause [THREAD]`](#pause-thread---undefined) block, the <img alt="pause" style="height: 1em;" src="https://raw.githubusercontent.com/PenguinMod/PenguinMod-Home/refs/heads/main/static/stage_controls/gradient/pause.svg"> button, or another source, and will be skipped. |
 
 <details>
   <summary>Internal behavior</summary>
