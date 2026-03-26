@@ -11,7 +11,7 @@
 // TO-DO
 //
 // - EPIC THREADS BLOCK SHAPE
-// - Figure out *exactly* what happens when an async block is run
+// - Test async blocks to make sure what I have written in the reference manual about `STATUS_PROMISE_WAIT` is correct
 // - Make compat atomic loops (atomic "for" loops for looping through arrays, objects, sets, etc.)
 // - Yell at @jwklong until they fix the lip that is happening in the `builder` block and the wrongly positioned arrows in dropdown textboxes with custom block shape addon enabled
 // - Make all blocks compiled
@@ -562,7 +562,7 @@
     [RawThreadType.STATUS_RUNNING]: 'Running',
     [RawThreadType.STATUS_PROMISE_WAIT]: 'Waiting for promise',
     [RawThreadType.STATUS_YIELD]: 'Yielded',
-    [RawThreadType.STATUS_YIELD_TICK]: 'Yielded for one tick',
+    [RawThreadType.STATUS_YIELD_TICK]: 'Waiting for frame',
     [RawThreadType.STATUS_DONE]: 'Completed',
     [RawThreadType.STATUS_PAUSED]: 'Paused',
   };
@@ -2524,8 +2524,8 @@
           source += compiler.script.yields ? `(yield* (function*(){` : `(function(){`;
 
           let activeIndex = compiler.localVariables.next();
-          source += `let ${activeIndex} = vm.SoupThreadsUtil.getCurrentThreadIndex(thread);`
-          source += `return activeIndex === -1 ? '' : activeIndex;`;
+          source += `let ${activeIndex} = vm.SoupThreadsUtil.getCurrentThreadIndex(thread);`;
+          source += `return ${activeIndex} === -1 ? '' : ${activeIndex};`;
 
           source += compiler.script.yields ? `})())` : `})()`; // no semicolon
 
