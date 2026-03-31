@@ -41,4 +41,4 @@
 
 ### Threads & Stacks
 
-<video src="../assets/Threads%20%26%20Stacks.mp4" width="480" height="360" controls>
+https://github.com/the-can-of-soup/pm_threads/raw/refs/heads/main/assets/Threads%20&%20Stacks.mp4
