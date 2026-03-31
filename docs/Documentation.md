@@ -13,7 +13,7 @@
 
 > [!NOTE]
 >
-> TO-DO: Write this page and at least these sections:
+> TO-DO: Write these sections:
 > - General
 >   - Sequencer Basics (threads array, steps vs ticks vs frames, etc.)
 >   - Redraw Conditions (work timer, graphics updated, turbo mode, etc.)
