@@ -434,8 +434,8 @@
       //
       // *This is false if this is a predicate step.
 
-      let orphaned;
-      return (rawThread.status !== RawThreadType.STATUS_DONE && !(orphaned = ThreadType.isOrphaned(rawThread)))
+      const orphaned = ThreadType.isOrphaned(rawThread);
+      return (rawThread.status !== RawThreadType.STATUS_DONE && !orphaned)
         || (!orphanedCurrentThreadIsNotAlive && orphaned && rawThread === runtime.sequencer.activeThread);
     }
 
