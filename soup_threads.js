@@ -16,6 +16,7 @@
 // - Yell at @jwklong until they fix the lip that is happening in the `builder` block and the wrongly positioned arrows in dropdown textboxes with custom block shape addon enabled
 // - Make all blocks compiled
 // - Use block switcher API to allow right click switch block addon to switch between vanilla and atomic loops
+// - Add step counter blocks
 
 // NOTES
 //
@@ -47,8 +48,8 @@
   const LoopIcon = './static/blocks-media/repeat.svg';
   const BlueFlagIcon = './static/blocks-media/blue-flag.svg';
 
-  function span(text) {
-    // Copied from jwArray, jwVector
+  function spanUnsafe(text) {
+    // Copied from jwArray/jwVector under the name "span"
 
     let el = document.createElement('span');
     el.innerHTML = text;
@@ -219,7 +220,7 @@
 
       content += `</span>`;
 
-      return span(content);
+      return spanUnsafe(content);
     }
 
     toMonitorContent() {
@@ -243,7 +244,7 @@
       content += `</span>`;
 
       this.monitorUpToDate = true;
-      return span(content);
+      return spanUnsafe(content);
     }
 
     getNewMonitorState() {
@@ -288,10 +289,10 @@
 
     get _monitorUpToDate() {
       // Will return true until the thread monitor should update, after which this
-      // will return false until toMonitorContent or toListItem is called.
+      // will return false until `toMonitorContent` or `toListItem` is called.
       // Initializes to true.
 
-      // Leave unchanged if already false; waiting for setter.
+      // Leave unchanged if already false; waiting for `toMonitorContent` or `toListItem`.
       if (!this.monitorUpToDate) {
         return this.monitorUpToDate;
       }
@@ -516,18 +517,18 @@
     Type: ThreadType,
     Block: {
         blockType: Scratch.BlockType.REPORTER,
-        blockShape: Scratch.BlockShape.ARROW,
+        // blockShape: Scratch.BlockShape.ARROW,
         // blockShape: 'soupThreads-wave',
         // blockShape: 'soupThreads-flag',
-        // blockShape: 'soupThreads-thread',
+        blockShape: 'soupThreads-thread',
         forceOutputType: 'soupThread',
         disableMonitor: true,
     },
     Argument: {
-        shape: Scratch.BlockShape.ARROW,
+        // shape: Scratch.BlockShape.ARROW,
         // shape: 'soupThreads-wave',
         // shape: 'soupThreads-flag',
-        // shape: 'soupThreads-thread',
+        shape: 'soupThreads-thread',
         check: ['soupThread'],
         exemptFromNormalization: true,
     }
@@ -761,6 +762,18 @@
     }
 
     /**
+     * Checks if the block contains a branch in functions of a custom block shape definition.
+     * 
+     * @static
+     * @param {Object} ScratchBlocks - The ScratchBlocks object.
+     * @param {Object} block - The block passed to the function of the custom block shape.
+     * @returns {boolean} Whether the block contains a branch.
+     */
+    static blockContainsBranch(ScratchBlocks, block) {
+      return block.inputList.some(i => i.type == ScratchBlocks.NEXT_STATEMENT);
+    }
+
+    /**
      * Generates the `leftPath` and `rightPath` functions for a custom block shape definition.
      * 
      * @static
@@ -887,7 +900,7 @@
             }
           }
 
-          // Combine result commands to a string
+          // Combine result commands into a string
           let resultCommandStrings = resultCommands.map((command) => (command.join(' ')));
           let resultCommandsAsString = resultCommandStrings.join(' ');
           return [resultCommandsAsString];
@@ -1026,13 +1039,101 @@
 
       const BlockSvg = ScratchBlocks.BlockSvg;
 
-      const threadScaledShapeEdges = SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 h 12 l 0 0 h 3 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -2 v 1.5 h 1 c 0.5 0 1 0.5 1 1 c 0.5 0 -10.5 0 0 0 v 5.5 c 1 0 1 -0.5 2 -0.5 c 2 0 2 1 4 1 c 1 0 1 -0.5 2 -0.5 v 4 c -1 0 -1 0.5 -2 0.5 c -1.9 0 -2 -1 -4 -1 c -1 0 -1 0.5 -2 0.5 c 0.5 0 -10.5 0 0 0 v 5.5 c 0 0.5 -0.5 1 -1 1 h -1 v 1.5 h 2 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -3 l 0 0 h -12 h -16 h -12 l 0 0 h -3 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 2 v -1.5 h -1 c -0.5 0 -1 -0.5 -1 -1 c 1 0 -17 0 0 0 v -15 c 0 -0.5 0.5 -1 1 -1 h 1 v -1.5 h -2 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 3 l 0 0 z');
+      // const threadShapeMaxScaledHeight = 96;
+
+      // const threadScaledShapeEdges = SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 h 12 l 0 0 h 3 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -2 v 1.5 h 1 c 0.5 0 1 0.5 1 1 c 0.5 0 -10.5 0 0 0 v 5.5 c 1 0 1 -0.5 2 -0.5 c 2 0 2 1 4 1 c 1 0 1 -0.5 2 -0.5 v 4 c -1 0 -1 0.5 -2 0.5 c -1.9 0 -2 -1 -4 -1 c -1 0 -1 0.5 -2 0.5 c 0.5 0 -10.5 0 0 0 v 5.5 c 0 0.5 -0.5 1 -1 1 h -1 v 1.5 h 2 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -3 l 0 0 h -12 h -16 h -12 l 0 0 h -3 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 2 v -1.5 h -1 c -0.5 0 -1 -0.5 -1 -1 c 1 0 -17 0 0 0 v -15 c 0 -0.5 0.5 -1 1 -1 h 1 v -1.5 h -2 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 3 l 0 0 z');
+      // const threadScaledShapeEdges = SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 l 0 0 h 12 h 6 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -2 v 1.5 h 1 c 0.5 0 1 0.5 1 1 c 0.5 0 -10.5 0 0 0 v 5.5 c 1 0 1 -0.5 2 -0.5 c 2 0 2 1 4 1 c 1 0 1 -0.5 2 -0.5 v 4 c -1 0 -1 0.5 -2 0.5 c -1.9 0 -2 -1 -4 -1 c -1 0 -1 0.5 -2 0.5 c 0.5 0 -10.5 0 0 0 v 5.5 c 0 0.5 -0.5 1 -1 1 h -1 v 1.5 h 2 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -6 h -12 l 0 0 h -16 l 0 0 h -12 h -6 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 2 v -1.5 h -1 c -0.5 0 -1 -0.5 -1 -1 c 1 0 -17 0 0 0 v -15 c 0 -0.5 0.5 -1 1 -1 h 1 v -1.5 h -2 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 6 h 12 l 0 0 z');
+      // const threadScaledShapeEdges = SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 l 0 0 h 10 h 6 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -2 v 1.5 h 1 c 0.5 0 1 0.5 1 1 c 0.5 0 -10.5 0 0 0 v 5.5 c 1 0 1 -0.5 2 -0.5 c 2 0 2 1 4 1 c 1 0 1 -0.5 2 -0.5 v 4 c -1 0 -1 0.5 -2 0.5 c -1.9 0 -2 -1 -4 -1 c -1 0 -1 0.5 -2 0.5 c 0.5 0 -10.5 0 0 0 v 5.5 c 0 0.5 -0.5 1 -1 1 h -1 v 1.5 h 2 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -6 h -10 l 0 0 h -16 l 0 0 h -10 h -6 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 2 v -1.5 h -1 c -0.5 0 -1 -0.5 -1 -1 c 1 0 -17 0 0 0 v -15 c 0 -0.5 0.5 -1 1 -1 h 1 v -1.5 h -2 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 6 h 10 l 0 0 z');
+      // const threadScaledShapeEdges = SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 l 0 0 h 2 h 6 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -2 v 1.5 h 1 c 0.5 0 1 0.5 1 1 c 0.5 0 -10.5 0 0 0 v 5.5 c 1 0 1 -0.5 2 -0.5 c 2 0 2 1 4 1 c 1 0 1 -0.5 2 -0.5 v 4 c -1 0 -1 0.5 -2 0.5 c -1.9 0 -2 -1 -4 -1 c -1 0 -1 0.5 -2 0.5 c 0.5 0 -10.5 0 0 0 v 5.5 c 0 0.5 -0.5 1 -1 1 h -1 v 1.5 h 2 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -6 h -2 l 0 0 h -16 l 0 0 h -10 h -6 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 2 v -1.5 h -1 c -0.5 0 -1 -0.5 -1 -1 c 1 0 -17 0 0 0 v -15 c 0 -0.5 0.5 -1 1 -1 h 1 v -1.5 h -2 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 6 h 10 l 0 0 z');
+      const threadScaledShapeEdges = SoupThreadsUtil.generateCustomShapeEdges('m 4 0 l 0 0 h 10 h 6 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -2 v 1.5 h 1 c 0.5 0 1 0.5 1 1 c 0.5 0 -10.5 0 0 0 v 5.5 c 1 0 1 -0.5 2 -0.5 c 2 0 2 1 4 1 c 1 0 1 -0.5 2 -0.5 v 4 c -1 0 -1 0.5 -2 0.5 c -1.9 0 -2 -1 -4 -1 c -1 0 -1 0.5 -2 0.5 c 0.5 0 -10.5 0 0 0 v 5.5 c 0 0.5 -0.5 1 -1 1 h -1 v 1.5 h 2 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -6 h -10 l 0 0 z m -8 32 l 0 0 h -10 h -6 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 2 v -1.5 h -1 c -0.5 0 -1 -0.5 -1 -1 c 1 0 -17 0 0 0 v -15 c 0 -0.5 0.5 -1 1 -1 h 1 v -1.5 h -2 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 6 h 10 l 0 0 z');
+
       // const threadUnscaledShapeEdges = SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 h 12 l 0 0 h 0 h 3 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -2 v 1.5 h 1 c 0.5 0 1 0.5 1 1 v 0 c 0.5 -10.5 0 0 0 0 v 5.5 h 0 c 1 0 1 -0.5 2 -0.5 c 2 0 2 1 4 1 c 1 0 1 -0.5 2 -0.5 v 4 c -1 0 -1 0.5 -2 0.5 c -1.9 0 -2 -1 -4 -1 c -1 0 -1 0.5 -2 0.5 v 0 c 0.5 -10.5 0 0 0 0 v 5.5 h 0 c 0 0.5 -0.5 1 -1 1 h -1 v 1.5 h 2 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -3 v 0 l 0 0 h -12 h -16 h -12 l 0 0 h 0 h -3 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 2 v -1.5 h -1 c -0.5 0 -1 -0.5 -1 -1 v 0 c 1 -17 0 0 0 0 v -15 h 0 c 0 -0.5 0.5 -1 1 -1 h 1 v -1.5 h -2 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 3 v 0 l 0 0 z');
-      const threadUnscaledShapeEdges = SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 h 12 l 0 0 h 0 h 9 c 1.5 0 3 1.5 3 3 v 12 c 0 1.5 -1.5 3 -3 3 h -6 v 4.5 h 3 c 1.5 0 3 1.5 3 3 v 0 c 0.5 -31.5 0 0 0 0 v 16.5 h 0 c 3 0 3 -1.5 6 -1.5 c 6 0 6 3 12 3 c 3 0 3 -1.5 6 -1.5 v 12 c -3 0 -3 1.5 -6 1.5 c -6 0 -6 -3 -12 -3 c -3 0 -3 1.5 -6 1.5 v 0 c 0.5 -31.5 0 0 0 0 v 16.5 h 0 c 0 1.5 -1.5 3 -3 3 h -3 v 4.5 h 6 c 1.5 0 3 1.5 3 3 v 12 c 0 1.5 -1.5 3 -3 3 h -9 v 0 l 0 0 h -12 h -16 h -12 l 0 0 h 0 h -9 c -1.5 0 -3 -1.5 -3 -3 v -12 c 0 -1.5 1.5 -3 3 -3 h 6 v -4.5 h -3 c -1.5 0 -3 -1.5 -3 -3 v 0 c 1 -51 0 0 0 0 v -45 h 0 c 0 -1.5 1.5 -3 3 -3 h 3 v -4.5 h -6 c -1.5 0 -3 -1.5 -3 -3 v -12 c 0 -1.5 1.5 -3 3 -3 h 9 v 0 l 0 0 z');
-      const threadShapeMaxScaledHeight = 96;
-      const threadArgumentShapePath = 'm 16 0 h 12 h 3 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -2 v 1.5 h 1 c 0.5 0 1 0.5 1 1 c 0.5 -10.5 0 0 0 0 v 5.5 c 1 0 1 -0.5 2 -0.5 c 2 0 2 1 4 1 c 1 0 1 -0.5 2 -0.5 v 4 c -1 0 -1 0.5 -2 0.5 c -1.9 0 -2 -1 -4 -1 c -1 0 -1 0.5 -2 0.5 v 5.5 c 0 0.5 -0.5 1 -1 1 h -1 v 1.5 h 2 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -3 h -12 h -12 h -3 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 2 v -1.5 h -1 c -0.5 0 -1 -0.5 -1 -1 v -15 c 0 -0.5 0.5 -1 1 -1 h 1 v -1.5 h -2 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 3 z';
+      // const threadUnscaledShapeEdges = SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 h 12 l 0 0 h 0 h 9 c 1.5 0 3 1.5 3 3 v 12 c 0 1.5 -1.5 3 -3 3 h -6 v 4.5 h 3 c 1.5 0 3 1.5 3 3 v 0 c 0.5 -31.5 0 0 0 0 v 16.5 h 0 c 3 0 3 -1.5 6 -1.5 c 6 0 6 3 12 3 c 3 0 3 -1.5 6 -1.5 v 12 c -3 0 -3 1.5 -6 1.5 c -6 0 -6 -3 -12 -3 c -3 0 -3 1.5 -6 1.5 v 0 c 0.5 -31.5 0 0 0 0 v 16.5 h 0 c 0 1.5 -1.5 3 -3 3 h -3 v 4.5 h 6 c 1.5 0 3 1.5 3 3 v 12 c 0 1.5 -1.5 3 -3 3 h -9 v 0 l 0 0 h -12 h -16 h -12 l 0 0 h 0 h -9 c -1.5 0 -3 -1.5 -3 -3 v -12 c 0 -1.5 1.5 -3 3 -3 h 6 v -4.5 h -3 c -1.5 0 -3 -1.5 -3 -3 v 0 c 1 -51 0 0 0 0 v -45 h 0 c 0 -1.5 1.5 -3 3 -3 h 3 v -4.5 h -6 c -1.5 0 -3 -1.5 -3 -3 v -12 c 0 -1.5 1.5 -3 3 -3 h 9 v 0 l 0 0 z');
+      // const threadUnscaledShapeEdges = SoupThreadsUtil.generateCustomShapeEdges('m 16 0 h 16 h 12 l 0 0 h 0 h 16 c 1.5 0 3 1.5 3 3 v 12 c 0 1.5 -1.5 3 -3 3 h -6 v 4.5 h 3 c 1.5 0 3 1.5 3 3 v 0 c 0.5 -31.5 0 0 0 0 v 16.5 h 0 c 3 0 3 -1.5 6 -1.5 c 6 0 6 3 12 3 c 3 0 3 -1.5 6 -1.5 v 12 c -3 0 -3 1.5 -6 1.5 c -6 0 -6 -3 -12 -3 c -3 0 -3 1.5 -6 1.5 v 0 c 0.5 -31.5 0 0 0 0 v 16.5 h 0 c 0 1.5 -1.5 3 -3 3 h -3 v 4.5 h 6 c 1.5 0 3 1.5 3 3 v 12 c 0 1.5 -1.5 3 -3 3 h -16 v 0 l 0 0 h -12 h -16 h -12 l 0 0 h 0 h -16 c -1.5 0 -3 -1.5 -3 -3 v -12 c 0 -1.5 1.5 -3 3 -3 h 6 v -4.5 h -3 c -1.5 0 -3 -1.5 -3 -3 v 0 c 1 -51 0 0 0 0 v -45 h 0 c 0 -1.5 1.5 -3 3 -3 h 3 v -4.5 h -6 c -1.5 0 -3 -1.5 -3 -3 v -12 c 0 -1.5 1.5 -3 3 -3 h 16 v 0 l 0 0 z');
+      const threadUnscaledShapeEdges = SoupThreadsUtil.generateCustomShapeEdges('m 4 0 l 0 0 h 0 h 16 c 1.5 0 3 1.5 3 3 v 12 c 0 1.5 -1.5 3 -3 3 h -6 v 4.5 h 3 c 1.5 0 3 1.5 3 3 v 0 c 0.5 -31.5 0 0 0 0 v 16.5 h 0 c 3 0 3 -1.5 6 -1.5 c 6 0 6 3 12 3 c 3 0 3 -1.5 6 -1.5 v 12 c -3 0 -3 1.5 -6 1.5 c -6 0 -6 -3 -12 -3 c -3 0 -3 1.5 -6 1.5 v 0 c 0.5 -31.5 0 0 0 0 v 16.5 h 0 c 0 1.5 -1.5 3 -3 3 h -3 v 4.5 h 6 c 1.5 0 3 1.5 3 3 v 12 c 0 1.5 -1.5 3 -3 3 h -16 v 0 l 0 0 z m -8 96 l 0 0 h 0 h -16 c -1.5 0 -3 -1.5 -3 -3 v -12 c 0 -1.5 1.5 -3 3 -3 h 6 v -4.5 h -3 c -1.5 0 -3 -1.5 -3 -3 v 0 c 1 -51 0 0 0 0 v -45 h 0 c 0 -1.5 1.5 -3 3 -3 h 3 v -4.5 h -6 c -1.5 0 -3 -1.5 -3 -3 v -12 c 0 -1.5 1.5 -3 3 -3 h 16 v 0 l 0 0 z');
+
+      // const threadArgumentShapePath = 'm 16 0 h 12 h 3 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -2 v 1.5 h 1 c 0.5 0 1 0.5 1 1 v 5.5 c 1 0 1 -0.5 2 -0.5 c 2 0 2 1 4 1 c 1 0 1 -0.5 2 -0.5 v 4 c -1 0 -1 0.5 -2 0.5 c -2 0 -2 -1 -4 -1 c -1 0 -1 0.5 -2 0.5 v 5.5 c 0 0.5 -0.5 1 -1 1 h -1 v 1.5 h 2 c 0.5 0 1 0.5 1 1 v 4 c 0 0.5 -0.5 1 -1 1 h -3 h -12 h -12 h -3 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 2 v -1.5 h -1 c -0.5 0 -1 -0.5 -1 -1 v -15 c 0 -0.5 0.5 -1 1 -1 h 1 v -1.5 h -2 c -0.5 0 -1 -0.5 -1 -1 v -4 c 0 -0.5 0.5 -1 1 -1 h 3 z';
+      const threadArgumentShapePath = 'm 16 0 h 12 h 2.5 c 0.75 0 1.5 0.75 1.5 1.5 v 4 c 0 0.75 -0.75 1.5 -1.5 1.5 h -3 v 2.25 h 1.5 c 0.75 0 1.5 0.75 1.5 1.5 v 3.25 c 1 0 1 -0.5 2 -0.5 c 2 0 2 1 4 1 c 1 0 1 -0.5 2 -0.5 v 4 c -1 0 -1 0.5 -2 0.5 c -2 0 -2 -1 -4 -1 c -1 0 -1 0.5 -2 0.5 v 3.25 c 0 0.75 -0.75 1.5 -1.5 1.5 h -1.5 v 2.25 h 3 c 0.75 0 1.5 0.75 1.5 1.5 v 4 c 0 0.75 -0.75 1.5 -1.5 1.5 h -2.5 h -12 h -12 h -2.5 c -0.75 0 -1.5 -0.75 -1.5 -1.5 v -4 c 0 -0.75 0.75 -1.5 1.5 -1.5 h 3 v -2.25 h -1.5 c -0.75 0 -1.5 -0.75 -1.5 -1.5 v -10.5 c 0 -0.75 0.75 -1.5 1.5 -1.5 h 1.5 v -2.25 h -3 c -0.75 0 -1.5 -0.75 -1.5 -1.5 v -4 c 0 -0.75 0.75 -1.5 1.5 -1.5 h 2.5 z';
 
       return {
+
+        thread: {
+          emptyInputPath: threadArgumentShapePath,
+          emptyInputWidth: 9 * BlockSvg.GRID_UNIT,
+
+          leftPath(block) {
+            const edgeWidth = block.height / 2;
+            const height = edgeWidth * 2;
+
+            const hasASubstack = SoupThreadsUtil.blockContainsBranch(ScratchBlocks, block);
+            if (/* height > threadShapeMaxScaledHeight && */ hasASubstack) {
+              return threadUnscaledShapeEdges.leftPath(block);
+            }
+            return threadScaledShapeEdges.leftPath(block);
+          },
+
+          rightPath(block) {
+            const edgeWidth = block.edgeShapeWidth_;
+            const height = edgeWidth * 2;
+
+            const hasASubstack = SoupThreadsUtil.blockContainsBranch(ScratchBlocks, block);
+            if (/* height > threadShapeMaxScaledHeight && */ hasASubstack) {
+              return threadUnscaledShapeEdges.rightPath(block);
+            }
+            return threadScaledShapeEdges.rightPath(block);
+          },
+
+          blockPadding: {
+            internal: {
+              // 0: 3 * BlockSvg.GRID_UNIT, // 0 means field
+            },
+            external: {},
+          },
+
+          blockPaddingStart(block, otherShape, firstInput, firstField, row) {
+            return -2 * BlockSvg.GRID_UNIT;
+          },
+
+          blockPaddingEnd(block, otherShape, firstInput, firstField, row) {
+            return -2 * BlockSvg.GRID_UNIT;
+          },
+
+          outputLeftPadding(block) {
+            const hasASubstack = SoupThreadsUtil.blockContainsBranch(ScratchBlocks, block);
+            const edgeWidth = block.height / 2;
+            const height = edgeWidth * 2;
+
+            let padding = 0;
+
+            // Patches bug where reporter blocks with branches will move to the right as they get taller.
+            // Copied from here: https://github.com/Dicuo/Iterators-Extension/blob/849b32e5b1566e2710cfbdffa00d24c1a1e4e94a/Iterators%20Extension.js#L503-L506
+            // div got it from jwklong. no clue why this works but lets just roll with it
+            if (hasASubstack) {
+              padding += -edgeWidth + (5.5 * BlockSvg.GRID_UNIT);
+            }
+
+            if (!hasASubstack) {
+              // Width of overhang from nubs over edge of thread body
+              padding += edgeWidth / 16;
+            }
+
+            return padding;
+          },
+
+          // outputRightPadding(block) {
+          //   const hasASubstack = SoupThreadsUtil.blockContainsBranch(ScratchBlocks, block);
+          //   const edgeWidth = block.edgeShapeWidth_;
+          //   const height = edgeWidth * 2;
+          //   let padding = 0;
+
+          //   if (!hasASubstack) {
+          //     // Width of overhang from nubs over edge of thread body
+          //     padding += edgeWidth / 16;
+          //   }
+
+          //   return padding;
+          // },
+        },
 
         wave: {
           emptyInputPath: 'm 16 0 h 16 l 0 0 h 0 c 3 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 v 0 c 1 0 0 0 0 0 v 32 h 0 c -4 1 -4 2 -8 2 c -9 0 -9 -4 -16 -4 c -4 0 -4 1 -8 2 v 0 l 0 0 h -16 l 0 0 h 0 c -4 1 -4 2 -8 2 c -8 0 -8 -4 -16 -4 c -4 0 -4 1 -8 2 v 0 c 1 0 0 0 0 0 v -32 h 0 c 4 -1 4 -2 8 -2 c 8 0 8 4 16 4 c 4 0 4 -1 8 -2 v 0 l 0 0 z',
@@ -1055,7 +1156,7 @@
             // Patches bug where reporter blocks with branches will move to the right as they get taller.
             // Copied from here: https://github.com/Dicuo/Iterators-Extension/blob/849b32e5b1566e2710cfbdffa00d24c1a1e4e94a/Iterators%20Extension.js#L503-L506
             // div got it from jwklong. no clue why this works but lets just roll with it
-            let hasASubstack = block.inputList.some(i => i.type == ScratchBlocks.NEXT_STATEMENT);
+            const hasASubstack = SoupThreadsUtil.blockContainsBranch(ScratchBlocks, block);
             if (hasASubstack) {
               padding += -block.height/2 + (5.5 * BlockSvg.GRID_UNIT);
             }
@@ -1094,52 +1195,13 @@
             // Patches bug where reporter blocks with branches will move to the right as they get taller.
             // Copied from here: https://github.com/Dicuo/Iterators-Extension/blob/849b32e5b1566e2710cfbdffa00d24c1a1e4e94a/Iterators%20Extension.js#L503-L506
             // div got it from jwklong. no clue why this works but lets just roll with it
-            let hasASubstack = block.inputList.some(i => i.type == ScratchBlocks.NEXT_STATEMENT);
+            const hasASubstack = SoupThreadsUtil.blockContainsBranch(ScratchBlocks, block);
             if (hasASubstack) {
               padding += -block.height/2 + (5.5 * BlockSvg.GRID_UNIT);
             }
 
             // Aligns reporters to the left edge of the palette.
             padding += (hasASubstack) ? (-0.5 * BlockSvg.GRID_UNIT) : (1.5 * BlockSvg.GRID_UNIT);
-
-            return padding;
-          },
-        },
-
-        thread: {
-          emptyInputPath: threadArgumentShapePath,
-          emptyInputWidth: 16 * BlockSvg.GRID_UNIT,
-
-          leftPath(block) {
-            const edgeWidth = block.height / 2;
-            const height = edgeWidth * 2;
-
-            if (height > threadShapeMaxScaledHeight) {
-              return threadUnscaledShapeEdges.leftPath(block);
-            }
-            return threadScaledShapeEdges.leftPath(block);
-          },
-
-          rightPath(block) {
-            const edgeWidth = block.edgeShapeWidth_;
-            const height = edgeWidth * 2;
-
-            if (height > threadShapeMaxScaledHeight) {
-              return threadUnscaledShapeEdges.rightPath(block);
-            }
-            return threadScaledShapeEdges.rightPath(block);
-          },
-
-          outputLeftPadding(block) {
-            let padding = 0;
-
-            // Patches bug where reporter blocks with branches will move to the right as they get taller.
-            // Copied from here: https://github.com/Dicuo/Iterators-Extension/blob/849b32e5b1566e2710cfbdffa00d24c1a1e4e94a/Iterators%20Extension.js#L503-L506
-            // div got it from jwklong. no clue why this works but lets just roll with it
-            let hasASubstack = block.inputList.some(i => i.type == ScratchBlocks.NEXT_STATEMENT);
-            if (hasASubstack) {
-              padding += -block.height/2 + (5.5 * BlockSvg.GRID_UNIT);
-            }
 
             return padding;
           },
