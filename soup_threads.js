@@ -916,7 +916,7 @@
       runtime.registerCompiledExtensionBlocks('soupThreads', SoupThreadsExtension.compileInfo);
 
       // Register custom shapes
-      if (Scratch.gui) { // There is not a GUI in e.g. packaged projects, so cannot register in that case
+      if (Scratch.gui) { // There is not a GUI in packaged projects, so cannot register in that case
         Scratch.gui.getBlockly().then(function(ScratchBlocks) {
           let shapeInfo = SoupThreadsExtension.getShapeInfo(ScratchBlocks);
           for (let shapeId in shapeInfo) {
