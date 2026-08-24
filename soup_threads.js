@@ -916,12 +916,14 @@
       runtime.registerCompiledExtensionBlocks('soupThreads', SoupThreadsExtension.compileInfo);
 
       // Register custom shapes
-      Scratch.gui.getBlockly().then(function(ScratchBlocks) {
-        let shapeInfo = SoupThreadsExtension.getShapeInfo(ScratchBlocks);
-        for (let shapeId in shapeInfo) {
-          ScratchBlocks.BlockSvg.registerCustomShape(`soupThreads-${shapeId}`, shapeInfo[shapeId]);
-        }
-      });
+      if (Scratch.gui) { // There is not a GUI in e.g. packaged projects, so cannot register in that case
+        Scratch.gui.getBlockly().then(function(ScratchBlocks) {
+          let shapeInfo = SoupThreadsExtension.getShapeInfo(ScratchBlocks);
+          for (let shapeId in shapeInfo) {
+            ScratchBlocks.BlockSvg.registerCustomShape(`soupThreads-${shapeId}`, shapeInfo[shapeId]);
+          }
+        });
+      }
 
       // Register thread type
       vm.SoupThreads = Thread;
